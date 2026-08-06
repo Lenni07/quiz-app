@@ -1,0 +1,42 @@
+[
+  {
+    "question": "Wie heißt du?",
+    "correctAnswer": "Ich heiße Anna.",
+    "distractors": ["Ich heißt Anna.", "Du heißt Anna."]
+  },
+  {
+    "question": "Wie geht es dir?",
+    "correctAnswer": "Mir geht es gut.",
+    "distractors": ["Ich geht es gut.", "Mir gehst es gut."]
+  },
+  {
+    "question": "Woher kommst du?",
+    "correctAnswer": "Ich komme aus Deutschland.",
+    "distractors": ["Ich kommst aus Deutschland.", "Ich komme von Deutschland."]
+  },
+  {
+    "question": "Wie alt bist du?",
+    "correctAnswer": "Ich bin 25 Jahre alt.",
+    "distractors": ["Ich bist 25 Jahre alt.", "Du bin 25 Jahre alt."]
+  },
+  {
+    "question": "Was bist du von Beruf?",
+    "correctAnswer": "Ich bin Koch von Beruf.",
+    "distractors": ["Ich bist Koch von Beruf.", "Er ist Koch von Beruf."]
+  },
+  {
+    "question": "Welche Sprachen sprichst du?",
+    "correctAnswer": "Ich spreche Deutsch und Englisch.",
+    "distractors": ["Ich spricht Deutsch und Englisch.", "Ich sprichst Deutsch und Englisch."]
+  },
+  {
+    "question": "Hast du Geschwister?",
+    "correctAnswer": "Ja, ich habe zwei Geschwister.",
+    "distractors": ["Ja, ich hast zwei Geschwister.", "Ja, du hast zwei Geschwister."]
+  },
+  {
+    "question": "Wie heißen Sie?",
+    "correctAnswer": "Ich heiße Schmidt.",
+    "distractors": ["Ich heißt Schmidt.", "Sie heißen Schmidt."]
+  }
+]

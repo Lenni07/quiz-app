@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models/question.dart';
-import 'screens/question_screen.dart';
+import 'screens/mode_select_screen.dart';
 import 'theme/app_theme.dart';
 import 'utils/page_transitions.dart';
 
@@ -65,14 +64,11 @@ class StartScreen extends StatelessWidget {
                 SizedBox(
                   width: 220,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      final questions = await loadQuestions();
-                      if (context.mounted) {
-                        Navigator.push(
-                          context,
-                          buildFadeSlideRoute(QuestionScreen(questions: questions)),
-                        );
-                      }
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        buildFadeSlideRoute(const ModeSelectScreen()),
+                      );
                     },
                     child: const Text('Spiel starten'),
                   ),

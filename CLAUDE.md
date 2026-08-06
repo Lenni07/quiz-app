@@ -63,6 +63,17 @@ Eine einfache, plattformübergreifende Quiz-App (iOS & Android) im Stil bekannte
 - **Phase 4:** Joker-System, Leaderboards, tägliche Herausforderungen
 - **Phase 5:** Echtzeit-1v1-Multiplayer (erst wenn App etabliert ist)
 
+**Karteikarten-Modus (Idee, noch nicht entschieden):**
+Inspiriert von Wordwall. Für die offenen Konversationsfragen aus den
+Deutsch-Prüfungskatalogen (z. B. "Wie heißt du?", "Was machst du in
+deiner Freizeit?") eignet sich Multiple-Choice nicht gut, da es keine
+festen Antwortoptionen gibt. Ein Karteikarten-Modus wäre passender:
+Frage anzeigen → Nutzer überlegt sich selbst eine Antwort → aufdecken
+→ Musterantwort/Erklärung zeigen → Nutzer bewertet selbst ("wusste ich"
+/ "muss ich üben"). Das würde den echten Fragenkatalog direkt nutzbar
+machen, ohne künstliche Multiple-Choice-Antworten erfinden zu müssen.
+Entscheidung erst nach Feedback von echten Crew-Mitgliedern zum MVP.
+
 ## 6. Arbeitsweise / Konventionen
 
 - Code so einfach und lesbar wie möglich halten, auch wenn das nicht die "eleganteste" Lösung ist.
