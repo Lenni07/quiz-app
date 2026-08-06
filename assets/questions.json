@@ -1,0 +1,142 @@
+[
+  {
+    "question": "Wie viele Fälle (Kasus) hat die deutsche Sprache?",
+    "options": ["3", "4", "5", "6"],
+    "correctIndex": 1
+  },
+  {
+    "question": "Welcher Buchstabe kommt im deutschen Alphabet vor, aber nicht im englischen?",
+    "options": ["ß", "Q", "X", "Y"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wer schrieb das Drama \"Faust\"?",
+    "options": ["Johann Wolfgang von Goethe", "Friedrich Schiller", "Franz Kafka", "Bertolt Brecht"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wie lautet der bestimmte Artikel für ein weibliches Substantiv im Nominativ?",
+    "options": ["der", "die", "das", "dem"],
+    "correctIndex": 1
+  },
+  {
+    "question": "Welches Wort ist ein umgangssprachliches Synonym für \"Fahrrad\"?",
+    "options": ["Drahtesel", "Blechesel", "Stahlross", "Rennschnecke"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wie viele grammatische Geschlechter (Genera) gibt es im Deutschen?",
+    "options": ["2", "3", "4", "5"],
+    "correctIndex": 1
+  },
+  {
+    "question": "Was bedeutet das deutsche Wort \"Fernweh\"?",
+    "options": ["Sehnsucht nach der Ferne", "Angst vor großer Höhe", "Starkes Heimweh", "Müdigkeit nach Reisen"],
+    "correctIndex": 0
+  },
+  {
+    "question": "In welchem Jahr trat die deutsche Rechtschreibreform in Kraft?",
+    "options": ["1996", "1980", "2005", "1945"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Was ist ein \"Kompositum\" in der deutschen Sprache?",
+    "options": ["Ein zusammengesetztes Wort", "Ein Fremdwort", "Eine Verbform", "Ein Fall (Kasus)"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wie lautet der Plural von \"das Kind\"?",
+    "options": ["die Kinder", "die Kindern", "die Kinds", "die Kinde"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Welcher Fall (Kasus) beantwortet die Frage \"Wessen?\"",
+    "options": ["Nominativ", "Genitiv", "Dativ", "Akkusativ"],
+    "correctIndex": 1
+  },
+  {
+    "question": "Wer gilt durch seine Bibelübersetzung als Wegbereiter der modernen deutschen Schriftsprache?",
+    "options": ["Martin Luther", "Johannes Gutenberg", "Friedrich Schiller", "Thomas Mann"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Was bedeutet das Wort \"Zeitgeist\"?",
+    "options": ["Die vorherrschende Stimmung einer Epoche", "Ein spukendes Uhrwerk", "Ein historisches Datum", "Ein Zeitungsartikel"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wie viele Wortarten werden im Deutschen traditionell unterschieden?",
+    "options": ["5", "8", "10", "12"],
+    "correctIndex": 2
+  },
+  {
+    "question": "Welches Gesetz galt lange als Beispiel für besonders lange deutsche Komposita, bevor es 2013 abgeschafft wurde?",
+    "options": [
+      "Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz",
+      "Bundesausbildungsförderungsgesetz",
+      "Kraftfahrzeug-Haftpflichtversicherungsgesetz",
+      "Donaudampfschifffahrtsgesetz"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "question": "Was ist der Unterschied zwischen \"das\" und \"dass\"?",
+    "options": [
+      "\"das\" ist Artikel/Pronomen, \"dass\" leitet einen Nebensatz ein",
+      "Beide werden immer gleich verwendet",
+      "\"dass\" ist ein Artikel",
+      "\"das\" leitet immer einen Nebensatz ein"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "question": "Welche Sprache hat die deutsche Sprache historisch am stärksten mit Lehnwörtern geprägt?",
+    "options": ["Latein", "Chinesisch", "Japanisch", "Finnisch"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wie heißt der Dialekt, der typischerweise in Bayern gesprochen wird?",
+    "options": ["Bairisch", "Sächsisch", "Plattdeutsch", "Schwäbisch"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Was versteht man unter \"Denglisch\"?",
+    "options": [
+      "Eine Mischung aus Deutsch und Englisch",
+      "Einen alten deutschen Dialekt",
+      "Eine Erfindung Goethes",
+      "Eine Programmiersprache"
+    ],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wie nennt man umgangssprachlich einen besonders langen, verschachtelten Satz?",
+    "options": ["Bandwurmsatz", "Kurzsatz", "Hauptsatz", "Fragesatz"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wer schrieb die Erzählung \"Die Verwandlung\"?",
+    "options": ["Franz Kafka", "Thomas Mann", "Bertolt Brecht", "Hermann Hesse"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Was bedeutet die Vorsilbe \"un-\" in den meisten deutschen Wörtern?",
+    "options": ["Verneinung / Gegenteil", "Verstärkung", "Wiederholung", "Verkleinerung"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Welches Modalverb drückt im Deutschen eine Erlaubnis aus?",
+    "options": ["dürfen", "müssen", "sollen", "wollen"],
+    "correctIndex": 0
+  },
+  {
+    "question": "Wie viele Buchstaben hat das deutsche Alphabet, wenn man Umlaute (ä, ö, ü) und ß mitzählt?",
+    "options": ["26", "29", "30", "33"],
+    "correctIndex": 2
+  },
+  {
+    "question": "Welches deutsche Wort wurde unverändert ins Englische übernommen?",
+    "options": ["Kindergarten", "Nur englische Wörter werden übernommen", "Fahrrad", "Rechtschreibung"],
+    "correctIndex": 0
+  }
+]
