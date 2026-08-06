@@ -7,11 +7,13 @@ class Sentence {
   final String question;
   final String correctAnswer;
   final List<String> distractors;
+  final int blankIndex;
 
   Sentence({
     required this.question,
     required this.correctAnswer,
     required this.distractors,
+    required this.blankIndex,
   });
 
   factory Sentence.fromJson(Map<String, dynamic> json) {
@@ -19,7 +21,19 @@ class Sentence {
       question: json['question'] as String,
       correctAnswer: json['correctAnswer'] as String,
       distractors: List<String>.from(json['distractors'] as List),
+      blankIndex: json['blankIndex'] as int,
     );
+  }
+
+  List<String> get words => correctAnswer.split(' ');
+
+  String get blankWord => words[blankIndex];
+
+  /// Der Satz mit "___" statt des zu erratenden Worts.
+  String get blankedSentence {
+    return words.asMap().entries.map((entry) {
+      return entry.key == blankIndex ? '___' : entry.value;
+    }).join(' ');
   }
 }
 

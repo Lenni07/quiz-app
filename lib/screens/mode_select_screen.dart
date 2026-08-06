@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
+import 'fill_blank_screen.dart';
 import 'question_screen.dart';
+import 'word_order_screen.dart';
 
 class ModeSelectScreen extends StatelessWidget {
   const ModeSelectScreen({super.key});
@@ -19,6 +21,20 @@ class ModeSelectScreen extends StatelessWidget {
     final questions = sentencesToQuestions(sentences);
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(QuestionScreen(questions: questions)));
+    }
+  }
+
+  Future<void> _startFillBlank(BuildContext context) async {
+    final sentences = await loadSentences();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(FillBlankScreen(sentences: sentences)));
+    }
+  }
+
+  Future<void> _startWordOrder(BuildContext context) async {
+    final sentences = await loadSentences();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(WordOrderScreen(sentences: sentences)));
     }
   }
 
@@ -45,18 +61,18 @@ class ModeSelectScreen extends StatelessWidget {
               onTap: () => _startConversationQuiz(context),
             ),
             const SizedBox(height: 16),
-            const _ModeCard(
+            _ModeCard(
               title: 'Lückentext',
-              subtitle: 'Bald verfügbar',
+              subtitle: 'Fehlendes Wort eintippen',
               icon: Icons.short_text,
-              onTap: null,
+              onTap: () => _startFillBlank(context),
             ),
             const SizedBox(height: 16),
-            const _ModeCard(
+            _ModeCard(
               title: 'Richtige Reihenfolge',
-              subtitle: 'Bald verfügbar',
+              subtitle: 'Wörter in die richtige Reihenfolge bringen',
               icon: Icons.low_priority,
-              onTap: null,
+              onTap: () => _startWordOrder(context),
             ),
           ],
         ),

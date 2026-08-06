@@ -2,41 +2,49 @@
   {
     "question": "Wie heißt du?",
     "correctAnswer": "Ich heiße Anna.",
-    "distractors": ["Ich heißt Anna.", "Du heißt Anna."]
+    "distractors": ["Ich heißt Anna.", "Du heißt Anna."],
+    "blankIndex": 0
   },
   {
     "question": "Wie geht es dir?",
     "correctAnswer": "Mir geht es gut.",
-    "distractors": ["Ich geht es gut.", "Mir gehst es gut."]
+    "distractors": ["Ich geht es gut.", "Mir gehst es gut."],
+    "blankIndex": 0
   },
   {
     "question": "Woher kommst du?",
     "correctAnswer": "Ich komme aus Deutschland.",
-    "distractors": ["Ich kommst aus Deutschland.", "Ich komme von Deutschland."]
+    "distractors": ["Ich kommst aus Deutschland.", "Ich komme von Deutschland."],
+    "blankIndex": 1
   },
   {
     "question": "Wie alt bist du?",
     "correctAnswer": "Ich bin 25 Jahre alt.",
-    "distractors": ["Ich bist 25 Jahre alt.", "Du bin 25 Jahre alt."]
+    "distractors": ["Ich bist 25 Jahre alt.", "Du bin 25 Jahre alt."],
+    "blankIndex": 1
   },
   {
     "question": "Was bist du von Beruf?",
     "correctAnswer": "Ich bin Koch von Beruf.",
-    "distractors": ["Ich bist Koch von Beruf.", "Er ist Koch von Beruf."]
+    "distractors": ["Ich bist Koch von Beruf.", "Er ist Koch von Beruf."],
+    "blankIndex": 0
   },
   {
     "question": "Welche Sprachen sprichst du?",
     "correctAnswer": "Ich spreche Deutsch und Englisch.",
-    "distractors": ["Ich spricht Deutsch und Englisch.", "Ich sprichst Deutsch und Englisch."]
+    "distractors": ["Ich spricht Deutsch und Englisch.", "Ich sprichst Deutsch und Englisch."],
+    "blankIndex": 1
   },
   {
     "question": "Hast du Geschwister?",
     "correctAnswer": "Ja, ich habe zwei Geschwister.",
-    "distractors": ["Ja, ich hast zwei Geschwister.", "Ja, du hast zwei Geschwister."]
+    "distractors": ["Ja, ich hast zwei Geschwister.", "Ja, du hast zwei Geschwister."],
+    "blankIndex": 1
   },
   {
     "question": "Wie heißen Sie?",
     "correctAnswer": "Ich heiße Schmidt.",
-    "distractors": ["Ich heißt Schmidt.", "Sie heißen Schmidt."]
+    "distractors": ["Ich heißt Schmidt.", "Sie heißen Schmidt."],
+    "blankIndex": 0
   }
 ]
