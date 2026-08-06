@@ -4,6 +4,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/question.dart';
+import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
 import 'result_screen.dart';
 
@@ -60,6 +61,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _nextQuestion() {
+    final isLastQuestion = _currentIndex == widget.questions.length - 1;
+    if (isLastQuestion) {
+      Navigator.push(
+        context,
+        buildFadeSlideRoute(
+          ResultScreen(
+            score: _score,
+            total: widget.questions.length,
+            onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
+          ),
+        ),
+      );
+      return;
+    }
     setState(() {
       _currentIndex++;
       _selectedIndex = null;
@@ -107,14 +122,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_currentIndex >= widget.questions.length) {
-      return ResultScreen(
-        score: _score,
-        total: widget.questions.length,
-        onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
-      );
-    }
-
     final question = widget.questions[_currentIndex];
     final answered = _selectedIndex != null;
     final isCorrect = _selectedIndex == question.correctIndex;
@@ -146,7 +153,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   children: [
                     Text(
                       'Stufe: $_score von ${widget.questions.length}',
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                     ),
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 250),
@@ -158,10 +168,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           ? Text(
                               '${'🔥' * min(_streak - 1, 3)} $_streak in Folge!',
                               key: ValueKey(_streak),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.deepOrange,
+                                color: Theme.of(context).colorScheme.secondary,
                               ),
                             )
                           : const SizedBox.shrink(key: ValueKey('no-streak')),

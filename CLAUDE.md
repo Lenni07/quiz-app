@@ -42,17 +42,17 @@ Eine einfache, plattformübergreifende Quiz-App (iOS & Android) im Stil bekannte
 
 ## 4. Schritt-für-Schritt-Plan (bitte in dieser Reihenfolge abarbeiten)
 
-- [ ] **Schritt 0: Setup-Check** – Prüfen, ob Flutter, ein Editor (VS Code) und ein Emulator/Testgerät vorhanden sind. Falls nicht: Anleitung zur Installation geben.
-- [ ] **Schritt 1: Neues Flutter-Projekt anlegen** – Leeres, lauffähiges Grundgerüst erstellen, testen dass es startet.
-- [ ] **Schritt 2: Startbildschirm** – Einfacher Screen mit App-Titel und "Spiel starten"-Button (noch ohne Funktion).
-- [ ] **Schritt 3: Fragen-Datenmodell** – JSON-Datei mit ca. 5 Test-Fragen anlegen, in Dart einlesen.
-- [ ] **Schritt 4: Frage-Bildschirm (statisch)** – Eine Frage mit 4 Antwortbuttons anzeigen, ohne Logik.
-- [ ] **Schritt 5: Antwort-Logik** – Klick auf Antwort prüfen (richtig/falsch), visuelles Feedback geben.
-- [ ] **Schritt 6: Navigation durch mehrere Fragen** – Nach Antwort zur nächsten Frage springen.
-- [ ] **Schritt 7: Punkte-/Gewinnstufen-Logik** – Fortschritt durch Stufen anzeigen und mitzählen.
-- [ ] **Schritt 8: Ergebnisbildschirm** – Endstand nach letzter Frage anzeigen, Option "Nochmal spielen".
-- [ ] **Schritt 9: Fragen-Set erweitern** – Von 5 Test-Fragen auf vollständigen Fragenkatalog (z. B. 20–30 Fragen) erweitern.
-- [ ] **Schritt 10: Feinschliff** – Einfache Animationen/Styling, App-Icon, Testen auf echtem Gerät.
+- [x] **Schritt 0: Setup-Check** – Prüfen, ob Flutter, ein Editor (VS Code) und ein Emulator/Testgerät vorhanden sind. Falls nicht: Anleitung zur Installation geben.
+- [x] **Schritt 1: Neues Flutter-Projekt anlegen** – Leeres, lauffähiges Grundgerüst erstellen, testen dass es startet.
+- [x] **Schritt 2: Startbildschirm** – Einfacher Screen mit App-Titel und "Spiel starten"-Button (noch ohne Funktion).
+- [x] **Schritt 3: Fragen-Datenmodell** – JSON-Datei mit ca. 5 Test-Fragen anlegen, in Dart einlesen.
+- [x] **Schritt 4: Frage-Bildschirm (statisch)** – Eine Frage mit 4 Antwortbuttons anzeigen, ohne Logik.
+- [x] **Schritt 5: Antwort-Logik** – Klick auf Antwort prüfen (richtig/falsch), visuelles Feedback geben.
+- [x] **Schritt 6: Navigation durch mehrere Fragen** – Nach Antwort zur nächsten Frage springen.
+- [x] **Schritt 7: Punkte-/Gewinnstufen-Logik** – Fortschritt durch Stufen anzeigen und mitzählen.
+- [x] **Schritt 8: Ergebnisbildschirm** – Endstand nach letzter Frage anzeigen, Option "Nochmal spielen".
+- [x] **Schritt 9: Fragen-Set erweitern** – Von 5 Test-Fragen auf vollständigen Fragenkatalog (z. B. 20–30 Fragen) erweitern.
+- [x] **Schritt 10: Feinschliff** – Einfache Animationen/Styling, App-Icon, Testen auf echtem Gerät.
 
 **Regel:** Ein Schritt gilt erst als abgeschlossen, wenn ich (der Projektinhaber) das Ergebnis gesehen und bestätigt habe. Erst dann geht es zum nächsten Schritt.
 

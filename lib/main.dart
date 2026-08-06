@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'models/question.dart';
 import 'screens/question_screen.dart';
+import 'theme/app_theme.dart';
+import 'utils/page_transitions.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,17 +14,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quiz-App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-      ),
+      title: 'Quiz Up Your Rank',
+      theme: buildAppTheme(),
       home: const StartScreen(),
     );
   }
@@ -36,28 +29,28 @@ class StartScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.surface,
-            ],
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/ocean_sunset_bg.png'),
+            fit: BoxFit.cover,
           ),
         ),
-        child: Center(
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.25)),
+          child: Center(
           child: Padding(
             padding: const EdgeInsets.all(32.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.quiz, size: 80, color: Colors.white),
+                const Icon(Icons.directions_boat_filled, size: 80, color: Colors.white),
                 const SizedBox(height: 24),
                 const Text(
-                  'Quiz-App',
+                  'Quiz Up Your Rank',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 40,
+                    fontSize: 34,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -77,9 +70,7 @@ class StartScreen extends StatelessWidget {
                       if (context.mounted) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => QuestionScreen(questions: questions),
-                          ),
+                          buildFadeSlideRoute(QuestionScreen(questions: questions)),
                         );
                       }
                     },
@@ -88,6 +79,7 @@ class StartScreen extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),
