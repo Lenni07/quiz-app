@@ -90,6 +90,7 @@ flutter:
     - assets/questions.json
     - assets/sentences.json
     - assets/true_false.json
+    - assets/image_quiz.json
     - assets/images/ocean_sunset_bg.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

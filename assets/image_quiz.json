@@ -1,0 +1,12 @@
+[
+  { "icon": "restaurant", "correctAnswer": "Koch", "distractors": ["Kapitän", "Passagier", "Anker"] },
+  { "icon": "local_hospital", "correctAnswer": "Arzt", "distractors": ["Kabine", "Gepäck", "Speisekarte"] },
+  { "icon": "cleaning_services", "correctAnswer": "Reinigungskraft", "distractors": ["Sonne", "Welle", "Koch"] },
+  { "icon": "luggage", "correctAnswer": "Gepäck", "distractors": ["Anker", "Arzt", "Kabine"] },
+  { "icon": "anchor", "correctAnswer": "Anker", "distractors": ["Gepäck", "Speisekarte", "Reinigungskraft"] },
+  { "icon": "directions_boat", "correctAnswer": "Schiff", "distractors": ["Welle", "Sonne", "Kabine"] },
+  { "icon": "menu_book", "correctAnswer": "Speisekarte", "distractors": ["Koch", "Passagier", "Anker"] },
+  { "icon": "bed", "correctAnswer": "Kabine", "distractors": ["Schiff", "Arzt", "Gepäck"] },
+  { "icon": "wb_sunny", "correctAnswer": "Sonne", "distractors": ["Welle", "Kabine", "Reinigungskraft"] },
+  { "icon": "waves", "correctAnswer": "Welle", "distractors": ["Sonne", "Schiff", "Koch"] }
+]

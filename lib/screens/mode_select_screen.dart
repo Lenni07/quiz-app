@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/image_quiz.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
@@ -6,6 +7,7 @@ import '../utils/page_transitions.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
 import 'gameshow_quiz_screen.dart';
+import 'image_quiz_screen.dart';
 import 'question_screen.dart';
 import 'true_false_screen.dart';
 import 'word_order_screen.dart';
@@ -53,6 +55,13 @@ class ModeSelectScreen extends StatelessWidget {
     final questions = await loadQuestions();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(GameshowQuizScreen(questions: questions)));
+    }
+  }
+
+  Future<void> _startImageQuiz(BuildContext context) async {
+    final items = await loadImageQuizItems();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(ImageQuizScreen(items: items)));
     }
   }
 
@@ -120,6 +129,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Antwort sperren, dann spannungsgeladen aufdecken',
               icon: Icons.theater_comedy,
               onTap: () => _startGameshowQuiz(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Bild-Quiz',
+              subtitle: 'Symbol sehen, passendes Wort wählen',
+              icon: Icons.image_outlined,
+              onTap: () => _startImageQuiz(context),
             ),
           ],
         ),
