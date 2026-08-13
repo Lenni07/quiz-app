@@ -3,48 +3,88 @@
     "question": "Wie heißt du?",
     "correctAnswer": "Ich heiße Anna.",
     "distractors": ["Ich heißt Anna.", "Du heißt Anna."],
-    "blankIndex": 0
+    "blankIndex": 0,
+    "translations": {
+      "en": { "question": "What is your name?", "answer": "My name is Anna." },
+      "tl": { "question": "Ano ang pangalan mo?", "answer": "Ang pangalan ko ay Anna." },
+      "id": { "question": "Siapa namamu?", "answer": "Namaku Anna." }
+    }
   },
   {
     "question": "Wie geht es dir?",
     "correctAnswer": "Mir geht es gut.",
     "distractors": ["Ich geht es gut.", "Mir gehst es gut."],
-    "blankIndex": 0
+    "blankIndex": 0,
+    "translations": {
+      "en": { "question": "How are you?", "answer": "I am fine." },
+      "tl": { "question": "Kumusta ka?", "answer": "Mabuti naman ako." },
+      "id": { "question": "Apa kabar?", "answer": "Saya baik-baik saja." }
+    }
   },
   {
     "question": "Woher kommst du?",
     "correctAnswer": "Ich komme aus Deutschland.",
     "distractors": ["Ich kommst aus Deutschland.", "Ich komme von Deutschland."],
-    "blankIndex": 1
+    "blankIndex": 1,
+    "translations": {
+      "en": { "question": "Where do you come from?", "answer": "I come from Germany." },
+      "tl": { "question": "Taga-saan ka?", "answer": "Taga-Alemanya ako." },
+      "id": { "question": "Kamu berasal dari mana?", "answer": "Saya berasal dari Jerman." }
+    }
   },
   {
     "question": "Wie alt bist du?",
     "correctAnswer": "Ich bin 25 Jahre alt.",
     "distractors": ["Ich bist 25 Jahre alt.", "Du bin 25 Jahre alt."],
-    "blankIndex": 1
+    "blankIndex": 1,
+    "translations": {
+      "en": { "question": "How old are you?", "answer": "I am 25 years old." },
+      "tl": { "question": "Ilang taon ka na?", "answer": "25 taong gulang na ako." },
+      "id": { "question": "Berapa umurmu?", "answer": "Saya berumur 25 tahun." }
+    }
   },
   {
     "question": "Was bist du von Beruf?",
     "correctAnswer": "Ich bin Koch von Beruf.",
     "distractors": ["Ich bist Koch von Beruf.", "Er ist Koch von Beruf."],
-    "blankIndex": 0
+    "blankIndex": 0,
+    "translations": {
+      "en": { "question": "What is your profession?", "answer": "I am a cook by profession." },
+      "tl": { "question": "Ano ang trabaho mo?", "answer": "Kusinero ako." },
+      "id": { "question": "Apa pekerjaanmu?", "answer": "Saya bekerja sebagai koki." }
+    }
   },
   {
     "question": "Welche Sprachen sprichst du?",
     "correctAnswer": "Ich spreche Deutsch und Englisch.",
     "distractors": ["Ich spricht Deutsch und Englisch.", "Ich sprichst Deutsch und Englisch."],
-    "blankIndex": 1
+    "blankIndex": 1,
+    "translations": {
+      "en": { "question": "Which languages do you speak?", "answer": "I speak German and English." },
+      "tl": { "question": "Anong mga wika ang alam mong salitain?", "answer": "Nagsasalita ako ng Aleman at Ingles." },
+      "id": { "question": "Bahasa apa saja yang kamu bisa?", "answer": "Saya bisa berbahasa Jerman dan Inggris." }
+    }
   },
   {
     "question": "Hast du Geschwister?",
     "correctAnswer": "Ja, ich habe zwei Geschwister.",
     "distractors": ["Ja, ich hast zwei Geschwister.", "Ja, du hast zwei Geschwister."],
-    "blankIndex": 1
+    "blankIndex": 1,
+    "translations": {
+      "en": { "question": "Do you have siblings?", "answer": "Yes, I have two siblings." },
+      "tl": { "question": "May mga kapatid ka ba?", "answer": "Oo, may dalawa akong kapatid." },
+      "id": { "question": "Apakah kamu punya saudara kandung?", "answer": "Ya, saya punya dua saudara kandung." }
+    }
   },
   {
     "question": "Wie heißen Sie?",
     "correctAnswer": "Ich heiße Schmidt.",
     "distractors": ["Ich heißt Schmidt.", "Sie heißen Schmidt."],
-    "blankIndex": 0
+    "blankIndex": 0,
+    "translations": {
+      "en": { "question": "What is your name?", "answer": "My name is Schmidt." },
+      "tl": { "question": "Ano po ang pangalan ninyo?", "answer": "Ang pangalan ko po ay Schmidt." },
+      "id": { "question": "Siapa nama Anda?", "answer": "Nama saya Schmidt." }
+    }
   }
 ]

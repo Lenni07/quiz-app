@@ -3,6 +3,7 @@ import '../models/question.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
 import 'fill_blank_screen.dart';
+import 'flashcard_category_screen.dart';
 import 'question_screen.dart';
 import 'word_order_screen.dart';
 
@@ -35,6 +36,13 @@ class ModeSelectScreen extends StatelessWidget {
     final sentences = await loadSentences();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(WordOrderScreen(sentences: sentences)));
+    }
+  }
+
+  Future<void> _startFlashcards(BuildContext context) async {
+    final sentences = await loadSentences();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(FlashcardCategoryScreen(sentences: sentences)));
     }
   }
 
@@ -73,6 +81,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Wörter in die richtige Reihenfolge bringen',
               icon: Icons.low_priority,
               onTap: () => _startWordOrder(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Karteikarten üben',
+              subtitle: 'Selbst antworten, dann Musterantwort ansehen',
+              icon: Icons.style_outlined,
+              onTap: () => _startFlashcards(context),
             ),
           ],
         ),

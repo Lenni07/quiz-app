@@ -3,25 +3,47 @@ import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
 import 'question.dart';
 
+class SentenceTranslation {
+  final String question;
+  final String answer;
+
+  SentenceTranslation({required this.question, required this.answer});
+
+  factory SentenceTranslation.fromJson(Map<String, dynamic> json) {
+    return SentenceTranslation(
+      question: json['question'] as String,
+      answer: json['answer'] as String,
+    );
+  }
+}
+
 class Sentence {
   final String question;
   final String correctAnswer;
   final List<String> distractors;
   final int blankIndex;
+  final Map<String, SentenceTranslation> translations;
 
   Sentence({
     required this.question,
     required this.correctAnswer,
     required this.distractors,
     required this.blankIndex,
+    this.translations = const {},
   });
 
   factory Sentence.fromJson(Map<String, dynamic> json) {
+    final translationsJson = json['translations'] as Map<String, dynamic>?;
     return Sentence(
       question: json['question'] as String,
       correctAnswer: json['correctAnswer'] as String,
       distractors: List<String>.from(json['distractors'] as List),
       blankIndex: json['blankIndex'] as int,
+      translations: translationsJson == null
+          ? const {}
+          : translationsJson.map(
+              (code, value) => MapEntry(code, SentenceTranslation.fromJson(value as Map<String, dynamic>)),
+            ),
     );
   }
 
