@@ -22,6 +22,7 @@ import 'random_cards_screen.dart';
 import 'random_wheel_screen.dart';
 import 'true_false_screen.dart';
 import 'whack_a_mole_screen.dart';
+import 'word_magnets_screen.dart';
 import 'word_order_screen.dart';
 
 class ModeSelectScreen extends StatelessWidget {
@@ -141,6 +142,13 @@ class ModeSelectScreen extends StatelessWidget {
     final sentences = await loadSentences();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(MatchUpScreen(sentences: sentences)));
+    }
+  }
+
+  Future<void> _startWordMagnets(BuildContext context) async {
+    final sentences = await loadSentences();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(WordMagnetsScreen(sentences: sentences)));
     }
   }
 
@@ -285,6 +293,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Deutsche Wörter zur englischen Übersetzung ziehen',
               icon: Icons.compare_arrows,
               onTap: () => _startMatchUp(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Word Magnets',
+              subtitle: 'Wortmagnete (inkl. Ablenkern) zum Satz zusammenziehen',
+              icon: Icons.dashboard_customize,
+              onTap: () => _startWordMagnets(context),
             ),
           ],
         ),
