@@ -14,6 +14,7 @@ import 'image_quiz_screen.dart';
 import 'match_pairs_screen.dart';
 import 'open_box_screen.dart';
 import 'question_screen.dart';
+import 'random_cards_screen.dart';
 import 'random_wheel_screen.dart';
 import 'true_false_screen.dart';
 import 'whack_a_mole_screen.dart';
@@ -111,6 +112,13 @@ class ModeSelectScreen extends StatelessWidget {
     final questions = await loadQuestions();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(RandomWheelScreen(questions: questions)));
+    }
+  }
+
+  Future<void> _startRandomCards(BuildContext context) async {
+    final questions = await loadQuestions();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(RandomCardsScreen(questions: questions)));
     }
   }
 
@@ -227,6 +235,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Glücksrad drehen und Frage beantworten',
               icon: Icons.donut_large,
               onTap: () => _startRandomWheel(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Random Cards',
+              subtitle: 'Zufällige Karte vom Stapel ziehen',
+              icon: Icons.style,
+              onTap: () => _startRandomCards(context),
             ),
           ],
         ),
