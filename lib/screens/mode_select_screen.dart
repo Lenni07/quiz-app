@@ -228,7 +228,7 @@ class ModeSelectScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _ModeCard(
               title: 'Flip Tiles',
-              subtitle: 'Kacheln aufdecken und gesuchtes Wort erraten',
+              subtitle: 'Buchstaben raten und Wort Stück für Stück aufdecken',
               icon: Icons.view_module,
               onTap: () => _startFlipTiles(context),
             ),
