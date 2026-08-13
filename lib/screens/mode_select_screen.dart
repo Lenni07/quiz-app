@@ -14,6 +14,7 @@ import 'higher_lower_screen.dart';
 import 'balloon_pop_screen.dart';
 import 'image_quiz_screen.dart';
 import 'match_pairs_screen.dart';
+import 'match_up_screen.dart';
 import 'math_generator_screen.dart';
 import 'open_box_screen.dart';
 import 'question_screen.dart';
@@ -134,6 +135,13 @@ class ModeSelectScreen extends StatelessWidget {
 
   void _startMathGenerator(BuildContext context) {
     Navigator.push(context, buildFadeSlideRoute(const MathGeneratorScreen()));
+  }
+
+  Future<void> _startMatchUp(BuildContext context) async {
+    final sentences = await loadSentences();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(MatchUpScreen(sentences: sentences)));
+    }
   }
 
   Future<void> _startFlashcards(BuildContext context) async {
@@ -270,6 +278,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Zufällige Rechenaufgaben lösen',
               icon: Icons.calculate,
               onTap: () => _startMathGenerator(context),
+            ),
+            const _SectionHeader('Drag-and-Drop'),
+            _ModeCard(
+              title: 'Match Up',
+              subtitle: 'Deutsche Wörter zur englischen Übersetzung ziehen',
+              icon: Icons.compare_arrows,
+              onTap: () => _startMatchUp(context),
             ),
           ],
         ),
