@@ -22,7 +22,11 @@ Das prägt die technische Architektur entscheidend, deshalb vorab explizit festg
 ## 3. Phase 2 – Mehr Spielformate
 
 **Ohne Drag-and-Drop (zuerst umsetzen, da einfacher):**
-Quiz, True or False, Gameshow Quiz, Image Quiz, Higher or Lower, Open the Box, Find the Match, Balloon Pop, Whack-a-Mole, Random Wheel, Random Cards, Flip Tiles, Maths Generator.
+Quiz, True or False, Gameshow Quiz, Image Quiz, Open the Box, Find the Match, Random Wheel, Flip Tiles (wird im "Glücksrad"-Stil überarbeitet, siehe Abschnitt 12).
+
+~~Higher or Lower, Random Cards, Maths Generator, Balloon Pop~~ – nach dem ersten Test aus der App entfernt, siehe Abschnitt 12.
+
+~~Whack-a-Mole~~ – vorerst aus der App entfernt, wird später überarbeitet und dann wieder aufgenommen, siehe Abschnitt 12.
 
 **Mit Drag-and-Drop (Flutter: `Draggable`, `DragTarget`, `ReorderableListView`):**
 Match Up, Word Magnets, Group Sort/Categorize, Rank Order.
@@ -88,10 +92,29 @@ Bewusste Entscheidung für den Entwicklungsprozess: Zuerst werden alle Module in
 - Sobald die echten Inhalte vorliegen, werden nur die Platzhalterdaten ausgetauscht – an der Modul-/Backend-Logik ändert sich dadurch nichts, solange das Schema eingehalten wurde.
 - Für Claude Code heißt das konkret: beim Bauen jedes Moduls einfach passende Platzhalterinhalte selbst ausdenken, nicht auf inhaltliche Vorgaben warten.
 
-## 10. Empfohlene Reihenfolge
+## 10. Arbeitsweise: eigenständige Umsetzung ohne Rückfrage pro Modul
+
+Die Formate aus Abschnitt 3 (sowohl ohne als auch **mit** Drag-and-Drop – die ursprüngliche Trennung war nur eine Empfehlung zur Reihenfolge, kein Ausschlusskriterium) werden von Claude Code eigenständig der Reihe nach umgesetzt, ohne für jedes einzelne Modul erneut nachfragen zu müssen:
+
+- Pro Modul: implementieren, kurz testbar machen (lokaler Testlink), committen, pushen.
+- Danach automatisch mit dem nächsten Format aus der Liste weitermachen.
+- Nur bei echten inhaltlichen/technischen Unklarheiten zwischendurch nachfragen, nicht routinemäßig vor jedem Modul.
+
+## 11. Empfohlene Reihenfolge
 
 1. Phase 2 (erste Hälfte): einfache neue Spielformate ohne Drag-and-Drop.
 2. Phase 2 (zweite Hälfte): Drag-and-Drop-Formate, inkl. flexiblerem Datenmodell.
 3. Phase 3: Firebase-Grundlage (Auth + Firestore) einziehen, auch wenn Mehrspieler noch nicht fertig ist – das ist die Basis für alles Weitere.
 4. Phase 4a: lokales Duell (kostenlos, kein Internet nötig) – schneller Erfolg, gutes Nutzererlebnis an Bord.
 5. Phase 4b: monatlicher Flottenkrieg (Schiff gegen Schiff) – technisch anspruchsvollster Teil, baut auf allem Vorherigen auf, inkl. Season-Logik mit monatlichem Reset.
+
+## 12. Status nach erstem Test aller 20 Modi
+
+Alle Modi aus Abschnitt 3 wurden gebaut und getestet (Stand: 20 Modi in "Modus wählen", inkl. Gameshow-Quiz und Bild-Quiz aus vorherigen Commits). Ergebnis des ersten Tests:
+
+- **Higher or Lower, Random Cards, Maths Generator ("Rechnen üben") und Balloon Pop werden entfernt** – aus der App-Liste sowie zugehörigem Code/Assets. Sie passen nach erstem Eindruck nicht ins Gesamtbild der App.
+- **Whack-a-Mole wird vorerst ebenfalls entfernt** (Code/Assets können archiviert statt komplett gelöscht werden) – im Unterschied zu den anderen vier ist das kein endgültiger Rauswurf, sondern soll später überarbeitet und wieder in die App aufgenommen werden.
+- **Flip Tiles wird neu ausgelegt**, im Stil eines "Glücksrad"/Wheel-of-Fortune-Spiels: Ein verstecktes Wort oder ein Satz wird als verdeckte Buchstaben-/Wortkacheln angezeigt, die Spieler raten einzelne Buchstaben, aufgedeckte Treffer bleiben sichtbar, bis das ganze Wort/der ganze Satz erraten ist. Bestehende Flip-Tiles-Logik (Kachel umdrehen) kann als Basis für die Buchstaben-Aufdeckung wiederverwendet werden.
+- Die übrigen Modi bleiben als Basis bestehen, auch wenn sie inhaltlich/visuell noch nicht final sind ("noch lange nicht so, wie ich es mir vorstelle, aber ein Start") – Feinschliff erfolgt später, bremst Phase 3 nicht.
+- Bei **Word Magnets** und **Rank Order** gab es bewusste Abweichungen von der wörtlichen Roadmap-Beschreibung, um Dopplungen mit anderen Modi zu vermeiden (siehe jeweilige Commit-Nachrichten) – akzeptiert, keine Änderung nötig.
+- Nächster Schritt laut Entscheidung: **Phase 3 (Firebase-Grundlage: Accounts + Fortschritt)** wird jetzt begonnen.

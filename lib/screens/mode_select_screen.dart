@@ -12,15 +12,12 @@ import 'flashcard_category_screen.dart';
 import 'flip_tiles_screen.dart';
 import 'gameshow_quiz_screen.dart';
 import 'group_sort_screen.dart';
-import 'higher_lower_screen.dart';
 import 'balloon_pop_screen.dart';
 import 'image_quiz_screen.dart';
 import 'match_pairs_screen.dart';
 import 'match_up_screen.dart';
-import 'math_generator_screen.dart';
 import 'open_box_screen.dart';
 import 'question_screen.dart';
-import 'random_cards_screen.dart';
 import 'random_wheel_screen.dart';
 import 'rank_order_screen.dart';
 import 'true_false_screen.dart';
@@ -81,13 +78,6 @@ class ModeSelectScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _startHigherLower(BuildContext context) async {
-    final words = await loadNumberWords();
-    if (context.mounted) {
-      Navigator.push(context, buildFadeSlideRoute(HigherLowerScreen(words: words)));
-    }
-  }
-
   Future<void> _startOpenBox(BuildContext context) async {
     final questions = await loadQuestions();
     if (context.mounted) {
@@ -123,22 +113,11 @@ class ModeSelectScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _startRandomCards(BuildContext context) async {
-    final questions = await loadQuestions();
-    if (context.mounted) {
-      Navigator.push(context, buildFadeSlideRoute(RandomCardsScreen(questions: questions)));
-    }
-  }
-
   Future<void> _startFlipTiles(BuildContext context) async {
     final words = await loadFlipTileWords();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(FlipTilesScreen(words: words)));
     }
-  }
-
-  void _startMathGenerator(BuildContext context) {
-    Navigator.push(context, buildFadeSlideRoute(const MathGeneratorScreen()));
   }
 
   Future<void> _startMatchUp(BuildContext context) async {
@@ -243,13 +222,6 @@ class ModeSelectScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Higher or Lower',
-              subtitle: 'Welches Zahlwort ist größer?',
-              icon: Icons.swap_vert,
-              onTap: () => _startHigherLower(context),
-            ),
-            const SizedBox(height: 16),
-            _ModeCard(
               title: 'Open the Box',
               subtitle: 'Box öffnen und versteckte Frage beantworten',
               icon: Icons.card_giftcard,
@@ -285,24 +257,10 @@ class ModeSelectScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Random Cards',
-              subtitle: 'Zufällige Karte vom Stapel ziehen',
-              icon: Icons.style,
-              onTap: () => _startRandomCards(context),
-            ),
-            const SizedBox(height: 16),
-            _ModeCard(
               title: 'Flip Tiles',
               subtitle: 'Kacheln aufdecken und gesuchtes Wort erraten',
               icon: Icons.view_module,
               onTap: () => _startFlipTiles(context),
-            ),
-            const SizedBox(height: 16),
-            _ModeCard(
-              title: 'Rechnen üben',
-              subtitle: 'Zufällige Rechenaufgaben lösen',
-              icon: Icons.calculate,
-              onTap: () => _startMathGenerator(context),
             ),
             const _SectionHeader('Drag-and-Drop'),
             _ModeCard(
