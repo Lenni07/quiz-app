@@ -14,6 +14,7 @@ import 'image_quiz_screen.dart';
 import 'match_pairs_screen.dart';
 import 'open_box_screen.dart';
 import 'question_screen.dart';
+import 'random_wheel_screen.dart';
 import 'true_false_screen.dart';
 import 'whack_a_mole_screen.dart';
 import 'word_order_screen.dart';
@@ -103,6 +104,13 @@ class ModeSelectScreen extends StatelessWidget {
     final questions = await loadQuestions();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(WhackAMoleScreen(questions: questions)));
+    }
+  }
+
+  Future<void> _startRandomWheel(BuildContext context) async {
+    final questions = await loadQuestions();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(RandomWheelScreen(questions: questions)));
     }
   }
 
@@ -212,6 +220,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Im richtigen Moment auf die richtige Antwort tippen',
               icon: Icons.sports_baseball,
               onTap: () => _startWhackAMole(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Random Wheel',
+              subtitle: 'Glücksrad drehen und Frage beantworten',
+              icon: Icons.donut_large,
+              onTap: () => _startRandomWheel(context),
             ),
           ],
         ),
