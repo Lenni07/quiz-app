@@ -11,11 +11,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    debugPrint('Firebase: initialized');
     final user = await AuthService().ensureSignedIn();
+    debugPrint('Firebase: signed in as ${user.uid}');
     await UserProfileService().ensureProfileExists(user.uid);
-  } catch (_) {
+    debugPrint('Firebase: profile ensured');
+  } catch (e, stack) {
     // Kein Internet oder Firebase nicht erreichbar: App bleibt trotzdem
     // voll nutzbar (offline-first), nur der Cloud-Abgleich fehlt dann.
+    debugPrint('Firebase: startup failed: $e');
+    debugPrint('$stack');
   }
   runApp(const MyApp());
 }
