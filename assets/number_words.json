@@ -1,0 +1,23 @@
+[
+  { "word": "eins", "value": 1 },
+  { "word": "zwei", "value": 2 },
+  { "word": "drei", "value": 3 },
+  { "word": "vier", "value": 4 },
+  { "word": "fünf", "value": 5 },
+  { "word": "sechs", "value": 6 },
+  { "word": "sieben", "value": 7 },
+  { "word": "acht", "value": 8 },
+  { "word": "neun", "value": 9 },
+  { "word": "zehn", "value": 10 },
+  { "word": "elf", "value": 11 },
+  { "word": "zwölf", "value": 12 },
+  { "word": "dreizehn", "value": 13 },
+  { "word": "vierzehn", "value": 14 },
+  { "word": "fünfzehn", "value": 15 },
+  { "word": "zwanzig", "value": 20 },
+  { "word": "einundzwanzig", "value": 21 },
+  { "word": "dreißig", "value": 30 },
+  { "word": "vierzig", "value": 40 },
+  { "word": "fünfzig", "value": 50 },
+  { "word": "hundert", "value": 100 }
+]

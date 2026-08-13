@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/image_quiz.dart';
+import '../models/number_word.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
@@ -7,6 +8,7 @@ import '../utils/page_transitions.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
 import 'gameshow_quiz_screen.dart';
+import 'higher_lower_screen.dart';
 import 'image_quiz_screen.dart';
 import 'question_screen.dart';
 import 'true_false_screen.dart';
@@ -62,6 +64,13 @@ class ModeSelectScreen extends StatelessWidget {
     final items = await loadImageQuizItems();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(ImageQuizScreen(items: items)));
+    }
+  }
+
+  Future<void> _startHigherLower(BuildContext context) async {
+    final words = await loadNumberWords();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(HigherLowerScreen(words: words)));
     }
   }
 
@@ -136,6 +145,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Symbol sehen, passendes Wort wählen',
               icon: Icons.image_outlined,
               onTap: () => _startImageQuiz(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Higher or Lower',
+              subtitle: 'Welches Zahlwort ist größer?',
+              icon: Icons.swap_vert,
+              onTap: () => _startHigherLower(context),
             ),
           ],
         ),
