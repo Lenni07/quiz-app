@@ -1,0 +1,17 @@
+{
+  "categories": ["Berufe", "Länder", "Sprachen"],
+  "items": [
+    { "word": "Koch", "category": "Berufe" },
+    { "word": "Kapitän", "category": "Berufe" },
+    { "word": "Arzt", "category": "Berufe" },
+    { "word": "Steward", "category": "Berufe" },
+    { "word": "Deutschland", "category": "Länder" },
+    { "word": "Philippinen", "category": "Länder" },
+    { "word": "Indonesien", "category": "Länder" },
+    { "word": "England", "category": "Länder" },
+    { "word": "Deutsch", "category": "Sprachen" },
+    { "word": "Englisch", "category": "Sprachen" },
+    { "word": "Tagalog", "category": "Sprachen" },
+    { "word": "Bahasa", "category": "Sprachen" }
+  ]
+}

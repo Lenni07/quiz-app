@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/flip_tile_word.dart';
+import '../models/group_sort.dart';
 import '../models/image_quiz.dart';
 import '../models/number_word.dart';
 import '../models/question.dart';
@@ -10,6 +11,7 @@ import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
 import 'flip_tiles_screen.dart';
 import 'gameshow_quiz_screen.dart';
+import 'group_sort_screen.dart';
 import 'higher_lower_screen.dart';
 import 'balloon_pop_screen.dart';
 import 'image_quiz_screen.dart';
@@ -149,6 +151,13 @@ class ModeSelectScreen extends StatelessWidget {
     final sentences = await loadSentences();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(WordMagnetsScreen(sentences: sentences)));
+    }
+  }
+
+  Future<void> _startGroupSort(BuildContext context) async {
+    final data = await loadGroupSortData();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(GroupSortScreen(data: data)));
     }
   }
 
@@ -300,6 +309,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Wortmagnete (inkl. Ablenkern) zum Satz zusammenziehen',
               icon: Icons.dashboard_customize,
               onTap: () => _startWordMagnets(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Group Sort',
+              subtitle: 'Wörter in die richtige Kategorie ziehen',
+              icon: Icons.category,
+              onTap: () => _startGroupSort(context),
             ),
           ],
         ),
