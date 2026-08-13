@@ -10,6 +10,7 @@ import 'flashcard_category_screen.dart';
 import 'gameshow_quiz_screen.dart';
 import 'higher_lower_screen.dart';
 import 'image_quiz_screen.dart';
+import 'open_box_screen.dart';
 import 'question_screen.dart';
 import 'true_false_screen.dart';
 import 'word_order_screen.dart';
@@ -71,6 +72,13 @@ class ModeSelectScreen extends StatelessWidget {
     final words = await loadNumberWords();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(HigherLowerScreen(words: words)));
+    }
+  }
+
+  Future<void> _startOpenBox(BuildContext context) async {
+    final questions = await loadQuestions();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(OpenBoxScreen(questions: questions.take(9).toList())));
     }
   }
 
@@ -152,6 +160,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Welches Zahlwort ist größer?',
               icon: Icons.swap_vert,
               onTap: () => _startHigherLower(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Open the Box',
+              subtitle: 'Box öffnen und versteckte Frage beantworten',
+              icon: Icons.card_giftcard,
+              onTap: () => _startOpenBox(context),
             ),
           ],
         ),
