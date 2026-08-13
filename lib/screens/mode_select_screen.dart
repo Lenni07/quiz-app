@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
+import '../models/true_false.dart';
 import '../utils/page_transitions.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
 import 'question_screen.dart';
+import 'true_false_screen.dart';
 import 'word_order_screen.dart';
 
 class ModeSelectScreen extends StatelessWidget {
@@ -36,6 +38,13 @@ class ModeSelectScreen extends StatelessWidget {
     final sentences = await loadSentences();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(WordOrderScreen(sentences: sentences)));
+    }
+  }
+
+  Future<void> _startTrueFalse(BuildContext context) async {
+    final statements = await loadTrueFalseStatements();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(TrueFalseScreen(statements: statements)));
     }
   }
 
@@ -88,6 +97,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Selbst antworten, dann Musterantwort ansehen',
               icon: Icons.style_outlined,
               onTap: () => _startFlashcards(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Wahr oder Falsch',
+              subtitle: 'Aussage lesen und richtig einschätzen',
+              icon: Icons.rule,
+              onTap: () => _startTrueFalse(context),
             ),
           ],
         ),

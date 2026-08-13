@@ -1,0 +1,42 @@
+[
+  {
+    "statement": "Das Wort 'Schiff' heißt auf Deutsch 'das Schiff' (Neutrum).",
+    "isTrue": true
+  },
+  {
+    "statement": "Im Deutschen steht das Verb in einem einfachen Aussagesatz an zweiter Stelle.",
+    "isTrue": true
+  },
+  {
+    "statement": "'Guten Morgen' sagt man üblicherweise abends.",
+    "isTrue": false
+  },
+  {
+    "statement": "Die Höflichkeitsform 'Sie' wird im Deutschen großgeschrieben.",
+    "isTrue": true
+  },
+  {
+    "statement": "'Ich heiße Anna' bedeutet auf Englisch 'My name is Anna'.",
+    "isTrue": true
+  },
+  {
+    "statement": "Im Deutschen gibt es nur einen bestimmten Artikel für alle Substantive.",
+    "isTrue": false
+  },
+  {
+    "statement": "'Wie geht es dir?' ist eine unhöfliche Frage.",
+    "isTrue": false
+  },
+  {
+    "statement": "Das Wort 'Koch' bezeichnet einen Beruf.",
+    "isTrue": true
+  },
+  {
+    "statement": "Auf Deutsch sagt man korrekt 'Ich bin 25 Jahre alt', nicht 'Ich habe 25 Jahre alt'.",
+    "isTrue": true
+  },
+  {
+    "statement": "Das deutsche Wort für 'kitchen' ist 'Küche'.",
+    "isTrue": true
+  }
+]
