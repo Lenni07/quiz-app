@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/flip_tile_word.dart';
 import '../models/image_quiz.dart';
 import '../models/number_word.dart';
 import '../models/question.dart';
@@ -7,6 +8,7 @@ import '../models/true_false.dart';
 import '../utils/page_transitions.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
+import 'flip_tiles_screen.dart';
 import 'gameshow_quiz_screen.dart';
 import 'higher_lower_screen.dart';
 import 'balloon_pop_screen.dart';
@@ -119,6 +121,13 @@ class ModeSelectScreen extends StatelessWidget {
     final questions = await loadQuestions();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(RandomCardsScreen(questions: questions)));
+    }
+  }
+
+  Future<void> _startFlipTiles(BuildContext context) async {
+    final words = await loadFlipTileWords();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(FlipTilesScreen(words: words)));
     }
   }
 
@@ -242,6 +251,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Zufällige Karte vom Stapel ziehen',
               icon: Icons.style,
               onTap: () => _startRandomCards(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Flip Tiles',
+              subtitle: 'Kacheln aufdecken und gesuchtes Wort erraten',
+              icon: Icons.view_module,
+              onTap: () => _startFlipTiles(context),
             ),
           ],
         ),
