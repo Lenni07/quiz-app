@@ -12,7 +12,6 @@ import 'flashcard_category_screen.dart';
 import 'flip_tiles_screen.dart';
 import 'gameshow_quiz_screen.dart';
 import 'group_sort_screen.dart';
-import 'balloon_pop_screen.dart';
 import 'image_quiz_screen.dart';
 import 'match_pairs_screen.dart';
 import 'match_up_screen.dart';
@@ -21,7 +20,6 @@ import 'question_screen.dart';
 import 'random_wheel_screen.dart';
 import 'rank_order_screen.dart';
 import 'true_false_screen.dart';
-import 'whack_a_mole_screen.dart';
 import 'word_magnets_screen.dart';
 import 'word_order_screen.dart';
 
@@ -89,20 +87,6 @@ class ModeSelectScreen extends StatelessWidget {
     final sentences = await loadSentences();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(MatchPairsScreen(sentences: sentences)));
-    }
-  }
-
-  Future<void> _startBalloonPop(BuildContext context) async {
-    final questions = await loadQuestions();
-    if (context.mounted) {
-      Navigator.push(context, buildFadeSlideRoute(BalloonPopScreen(questions: questions)));
-    }
-  }
-
-  Future<void> _startWhackAMole(BuildContext context) async {
-    final questions = await loadQuestions();
-    if (context.mounted) {
-      Navigator.push(context, buildFadeSlideRoute(WhackAMoleScreen(questions: questions)));
     }
   }
 
@@ -233,20 +217,6 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Memory: Deutsch und Englisch zusammenfinden',
               icon: Icons.grid_view,
               onTap: () => _startMatchPairs(context),
-            ),
-            const SizedBox(height: 16),
-            _ModeCard(
-              title: 'Balloon Pop',
-              subtitle: 'Richtigen Ballon antippen, bevor die Zeit abläuft',
-              icon: Icons.bubble_chart,
-              onTap: () => _startBalloonPop(context),
-            ),
-            const SizedBox(height: 16),
-            _ModeCard(
-              title: 'Whack-a-Mole',
-              subtitle: 'Im richtigen Moment auf die richtige Antwort tippen',
-              icon: Icons.sports_baseball,
-              onTap: () => _startWhackAMole(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
