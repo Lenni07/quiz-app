@@ -10,6 +10,7 @@ import 'flashcard_category_screen.dart';
 import 'gameshow_quiz_screen.dart';
 import 'higher_lower_screen.dart';
 import 'image_quiz_screen.dart';
+import 'match_pairs_screen.dart';
 import 'open_box_screen.dart';
 import 'question_screen.dart';
 import 'true_false_screen.dart';
@@ -79,6 +80,13 @@ class ModeSelectScreen extends StatelessWidget {
     final questions = await loadQuestions();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(OpenBoxScreen(questions: questions.take(9).toList())));
+    }
+  }
+
+  Future<void> _startMatchPairs(BuildContext context) async {
+    final sentences = await loadSentences();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(MatchPairsScreen(sentences: sentences)));
     }
   }
 
@@ -167,6 +175,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Box öffnen und versteckte Frage beantworten',
               icon: Icons.card_giftcard,
               onTap: () => _startOpenBox(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Find the Match',
+              subtitle: 'Memory: Deutsch und Englisch zusammenfinden',
+              icon: Icons.grid_view,
+              onTap: () => _startMatchPairs(context),
             ),
           ],
         ),
