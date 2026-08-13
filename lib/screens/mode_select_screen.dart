@@ -5,6 +5,7 @@ import '../models/true_false.dart';
 import '../utils/page_transitions.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
+import 'gameshow_quiz_screen.dart';
 import 'question_screen.dart';
 import 'true_false_screen.dart';
 import 'word_order_screen.dart';
@@ -48,6 +49,13 @@ class ModeSelectScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _startGameshowQuiz(BuildContext context) async {
+    final questions = await loadQuestions();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(GameshowQuizScreen(questions: questions)));
+    }
+  }
+
   Future<void> _startFlashcards(BuildContext context) async {
     final sentences = await loadSentences();
     if (context.mounted) {
@@ -59,11 +67,12 @@ class ModeSelectScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Modus wählen')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const _SectionHeader('Grundmodi'),
             _ModeCard(
               title: 'Allgemeinwissen-Quiz',
               subtitle: '25 Wissensfragen zur deutschen Sprache',
@@ -105,7 +114,36 @@ class ModeSelectScreen extends StatelessWidget {
               icon: Icons.rule,
               onTap: () => _startTrueFalse(context),
             ),
+            const _SectionHeader('Weitere Formate'),
+            _ModeCard(
+              title: 'Gameshow-Quiz',
+              subtitle: 'Antwort sperren, dann spannungsgeladen aufdecken',
+              icon: Icons.theater_comedy,
+              onTap: () => _startGameshowQuiz(context),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         ),
       ),
     );
