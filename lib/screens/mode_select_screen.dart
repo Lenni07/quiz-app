@@ -14,6 +14,7 @@ import 'higher_lower_screen.dart';
 import 'balloon_pop_screen.dart';
 import 'image_quiz_screen.dart';
 import 'match_pairs_screen.dart';
+import 'math_generator_screen.dart';
 import 'open_box_screen.dart';
 import 'question_screen.dart';
 import 'random_cards_screen.dart';
@@ -129,6 +130,10 @@ class ModeSelectScreen extends StatelessWidget {
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(FlipTilesScreen(words: words)));
     }
+  }
+
+  void _startMathGenerator(BuildContext context) {
+    Navigator.push(context, buildFadeSlideRoute(const MathGeneratorScreen()));
   }
 
   Future<void> _startFlashcards(BuildContext context) async {
@@ -258,6 +263,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Kacheln aufdecken und gesuchtes Wort erraten',
               icon: Icons.view_module,
               onTap: () => _startFlipTiles(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Rechnen üben',
+              subtitle: 'Zufällige Rechenaufgaben lösen',
+              icon: Icons.calculate,
+              onTap: () => _startMathGenerator(context),
             ),
           ],
         ),
