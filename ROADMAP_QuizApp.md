@@ -118,3 +118,18 @@ Alle Modi aus Abschnitt 3 wurden gebaut und getestet (Stand: 20 Modi in "Modus w
 - Die übrigen Modi bleiben als Basis bestehen, auch wenn sie inhaltlich/visuell noch nicht final sind ("noch lange nicht so, wie ich es mir vorstelle, aber ein Start") – Feinschliff erfolgt später, bremst Phase 3 nicht.
 - Bei **Word Magnets** und **Rank Order** gab es bewusste Abweichungen von der wörtlichen Roadmap-Beschreibung, um Dopplungen mit anderen Modi zu vermeiden (siehe jeweilige Commit-Nachrichten) – akzeptiert, keine Änderung nötig.
 - Nächster Schritt laut Entscheidung: **Phase 3 (Firebase-Grundlage: Accounts + Fortschritt)** wird jetzt begonnen.
+
+## 13. Phase 5 – Visueller Feinschliff & Freelancer-Handoff
+
+Bewusste Trennung: Claude Code baut die App **funktional komplett** (alle Modi, Backend, Mehrspieler) mit einfachem/funktionalem Styling ("Platzhalter-Optik", analog zu Abschnitt 9 bei den Inhalten). Erst wenn die Funktion steht, kommt ein Freelancer für den kompletten visuellen Feinschliff – Ziel: Endergebnis soll wirken wie eine hochwertige, vollständig durchgestaltete App (Layout, Farben, Typografie, **und komplette Animationen**, z. B. Dreh-Animation beim Glücksrad, Übergänge zwischen Screens, Feedback-Animationen bei richtig/falsch).
+
+**Warum diese Reihenfolge:**
+- Solange sich Modi/Features noch ändern (siehe Abschnitt 12), wäre Freelancer-Arbeit am Design verschwendetes Geld – die müsste bei jeder Änderung teilweise wiederholt werden.
+- Code (Flutter/Dart, auf GitHub) und Inhalte (JSON) sind vollständig portabel – ein Freelancer mit Flutter-Kenntnissen kann direkt darauf aufbauen, unabhängig davon, wer den funktionalen Teil gebaut hat.
+
+**Vorbereitung vor der Freelancer-Suche:**
+1. Funktionaler Stand muss stehen (alle Modi + mindestens Phase 3/4-Grundgerüst).
+2. Ein kurzes **Design-Briefing** erstellen (Vision, Stilrichtung, Referenzen/Moodboard, Zielgefühl "hochwertig"), damit der Freelancer nicht raten muss, wie "wie ich es mir vorstelle" konkret aussieht.
+3. Klären, ob ein Flutter-Entwickler mit Design-Gespür gesucht wird (kann Theming/Animationen direkt im Code umsetzen) oder ein reiner UI/UX-Designer (liefert Mockups, die danach wieder implementiert werden müssen).
+
+**Hinweis zur Abgrenzung:** Rein optische Anpassungen (Farben, Schriften, Icons, Layout) lassen sich später sauber "draufsetzen". Bei Interaktionen, die Optik und Logik eng verzahnen (z. B. Drag-and-Drop-Gefühl, Dreh-Animation), kann der Freelancer auch etwas am bestehenden Code anpassen müssen – das ist normal und kein Zeichen für einen Fehler im bisherigen Aufbau.

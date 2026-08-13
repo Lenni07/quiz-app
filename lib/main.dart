@@ -1,9 +1,22 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'firebase_options.dart';
 import 'screens/mode_select_screen.dart';
+import 'services/auth_service.dart';
+import 'services/user_profile_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/page_transitions.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    final user = await AuthService().ensureSignedIn();
+    await UserProfileService().ensureProfileExists(user.uid);
+  } catch (_) {
+    // Kein Internet oder Firebase nicht erreichbar: App bleibt trotzdem
+    // voll nutzbar (offline-first), nur der Cloud-Abgleich fehlt dann.
+  }
   runApp(const MyApp());
 }
 
