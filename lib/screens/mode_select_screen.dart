@@ -22,6 +22,7 @@ import 'open_box_screen.dart';
 import 'question_screen.dart';
 import 'random_cards_screen.dart';
 import 'random_wheel_screen.dart';
+import 'rank_order_screen.dart';
 import 'true_false_screen.dart';
 import 'whack_a_mole_screen.dart';
 import 'word_magnets_screen.dart';
@@ -158,6 +159,13 @@ class ModeSelectScreen extends StatelessWidget {
     final data = await loadGroupSortData();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(GroupSortScreen(data: data)));
+    }
+  }
+
+  Future<void> _startRankOrder(BuildContext context) async {
+    final words = await loadNumberWords();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(RankOrderScreen(words: words)));
     }
   }
 
@@ -316,6 +324,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Wörter in die richtige Kategorie ziehen',
               icon: Icons.category,
               onTap: () => _startGroupSort(context),
+            ),
+            const SizedBox(height: 16),
+            _ModeCard(
+              title: 'Rank Order',
+              subtitle: 'Zahlwörter der Größe nach sortieren',
+              icon: Icons.sort,
+              onTap: () => _startRankOrder(context),
             ),
           ],
         ),
