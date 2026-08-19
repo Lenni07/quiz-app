@@ -19,6 +19,14 @@ class Question {
       correctIndex: json['correctIndex'] as int,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'question': question,
+      'options': options,
+      'correctIndex': correctIndex,
+    };
+  }
 }
 
 Future<List<Question>> loadQuestions() async {

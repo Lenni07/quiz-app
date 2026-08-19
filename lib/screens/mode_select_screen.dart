@@ -7,6 +7,7 @@ import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
 import '../utils/page_transitions.dart';
+import 'duel_mode_screen.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
 import 'flip_tiles_screen.dart';
@@ -139,6 +140,10 @@ class ModeSelectScreen extends StatelessWidget {
     }
   }
 
+  void _startDuel(BuildContext context) {
+    Navigator.push(context, buildFadeSlideRoute(const DuelModeScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -259,6 +264,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: 'Zahlwörter der Größe nach sortieren',
               icon: Icons.sort,
               onTap: () => _startRankOrder(context),
+            ),
+            const _SectionHeader('Mehrspieler'),
+            _ModeCard(
+              title: 'Lokales Duell',
+              subtitle: 'Gegen ein anderes Gerät im selben WLAN antreten',
+              icon: Icons.people_alt,
+              onTap: () => _startDuel(context),
             ),
           ],
         ),
