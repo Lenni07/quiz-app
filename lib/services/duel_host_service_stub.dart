@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'duel_protocol.dart';
 
 /// Web-Ersatz: Im Browser können keine Server-Sockets geöffnet werden, daher
@@ -6,6 +7,8 @@ import 'duel_protocol.dart';
 class DuelHostService {
   Stream<DuelMessage> get messages => const Stream.empty();
   bool get hasClient => false;
+
+  Future<T> waitFor<T extends DuelMessage>() => Completer<T>().future;
 
   Future<String?> findLocalIp() async => null;
 

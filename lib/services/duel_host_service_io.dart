@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'duel_message_bus.dart';
 import 'duel_protocol.dart';
 
 /// Startet einen lokalen WebSocket-Server im selben WLAN, mit dem sich genau
@@ -10,11 +10,13 @@ import 'duel_protocol.dart';
 /// Option 2). Nur auf Android/iOS/Windows/macOS/Linux verfügbar, nicht im Web.
 class DuelHostService {
   HttpServer? _server;
-  final _messageController = StreamController<DuelMessage>.broadcast();
+  final _bus = DuelMessageBus();
   WebSocketChannel? _channel;
 
-  Stream<DuelMessage> get messages => _messageController.stream;
+  Stream<DuelMessage> get messages => _bus.stream;
   bool get hasClient => _channel != null;
+
+  Future<T> waitFor<T extends DuelMessage>() => _bus.waitFor<T>();
 
   /// Ermittelt die lokale LAN-IP-Adresse, die der zweite Spieler eintippen kann.
   Future<String?> findLocalIp() async {
@@ -35,7 +37,7 @@ class DuelHostService {
       _channel = webSocket;
       onConnected?.call();
       webSocket.stream.listen(
-        (raw) => _messageController.add(DuelMessage.decode(raw as String)),
+        (raw) => _bus.add(DuelMessage.decode(raw as String)),
         onDone: () => _channel = null,
       );
     });
@@ -49,6 +51,6 @@ class DuelHostService {
 
   Future<void> stop() async {
     await _server?.close(force: true);
-    await _messageController.close();
+    await _bus.close();
   }
 }

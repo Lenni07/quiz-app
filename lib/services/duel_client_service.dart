@@ -1,21 +1,23 @@
-import 'dart:async';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'duel_message_bus.dart';
 import 'duel_protocol.dart';
 
 /// Verbindet sich als zweiter Spieler mit einem lokal gehosteten Duell.
 /// Läuft auf allen Plattformen inkl. Web.
 class DuelClientService {
   WebSocketChannel? _channel;
-  final _messageController = StreamController<DuelMessage>.broadcast();
+  final _bus = DuelMessageBus();
 
-  Stream<DuelMessage> get messages => _messageController.stream;
+  Stream<DuelMessage> get messages => _bus.stream;
+
+  Future<T> waitFor<T extends DuelMessage>() => _bus.waitFor<T>();
 
   Future<void> connect(String host, int port) async {
     final channel = WebSocketChannel.connect(Uri.parse('ws://$host:$port'));
     await channel.ready;
     _channel = channel;
     channel.stream.listen(
-      (raw) => _messageController.add(DuelMessage.decode(raw as String)),
+      (raw) => _bus.add(DuelMessage.decode(raw as String)),
     );
   }
 
@@ -25,6 +27,6 @@ class DuelClientService {
 
   Future<void> disconnect() async {
     await _channel?.sink.close();
-    await _messageController.close();
+    await _bus.close();
   }
 }

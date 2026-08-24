@@ -77,8 +77,8 @@ class _DuelHostScreenState extends State<DuelHostScreen> {
     _hostService.send(ScoreMessage(myScore, _questions.length));
     setState(() => _stage = _Stage.waitingForOpponentScore);
 
-    final opponentMessage = await _hostService.messages.firstWhere((m) => m is ScoreMessage);
-    final opponentScore = (opponentMessage as ScoreMessage).score;
+    final opponentMessage = await _hostService.waitFor<ScoreMessage>();
+    final opponentScore = opponentMessage.score;
     if (!mounted) return;
 
     Navigator.pushReplacement(

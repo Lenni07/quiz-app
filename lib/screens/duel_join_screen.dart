@@ -47,8 +47,8 @@ class _DuelJoinScreenState extends State<DuelJoinScreen> {
       await _clientService.connect(host, port);
       setState(() => _stage = _Stage.waitingForQuestions);
 
-      final questionsMessage = await _clientService.messages.firstWhere((m) => m is QuestionsMessage);
-      _questions = (questionsMessage as QuestionsMessage).questions;
+      final questionsMessage = await _clientService.waitFor<QuestionsMessage>();
+      _questions = questionsMessage.questions;
       if (!mounted) return;
       setState(() => _stage = _Stage.playing);
       await _playAndExchangeScore();
@@ -71,8 +71,8 @@ class _DuelJoinScreenState extends State<DuelJoinScreen> {
     _clientService.send(ScoreMessage(myScore, _questions!.length));
     setState(() => _stage = _Stage.waitingForOpponentScore);
 
-    final opponentMessage = await _clientService.messages.firstWhere((m) => m is ScoreMessage);
-    final opponentScore = (opponentMessage as ScoreMessage).score;
+    final opponentMessage = await _clientService.waitFor<ScoreMessage>();
+    final opponentScore = opponentMessage.score;
     if (!mounted) return;
 
     Navigator.pushReplacement(
