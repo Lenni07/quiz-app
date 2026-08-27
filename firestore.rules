@@ -3,9 +3,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Jeder Nutzer darf nur sein eigenes Profil lesen/schreiben.
+    // Jeder Nutzer darf nur sein eigenes Profil lesen/schreiben - aber die
+    // ELO-Wertung darf nur die Cloud Function ändern, nicht der Client selbst
+    // (sonst könnte man sich einfach eine Top-Wertung eintragen).
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['eloRating']);
     }
 
     // Flottenrangliste: für alle lesbar, aber nur die Cloud Function (Admin
@@ -28,6 +33,24 @@ service cloud.firestore {
       allow read: if request.auth != null
         && resource.data.uid == request.auth.uid;
       allow update, delete: if false;
+    }
+
+    // Karrieremodus-Einreichungen fürs Matchmaking: gleiches Prinzip wie
+    // scoreSubmissions - Clients dürfen nur eigene Ergebnisse einreichen,
+    // die eigentliche Zuordnung/Wertung übernimmt die Cloud Function.
+    match /careerSubmissions/{submissionId} {
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Karriere-Rangliste: für alle lesbar, nur die Cloud Function darf
+    // schreiben.
+    match /careerRankings/{uid} {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

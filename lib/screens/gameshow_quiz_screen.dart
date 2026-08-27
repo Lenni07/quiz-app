@@ -42,6 +42,7 @@ class _GameshowQuizScreenState extends State<GameshowQuizScreen> {
           ResultScreen(
             score: _score,
             total: widget.questions.length,
+            formatId: 'gameshow-quiz',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

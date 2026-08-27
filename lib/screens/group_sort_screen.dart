@@ -43,6 +43,7 @@ class _GroupSortScreenState extends State<GroupSortScreen> {
             ResultScreen(
               score: widget.data.items.length,
               total: _attempts,
+              formatId: 'group-sort',
               onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
             ),
           ),

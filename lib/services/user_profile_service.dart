@@ -12,6 +12,7 @@ class UserProfileService {
       await docRef.set({
         'createdAt': FieldValue.serverTimestamp(),
         'ship': null,
+        'eloRating': 1000,
       });
     }
   }

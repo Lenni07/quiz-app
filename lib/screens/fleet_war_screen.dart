@@ -65,7 +65,7 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
     final loggedIn = _uid != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Flottenkrieg')),
+      appBar: AppBar(title: const Text('Flottentreffen')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -79,7 +79,7 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
             const SizedBox(height: 20),
             if (!loggedIn)
               Text(
-                'Keine Verbindung zum Konto - Flottenkrieg ist gerade nicht verfügbar.',
+                'Keine Verbindung zum Konto - Flottentreffen ist gerade nicht verfügbar.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.red),
               )

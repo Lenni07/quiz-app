@@ -48,6 +48,7 @@ class _ImageQuizScreenState extends State<ImageQuizScreen> {
           ResultScreen(
             score: _score,
             total: widget.items.length,
+            formatId: 'bild-quiz',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

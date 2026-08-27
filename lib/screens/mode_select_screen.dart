@@ -6,7 +6,9 @@ import '../models/number_word.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
+import '../services/game_mode_context.dart';
 import '../utils/page_transitions.dart';
+import 'career_ranking_screen.dart';
 import 'duel_mode_screen.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
@@ -25,12 +27,17 @@ import 'word_magnets_screen.dart';
 import 'word_order_screen.dart';
 
 class ModeSelectScreen extends StatelessWidget {
-  const ModeSelectScreen({super.key});
+  final GameMode mode;
+
+  const ModeSelectScreen({super.key, required this.mode});
 
   Future<void> _startGeneralQuiz(BuildContext context) async {
     final questions = await loadQuestions();
     if (context.mounted) {
-      Navigator.push(context, buildFadeSlideRoute(QuestionScreen(questions: questions)));
+      Navigator.push(
+        context,
+        buildFadeSlideRoute(QuestionScreen(questions: questions, formatId: 'allgemeinwissen-quiz')),
+      );
     }
   }
 
@@ -38,7 +45,10 @@ class ModeSelectScreen extends StatelessWidget {
     final sentences = await loadSentences();
     final questions = sentencesToQuestions(sentences);
     if (context.mounted) {
-      Navigator.push(context, buildFadeSlideRoute(QuestionScreen(questions: questions)));
+      Navigator.push(
+        context,
+        buildFadeSlideRoute(QuestionScreen(questions: questions, formatId: 'konversation-ueben')),
+      );
     }
   }
 
@@ -146,8 +156,20 @@ class ModeSelectScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    GameModeContext.current = mode;
+    final title = mode == GameMode.career ? 'Karrieremodus' : 'Lernmodus';
     return Scaffold(
-      appBar: AppBar(title: const Text('Modus wählen')),
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          if (mode == GameMode.career)
+            IconButton(
+              icon: const Icon(Icons.leaderboard_outlined),
+              tooltip: 'Rangliste',
+              onPressed: () => Navigator.push(context, buildFadeSlideRoute(const CareerRankingScreen())),
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(

@@ -4,6 +4,7 @@ import 'firebase_options.dart';
 import 'screens/fleet_war_screen.dart';
 import 'screens/mode_select_screen.dart';
 import 'services/auth_service.dart';
+import 'services/game_mode_context.dart';
 import 'services/user_profile_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/page_transitions.dart';
@@ -80,40 +81,67 @@ class StartScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 const SizedBox(height: 48),
-                SizedBox(
-                  width: 220,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        buildFadeSlideRoute(const ModeSelectScreen()),
-                      );
-                    },
-                    child: const Text('Spiel starten'),
-                  ),
+                _HomeAreaButton(
+                  icon: Icons.emoji_events_outlined,
+                  label: 'Karrieremodus',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      buildFadeSlideRoute(const ModeSelectScreen(mode: GameMode.career)),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: 220,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        buildFadeSlideRoute(const FleetWarScreen()),
-                      );
-                    },
-                    child: const Text('Flottenkrieg'),
-                  ),
+                _HomeAreaButton(
+                  icon: Icons.school_outlined,
+                  label: 'Lernmodus',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      buildFadeSlideRoute(const ModeSelectScreen(mode: GameMode.learn)),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _HomeAreaButton(
+                  icon: Icons.groups_outlined,
+                  label: 'Flottentreffen',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      buildFadeSlideRoute(const FleetWarScreen()),
+                    );
+                  },
                 ),
               ],
             ),
           ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Eine von drei gleichrangigen Hauptbereichs-"Kacheln" auf der Startseite
+/// (siehe ROADMAP_QuizApp.md Abschnitt 15) - bewusst kein verschachteltes
+/// Untermenü, sondern drei gleich gewichtete Einstiegspunkte.
+class _HomeAreaButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  const _HomeAreaButton({required this.icon, required this.label, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 260,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
       ),
     );
   }

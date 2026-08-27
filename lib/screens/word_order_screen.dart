@@ -69,6 +69,7 @@ class _WordOrderScreenState extends State<WordOrderScreen> {
           ResultScreen(
             score: _score,
             total: widget.sentences.length,
+            formatId: 'richtige-reihenfolge',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

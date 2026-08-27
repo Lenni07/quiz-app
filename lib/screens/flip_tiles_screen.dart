@@ -71,6 +71,7 @@ class _FlipTilesScreenState extends State<FlipTilesScreen> {
           ResultScreen(
             score: _score,
             total: widget.words.length,
+            formatId: 'flip-tiles',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

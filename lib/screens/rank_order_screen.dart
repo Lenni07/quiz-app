@@ -67,6 +67,7 @@ class _RankOrderScreenState extends State<RankOrderScreen> {
           ResultScreen(
             score: _score,
             total: widget.roundCount,
+            formatId: 'rank-order',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

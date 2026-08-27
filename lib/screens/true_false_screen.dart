@@ -35,6 +35,7 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
           ResultScreen(
             score: _score,
             total: widget.statements.length,
+            formatId: 'wahr-oder-falsch',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

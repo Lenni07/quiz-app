@@ -83,6 +83,7 @@ class _MatchUpScreenState extends State<MatchUpScreen> {
           ResultScreen(
             score: _allPairs.length,
             total: _attempts,
+            formatId: 'match-up',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

@@ -45,6 +45,7 @@ class _OpenBoxScreenState extends State<OpenBoxScreen> {
           ResultScreen(
             score: _score,
             total: widget.questions.length,
+            formatId: 'open-the-box',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

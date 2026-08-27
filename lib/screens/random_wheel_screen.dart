@@ -96,6 +96,7 @@ class _RandomWheelScreenState extends State<RandomWheelScreen> with SingleTicker
           ResultScreen(
             score: _score,
             total: _roundQuestions.length,
+            formatId: 'random-wheel',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

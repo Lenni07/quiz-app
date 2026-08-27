@@ -68,6 +68,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> with SingleTickerProv
           ResultScreen(
             score: knownCount,
             total: widget.sentences.length,
+            formatId: 'karteikarten',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

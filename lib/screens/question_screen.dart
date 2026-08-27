@@ -10,8 +10,9 @@ import 'result_screen.dart';
 
 class QuestionScreen extends StatefulWidget {
   final List<Question> questions;
+  final String formatId;
 
-  const QuestionScreen({super.key, required this.questions});
+  const QuestionScreen({super.key, required this.questions, required this.formatId});
 
   @override
   State<QuestionScreen> createState() => _QuestionScreenState();
@@ -69,6 +70,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ResultScreen(
             score: _score,
             total: widget.questions.length,
+            formatId: widget.formatId,
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

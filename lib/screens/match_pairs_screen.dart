@@ -77,6 +77,7 @@ class _MatchPairsScreenState extends State<MatchPairsScreen> {
                 ResultScreen(
                   score: _totalPairs,
                   total: _attempts,
+                  formatId: 'find-the-match',
                   onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
                 ),
               ),

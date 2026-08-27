@@ -95,6 +95,7 @@ class _WordMagnetsScreenState extends State<WordMagnetsScreen> {
           ResultScreen(
             score: _score,
             total: widget.sentences.length,
+            formatId: 'word-magnets',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),

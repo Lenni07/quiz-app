@@ -144,3 +144,19 @@ Phase 4a (lokales Mehrspieler-Duell) ist fertig, technisch: lokaler WLAN-Server 
 - Commit `5167449`.
 
 **Nächster Schritt:** Phase 4b (monatlicher Flottenkrieg, siehe Abschnitt 6).
+
+## 15. Navigationsumbau: drei Hauptbereiche statt flacher Modus-Liste
+
+Wichtige Struktur-Entscheidung, die die bisherige einfache "Modus wählen"-Liste ablöst. Die App bekommt drei Hauptbereiche auf oberster Ebene; innerhalb jedes Bereichs wählt man danach ein Spielformat (Quiz, True/False, Match Up, ...) wie bisher:
+
+- **Karrieremodus:** Ranking/Wettkampf. Zeitdruck, Punkte für Siege, direktes Antreten gegen ähnlich gerankte Spieler (Ranking-Liste/Rangsystem).
+- **Lernmodus:** Entspanntes Üben, ohne Zeitdruck und ohne Wertungsdruck. Bei falscher Antwort wird sofort die richtige Lösung gezeigt – zum Vokabeln-/Grammatik-Üben statt zum Wettkampf.
+- **Flottentreffen** (bisher "Flottenkrieg" – umbenannt, weniger martialisch): der monatliche Schiff-gegen-Schiff-Wettbewerb aus Phase 4b (Abschnitt 6), bleibt inhaltlich gleich, nur der Name ändert sich.
+
+**Wichtig:** Alle drei sind eigenständige, gleichrangige Hauptbereiche (wie eigene "Kacheln" auf der Startseite) – kein verschachteltes Untermenü, kein Modus in einer flachen Liste. Die bisherigen Spielformate (Quiz, True/False, Gameshow Quiz, Match Up, Rank Order, usw.) werden diesen drei Bereichen zugeordnet bzw. innerhalb von Karrieremodus/Lernmodus auswählbar gemacht.
+
+**Offen/zu klären beim Umbau:** Wie genau Ranking im Karrieremodus berechnet wird (z. B. ELO-artig, einfache Punktesumme) und ob Lernmodus alle Formate umfasst oder nur eine Teilmenge – das kann im nächsten Schritt mit Claude Code konkretisiert werden.
+
+**Konkretisiert (2026-08-27):**
+- **Ranking:** echtes ELO-System mit **asynchronem Matchmaking** (kein Echtzeit-Gegner, passend zum Satelliten-Internet-Prinzip aus Abschnitt 2/6). Ablauf: Format normal zu Ende spielen → Ergebnis wird eingereicht → eine Cloud Function sucht unter wartenden Einreichungen desselben Formats den Spieler mit der nächstgelegenen Wertung; findet sie einen, werden beide ELO-Werte aktualisiert (auch wenn der andere Spieler längst offline ist), sonst wird die eigene Einreichung selbst zur wartenden Einreichung. Kein Härte-Grenzwert bei der Wertungsnähe (immer der nächstbeste verfügbare Gegner), damit Matchmaking bei kleiner Nutzerzahl nicht ins Leere läuft.
+- **Formate:** alle 15 Formate sind sowohl unter Karriere- als auch unter Lernmodus wählbar (keine feste Aufteilung), kann später bei Bedarf geändert werden.

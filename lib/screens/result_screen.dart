@@ -1,18 +1,22 @@
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../services/career_service.dart';
 import '../services/fleet_war_service.dart';
+import '../services/game_mode_context.dart';
 import '../widgets/firework_particle.dart';
 
 class ResultScreen extends StatefulWidget {
   final int score;
   final int total;
+  final String formatId;
   final VoidCallback onPlayAgain;
 
   const ResultScreen({
     super.key,
     required this.score,
     required this.total,
+    required this.formatId,
     required this.onPlayAgain,
   });
 
@@ -42,12 +46,25 @@ class _ResultScreenState extends State<ResultScreen> {
       _launchFireworks();
     }
     _submitToFleetWar();
+    _submitToCareerMode();
   }
 
   void _submitToFleetWar() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     FleetWarService().submitScore(uid: user.uid, score: widget.score, total: widget.total);
+  }
+
+  void _submitToCareerMode() {
+    if (GameModeContext.current != GameMode.career) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    CareerService().submitResult(
+      uid: user.uid,
+      format: widget.formatId,
+      score: widget.score,
+      total: widget.total,
+    );
   }
 
   void _launchFireworks() async {

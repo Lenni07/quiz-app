@@ -46,6 +46,7 @@ class _FillBlankScreenState extends State<FillBlankScreen> {
           ResultScreen(
             score: _score,
             total: widget.sentences.length,
+            formatId: 'lueckentext',
             onPlayAgain: () => Navigator.popUntil(context, (route) => route.isFirst),
           ),
         ),
