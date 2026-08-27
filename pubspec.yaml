@@ -60,6 +60,7 @@ dev_dependencies:
 
   # Erzeugt den nativen Splash-Screen für Android/iOS
   flutter_native_splash: ^2.4.4
+  fake_cloud_firestore: ^4.2.0
 
 flutter_launcher_icons:
   android: true

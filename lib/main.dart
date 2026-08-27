@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
+import 'screens/fleet_war_screen.dart';
 import 'screens/mode_select_screen.dart';
 import 'services/auth_service.dart';
 import 'services/user_profile_service.dart';
@@ -89,6 +90,23 @@ class StartScreen extends StatelessWidget {
                       );
                     },
                     child: const Text('Spiel starten'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: 220,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        buildFadeSlideRoute(const FleetWarScreen()),
+                      );
+                    },
+                    child: const Text('Flottenkrieg'),
                   ),
                 ),
               ],

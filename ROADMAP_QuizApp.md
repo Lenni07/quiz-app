@@ -133,3 +133,14 @@ Bewusste Trennung: Claude Code baut die App **funktional komplett** (alle Modi, 
 3. Klären, ob ein Flutter-Entwickler mit Design-Gespür gesucht wird (kann Theming/Animationen direkt im Code umsetzen) oder ein reiner UI/UX-Designer (liefert Mockups, die danach wieder implementiert werden müssen).
 
 **Hinweis zur Abgrenzung:** Rein optische Anpassungen (Farben, Schriften, Icons, Layout) lassen sich später sauber "draufsetzen". Bei Interaktionen, die Optik und Logik eng verzahnen (z. B. Drag-and-Drop-Gefühl, Dreh-Animation), kann der Freelancer auch etwas am bestehenden Code anpassen müssen – das ist normal und kein Zeichen für einen Fehler im bisherigen Aufbau.
+
+## 14. Status Phase 4a – abgeschlossen und auf echten Geräten bestätigt
+
+Phase 4a (lokales Mehrspieler-Duell) ist fertig, technisch: lokaler WLAN-Server (shelf/WebSocket, Option 1 aus Abschnitt 5 der ursprünglichen Optionen), nicht `nearby_connections` (Android-Umgebung war dafür zu instabil, außerdem hätte das iPhones ausgeschlossen).
+
+- Android-Entwicklungsumgebung repariert, echte APK-Builds funktionieren (Verteilung ans Testgerät über WLAN-Download statt USB-Kopie).
+- Ein echter Bug gefunden und behoben: Ergebnis-Nachricht des Gegners ging verloren, wenn sie ankam, bevor die eigene Seite fertig gespielt hatte (Race Condition) – jetzt per automatisiertem Test dauerhaft abgesichert.
+- Auf zwei echten Geräten bestätigt (Handy hostet, Browser tritt bei): kompletter Ablauf inkl. korrektem Ergebnis-Bildschirm funktioniert.
+- Commit `5167449`.
+
+**Nächster Schritt:** Phase 4b (monatlicher Flottenkrieg, siehe Abschnitt 6).

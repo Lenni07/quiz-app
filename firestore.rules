@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Jeder Nutzer darf nur sein eigenes Profil lesen/schreiben.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Flottenrangliste: für alle lesbar, aber nur die Cloud Function (Admin
+    // SDK, umgeht Regeln) darf den Punktestand ändern - Clients nicht.
+    match /ships/{shipId} {
+      allow read: if true;
+      allow write: if false;
+
+      match /seasons/{seasonKey} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
+    // Ergebnis-Einreichungen: jeder angemeldete Nutzer darf für sich selbst
+    // einreichen (einmalig, nicht änderbar), aber nur eigene einsehen.
+    match /scoreSubmissions/{submissionId} {
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+      allow read: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}

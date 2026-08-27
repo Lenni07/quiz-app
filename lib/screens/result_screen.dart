@@ -1,5 +1,7 @@
 import 'package:confetti/confetti.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../services/fleet_war_service.dart';
 import '../widgets/firework_particle.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -39,6 +41,13 @@ class _ResultScreenState extends State<ResultScreen> {
     if (_isGoodResult) {
       _launchFireworks();
     }
+    _submitToFleetWar();
+  }
+
+  void _submitToFleetWar() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    FleetWarService().submitScore(uid: user.uid, score: widget.score, total: widget.total);
   }
 
   void _launchFireworks() async {
