@@ -105,6 +105,7 @@ class StartScreen extends StatelessWidget {
                         GameButton(
                           label: S.t('start_button'),
                           icon: Icons.play_arrow_rounded,
+                          pulse: true,
                           onPressed: () {
                             Navigator.push(
                               context,

@@ -407,7 +407,6 @@ class _ModeCardState extends State<_ModeCard> {
         duration: const Duration(milliseconds: 120),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 120),
-          padding: const EdgeInsets.all(18.0),
           decoration: BoxDecoration(
             gradient: _enabled ? AppColors.panelGradient : null,
             color: _enabled ? null : Colors.white.withValues(alpha: 0.04),
@@ -417,31 +416,59 @@ class _ModeCardState extends State<_ModeCard> {
                 ? const [BoxShadow(color: Colors.black45, offset: Offset(0, 4), blurRadius: 8)]
                 : null,
           ),
-          child: Row(
-            children: [
-              Icon(widget.icon, size: 34, color: _enabled ? AppColors.brassLight : foreground),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: displayStyle(fontSize: 17, color: foreground),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.subtitle,
-                      style: TextStyle(fontSize: 13, color: foreground.withValues(alpha: 0.75)),
-                    ),
-                  ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Row(
+                    children: [
+                      Icon(widget.icon, size: 34, color: _enabled ? AppColors.brassLight : foreground),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: displayStyle(fontSize: 17, color: foreground),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.subtitle,
+                              style: TextStyle(fontSize: 13, color: foreground.withValues(alpha: 0.75)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!_enabled)
+                        Icon(Icons.lock_outline, color: foreground)
+                      else
+                        Icon(Icons.chevron_right, color: foreground),
+                    ],
+                  ),
                 ),
-              ),
-              if (!_enabled)
-                Icon(Icons.lock_outline, color: foreground)
-              else
-                Icon(Icons.chevron_right, color: foreground),
-            ],
+                if (_enabled)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    height: 10,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.white.withValues(alpha: 0.14), Colors.white.withValues(alpha: 0)],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

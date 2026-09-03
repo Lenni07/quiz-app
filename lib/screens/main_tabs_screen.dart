@@ -13,6 +13,7 @@ import '../widgets/game_panel.dart';
 import '../widgets/maritime_background.dart';
 import '../widgets/maritime_icon.dart';
 import '../widgets/maritime_painters.dart';
+import '../widgets/pop_in.dart';
 import 'career_ranking_screen.dart';
 import 'fleet_war_screen.dart';
 import 'mode_select_screen.dart';
@@ -215,50 +216,56 @@ class _OneVsOneLanding extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GamePanel(
-            child: Column(
-              children: [
-                const MaritimeIcon(MaritimeIconShape.crossedOars, size: 56, color: AppColors.brassLight),
-                const SizedBox(height: 8),
-                Text(S.t('tab_1v1'), style: displayStyle(fontSize: 26, color: AppColors.canvas)),
-                const SizedBox(height: 6),
-                Text(
-                  S.t('landing_1v1_subtitle'),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.canvas.withValues(alpha: 0.8)),
-                ),
-                const SizedBox(height: 20),
-                GameButton(
-                  label: S.t('landing_1v1_button'),
-                  icon: Icons.flash_on,
-                  onPressed: () {
-                    Navigator.push(context, buildFadeSlideRoute(const OneVsOneQueueScreen()));
-                  },
-                ),
-              ],
+          PopIn(
+            child: GamePanel(
+              child: Column(
+                children: [
+                  const MaritimeIcon(MaritimeIconShape.crossedOars, size: 56, color: AppColors.brassLight),
+                  const SizedBox(height: 8),
+                  Text(S.t('tab_1v1'), style: displayStyle(fontSize: 26, color: AppColors.canvas)),
+                  const SizedBox(height: 6),
+                  Text(
+                    S.t('landing_1v1_subtitle'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.canvas.withValues(alpha: 0.8)),
+                  ),
+                  const SizedBox(height: 20),
+                  GameButton(
+                    label: S.t('landing_1v1_button'),
+                    icon: Icons.flash_on,
+                    pulse: true,
+                    onPressed: () {
+                      Navigator.push(context, buildFadeSlideRoute(const OneVsOneQueueScreen()));
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
-          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
-            builder: (context, snapshot) {
-              final rating = (snapshot.data?.data()?['eloRating'] as num?)?.toInt() ?? 1000;
-              final streak = ((snapshot.data?.data()?['dailyChallenge'] as Map<String, dynamic>?)?['streak'] as num?)?.toInt() ?? 0;
-              return Row(
-                children: [
-                  Expanded(child: _StatTile(icon: Icons.emoji_events, label: S.t('profile_rating_label'), value: rating)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _StatTile(icon: Icons.local_fire_department, label: S.t('streak_tile_label'), value: streak)),
-                ],
-              );
-            },
+          PopIn(
+            delay: const Duration(milliseconds: 90),
+            child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
+              builder: (context, snapshot) {
+                final rating = (snapshot.data?.data()?['eloRating'] as num?)?.toInt() ?? 1000;
+                final streak = ((snapshot.data?.data()?['dailyChallenge'] as Map<String, dynamic>?)?['streak'] as num?)?.toInt() ?? 0;
+                return Row(
+                  children: [
+                    Expanded(child: _StatTile(icon: Icons.emoji_events, label: S.t('profile_rating_label'), value: rating)),
+                    const SizedBox(width: 12),
+                    Expanded(child: _StatTile(icon: Icons.local_fire_department, label: S.t('streak_tile_label'), value: streak)),
+                  ],
+                );
+              },
+            ),
           ),
-          const SizedBox(height: 12),
-          _SeasonRankTile(uid: myUid),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+          PopIn(delay: const Duration(milliseconds: 160), child: _SeasonRankTile(uid: myUid)),
+          const SizedBox(height: 16),
           Text(S.t('recent_matches_title'), style: displayStyle(fontSize: 16, color: AppColors.canvas)),
           const SizedBox(height: 8),
-          _RecentMatchesList(uid: myUid),
+          PopIn(delay: const Duration(milliseconds: 220), child: _RecentMatchesList(uid: myUid)),
         ],
       ),
     );
