@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../models/avatar_option.dart';
 import '../services/career_service.dart';
 import '../services/fleet_war_service.dart';
@@ -62,6 +64,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _changeLanguage(AppLanguage language) async {
+    await setAppLanguage(language);
+    if (mounted) setState(() {});
+  }
+
   Future<void> _pickCertificateDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -90,11 +97,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         certificateIssuedAt: _certificateIssuedAt,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil gespeichert.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('profile_save_success'))));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Speichern fehlgeschlagen - bitte Internetverbindung prüfen.')),
+        SnackBar(content: Text(S.t('profile_save_error'))),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -105,8 +112,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    final body = uid == null
-        ? const Center(child: Text('Keine Verbindung zum Konto.'))
+    final body = ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) => uid == null
+        ? Center(child: Text(S.t('profile_no_account')))
         : FutureBuilder<void>(
             future: _loadProfile(uid),
             builder: (context, snapshot) {
@@ -118,6 +127,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Text(S.t('profile_language_title'), style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 8),
+                    SegmentedButton<AppLanguage>(
+                      segments: [
+                        ButtonSegment(value: AppLanguage.de, label: Text(S.t('profile_language_de'))),
+                        ButtonSegment(value: AppLanguage.en, label: Text(S.t('profile_language_en'))),
+                      ],
+                      selected: {language},
+                      onSelectionChanged: (selection) => _changeLanguage(selection.first),
+                    ),
+                    const SizedBox(height: 24),
                     Center(
                       child: CircleAvatar(
                         radius: 40,
@@ -126,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text('Avatar wählen', style: Theme.of(context).textTheme.titleSmall),
+                    Text(S.t('profile_avatar_choose'), style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 12,
@@ -143,53 +163,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 24),
                     TextField(
                       controller: _nicknameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nickname',
-                        helperText: 'Wird auch in der Rangliste angezeigt',
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_nickname_label'),
+                        helperText: S.t('profile_public_helper'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _positionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Position',
-                        helperText: 'Wird auch in der Rangliste angezeigt',
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_position_label'),
+                        helperText: S.t('profile_public_helper'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _realNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Echter Name',
-                        helperText: 'Nur in deinem Profil sichtbar',
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_realname_label'),
+                        helperText: S.t('profile_private_helper'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _departmentController,
-                      decoration: const InputDecoration(
-                        labelText: 'Department',
-                        helperText: 'Nur in deinem Profil sichtbar',
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_department_label'),
+                        helperText: S.t('profile_private_helper'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _crewIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Crew-ID',
-                        helperText: 'Nur in deinem Profil sichtbar',
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_crewid_label'),
+                        helperText: S.t('profile_private_helper'),
                       ),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<int>(
                       initialValue: _germanLevel,
-                      decoration: const InputDecoration(
-                        labelText: 'Deutsch-Level',
-                        helperText: 'Bestimmt deine Start-Wertung im 1-vs-1-Modus (nur vor deinem ersten gewerteten Match)',
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_level_label'),
+                        helperText: S.t('profile_level_helper'),
                       ),
                       items: [
                         for (var level = 1; level <= 6; level++)
-                          DropdownMenuItem(value: level, child: Text('Level $level')),
+                          DropdownMenuItem(value: level, child: Text(S.f('profile_level_option', [level]))),
                       ],
                       onChanged: (value) => setState(() => _germanLevel = value),
                     ),
@@ -197,12 +217,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
-                          'Du hast schon gewertete Matches gespielt - eine Änderung hier wirkt sich nicht mehr auf deine Wertung aus.',
+                          S.t('profile_level_locked_hint'),
                           style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                         ),
                       ),
                     const SizedBox(height: 16),
-                    Text('Zertifikat', style: Theme.of(context).textTheme.titleSmall),
+                    Text(S.t('profile_certificate_title'), style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
                     _CertificateStatus(
                       issuedAt: _certificateIssuedAt,
@@ -217,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Speichern'),
+                          : Text(S.t('profile_save')),
                     ),
                     const SizedBox(height: 32),
                     FutureBuilder<List<dynamic>>(
@@ -234,9 +254,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _InfoRow(icon: Icons.emoji_events_outlined, label: '1-vs-1-Wertung', value: '$rating'),
+                            _InfoRow(icon: Icons.emoji_events_outlined, label: S.t('profile_rating_label'), value: '$rating'),
                             const SizedBox(height: 12),
-                            _InfoRow(icon: Icons.groups_outlined, label: 'Schiff', value: ship ?? 'Keinem beigetreten'),
+                            _InfoRow(icon: Icons.groups_outlined, label: S.t('profile_ship_label'), value: ship ?? S.t('profile_ship_none')),
                           ],
                         );
                       },
@@ -245,11 +265,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
             },
-          );
+          ),
+    );
 
     if (widget.embedded) return body;
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
+      appBar: AppBar(title: Text(S.t('tab_profile'))),
       body: body,
     );
   }
@@ -322,10 +343,12 @@ class _CertificateStatus extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(issued == null ? 'Kein Ausstellungsdatum hinterlegt' : 'Ausgestellt am ${formatDate(issued)}'),
+                Text(issued == null ? S.t('profile_certificate_none') : S.f('profile_certificate_issued', [formatDate(issued)])),
                 if (expiry != null)
                   Text(
-                    isValid! ? 'Gültig bis ${formatDate(expiry)}' : 'Abgelaufen seit ${formatDate(expiry)}',
+                    isValid!
+                        ? S.f('profile_certificate_valid', [formatDate(expiry)])
+                        : S.f('profile_certificate_expired', [formatDate(expiry)]),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: isValid ? Colors.green : Colors.red,
@@ -334,7 +357,7 @@ class _CertificateStatus extends StatelessWidget {
               ],
             ),
           ),
-          TextButton(onPressed: onPick, child: const Text('Datum wählen')),
+          TextButton(onPressed: onPick, child: Text(S.t('profile_certificate_pick'))),
         ],
       ),
     );

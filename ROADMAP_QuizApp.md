@@ -209,7 +209,13 @@ Felder im Nutzerprofil:
 
 **Verknüpfung mit Karrieremodus/1-vs-1 (ELO-Start):** Das selbstangegebene Deutsch-Level bestimmt die **Start-Wertung** im 1-vs-1-Matchmaking: Level 1 = 1000 Start-EP, Level 2 = 2000, Level 3 = 3000, Level 4 = 4000, usw. (Level × 1000). Damit starten erfahrenere Sprecher nicht bei null gegen Anfänger.
 
-## 19. Status Abschnitt 16/17/18 – umgesetzt und im Emulator vollständig getestet (Stand 2026-09-03)
+## 19. Sprachumschaltung Deutsch/Englisch für die Bedienoberfläche
+
+In den Optionen (Profil-Reiter, Abschnitt 16/18) lässt sich die Sprache der Bedienoberfläche zwischen Deutsch und Englisch umschalten – Menüs, Reiter, Buttons, Texte. **Die Deutsch-Lerninhalte/Fragen selbst bleiben davon unberührt und immer Deutsch** (das ist schließlich der Zweck der App).
+
+**Umfang (bewusst begrenzt, siehe Status unten):** Reiter-Leiste, Kopfbereich, Startbildschirm, Profil, Rangliste, Flottentreffen, 1-vs-1-Warteschlange/Draft-Phase/Match-Ergebnis, Ergebnisbildschirm, sowie die Formatnamen/-untertitel in der Lernmodus-Übersicht. Die Bedienelemente **innerhalb** der 16 einzelnen Spielformate (Buttons, Anleitungen, Richtig/Falsch-Feedback) bleiben vorerst Deutsch – das wäre ein deutlich größerer, separater Schritt.
+
+## 20. Status Abschnitt 16/17/18 – umgesetzt und im Emulator vollständig getestet (Stand 2026-09-03)
 
 Alle drei Abschnitte sind fertig gebaut, noch **nicht live deployt** (nur `main` auf GitHub, `quiz-up-c1312` läuft weiterhin mit dem alten Funktionsstand).
 
@@ -222,3 +228,12 @@ Alle drei Abschnitte sind fertig gebaut, noch **nicht live deployt** (nur `main`
 `flutter analyze`, `flutter test` (14 Tests) und `flutter build web` laufen alle sauber durch.
 
 **Lektion für später:** Der allererste Aufruf einer neu geladenen Cloud Function im Emulator kann auf Windows über 30 Sekunden zum Hochfahren brauchen – der Emulator gibt nach 30 Sekunden auf und meldet einen Fehler, obwohl die Funktion kurz danach doch noch bereit wird. Einfacher zweiter Versuch reicht. Außerdem: nach einem `TaskStop` können Zombie-Prozesse übrig bleiben, die keinen Port mehr belegen, aber trotzdem einen sauberen Neustart verhindern – zusätzlich zur Port-Prüfung auch offene `java`/`node`-Prozesse direkt per PID beenden.
+
+## 21. Status Abschnitt 19 – umgesetzt (Stand 2026-09-03)
+
+Sprachumschaltung Deutsch/Englisch fertig gebaut, im Umfang wie in Abschnitt 19 festgelegt (App-Hülle, nicht die 16 Formate selbst).
+
+- **Technik:** Kein Flutter-`intl`/ARB-Codegenerator, sondern eine einfache, selbst geschriebene Übersetzungstabelle (`lib/l10n/strings.dart`, Schlüssel → Text je Sprache), passend zum bisherigen Verzicht auf Provider/Riverpod in diesem Projekt. Die aktuelle Sprache ist ein globaler `ValueNotifier<AppLanguage>` (`lib/l10n/app_language.dart`), lokal auf dem Gerät gespeichert (`shared_preferences`, neues Paket) – bewusst **nicht** in Firestore, damit die Sprache auch ganz ohne Internet sofort beim Start feststeht (Offline-first-Prinzip).
+- **Live-Wechsel ohne Neustart:** Jeder übersetzte Bildschirm hört selbst per `ValueListenableBuilder` auf Sprachänderungen. Das war nötig, weil ein einzelner Rebuild an der Wurzel (`MaterialApp`) nicht ausreicht – Flutter überspringt `const`-Kind-Widgets beim Rebuild ihres Elternteils, und der Umschalter selbst sitzt im Profil-Reiter, tief im Navigator verschachtelt.
+- **Umgesetzte Bildschirme:** Startbildschirm, Reiter-Leiste + Kopfbereich, Lernmodus-Übersicht (inkl. aller 16 Formatnamen/-untertitel, die zentral aus `game_format.dart` kommen und auch in Draft-Phase/Match-Ergebnis wiederverwendet werden), Flottentreffen, Rangliste, 1-vs-1-Warteschlange, Draft-Phase, Match-Ergebnis, Ergebnisbildschirm (Solo und Match-Runde), Profil (inkl. des neuen Sprachumschalters selbst, als `SegmentedButton`).
+- **Getestet:** `flutter analyze` und die volle Testsuite (15 Tests, davon ein neuer Test, der `appLanguage.value` direkt umschaltet und prüft, dass sichtbare Texte sofort wechseln, ohne Neustart) laufen sauber; `flutter build web` erfolgreich. Ein echter Bildschirmtest im Browser war nicht möglich (siehe [[dev_environment_notes]] – kein Browser-Werkzeug in dieser Umgebung verfügbar) – der lokale Server läuft auf `http://localhost:8768/`, der Nutzer sollte den Umschalter im Profil-Reiter selbst einmal ausprobieren.

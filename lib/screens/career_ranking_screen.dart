@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../models/career_ranking_entry.dart';
 import '../services/career_service.dart';
 
@@ -13,7 +15,9 @@ class CareerRankingScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
-    final body = Padding(
+    final body = ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) => Padding(
       padding: const EdgeInsets.all(24.0),
       child: StreamBuilder<List<CareerRankingEntry>>(
         stream: CareerService().watchRanking(),
@@ -22,15 +26,15 @@ class CareerRankingScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(
-              child: Text('Rangliste gerade nicht verfügbar.', style: TextStyle(color: Colors.red)),
+            return Center(
+              child: Text(S.t('ranking_unavailable'), style: const TextStyle(color: Colors.red)),
             );
           }
           final entries = snapshot.data ?? [];
           if (entries.isEmpty) {
             return Center(
               child: Text(
-                'Noch keine gewerteten Matches – spiel eine Runde im 1-vs-1-Modus, um zu starten.',
+                S.t('ranking_empty'),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
@@ -57,7 +61,7 @@ class CareerRankingScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isMe ? '${entry.displayName} (du)' : entry.displayName,
+                            isMe ? '${entry.displayName} ${S.t('ranking_you_suffix')}' : entry.displayName,
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           if (entry.position != null && entry.position!.trim().isNotEmpty)
@@ -76,11 +80,12 @@ class CareerRankingScreen extends StatelessWidget {
           );
         },
       ),
+      ),
     );
 
     if (embedded) return body;
     return Scaffold(
-      appBar: AppBar(title: const Text('Rangliste')),
+      appBar: AppBar(title: Text(S.t('tab_ranking'))),
       body: body,
     );
   }

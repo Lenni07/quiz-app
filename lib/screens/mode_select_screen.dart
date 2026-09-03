@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../models/flip_tile_word.dart';
+import '../models/game_format.dart';
 import '../models/group_sort.dart';
 import '../models/image_quiz.dart';
 import '../models/number_word.dart';
@@ -156,136 +159,142 @@ class ModeSelectScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = SingleChildScrollView(
+    // Reagiert auf Sprachwechsel (siehe ROADMAP_QuizApp.md Abschnitt 19) -
+    // die Formatnamen/-untertitel hier gehören zur Bedienoberfläche, die
+    // Inhalte innerhalb der Formate selbst bleiben Deutsch.
+    final body = ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) => SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-            const _SectionHeader('Grundmodi'),
+            _SectionHeader(S.t('section_basics')),
             _ModeCard(
-              title: 'Allgemeinwissen-Quiz',
-              subtitle: '25 Wissensfragen zur deutschen Sprache',
+              title: gameFormatById('allgemeinwissen-quiz').displayName,
+              subtitle: S.t('format_allgemeinwissen-quiz_subtitle'),
               icon: Icons.public,
               onTap: () => _startGeneralQuiz(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Konversation üben',
-              subtitle: '8 typische Vorstellungsfragen',
+              title: gameFormatById('konversation-ueben').displayName,
+              subtitle: S.t('format_konversation-ueben_subtitle'),
               icon: Icons.chat_bubble_outline,
               onTap: () => _startConversationQuiz(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Lückentext',
-              subtitle: 'Fehlendes Wort eintippen',
+              title: gameFormatById('lueckentext').displayName,
+              subtitle: S.t('format_lueckentext_subtitle'),
               icon: Icons.short_text,
               onTap: () => _startFillBlank(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Richtige Reihenfolge',
-              subtitle: 'Wörter in die richtige Reihenfolge bringen',
+              title: gameFormatById('richtige-reihenfolge').displayName,
+              subtitle: S.t('format_richtige-reihenfolge_subtitle'),
               icon: Icons.low_priority,
               onTap: () => _startWordOrder(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Karteikarten üben',
-              subtitle: 'Selbst antworten, dann Musterantwort ansehen',
+              title: gameFormatById('karteikarten').displayName,
+              subtitle: S.t('format_karteikarten_subtitle'),
               icon: Icons.style_outlined,
               onTap: () => _startFlashcards(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Wahr oder Falsch',
-              subtitle: 'Aussage lesen und richtig einschätzen',
+              title: gameFormatById('wahr-oder-falsch').displayName,
+              subtitle: S.t('format_wahr-oder-falsch_subtitle'),
               icon: Icons.rule,
               onTap: () => _startTrueFalse(context),
             ),
-            const _SectionHeader('Weitere Formate'),
+            _SectionHeader(S.t('section_more_formats')),
             _ModeCard(
-              title: 'Gameshow-Quiz',
-              subtitle: 'Antwort sperren, dann spannungsgeladen aufdecken',
+              title: gameFormatById('gameshow-quiz').displayName,
+              subtitle: S.t('format_gameshow-quiz_subtitle'),
               icon: Icons.theater_comedy,
               onTap: () => _startGameshowQuiz(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Bild-Quiz',
-              subtitle: 'Symbol sehen, passendes Wort wählen',
+              title: gameFormatById('bild-quiz').displayName,
+              subtitle: S.t('format_bild-quiz_subtitle'),
               icon: Icons.image_outlined,
               onTap: () => _startImageQuiz(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Open the Box',
-              subtitle: 'Box öffnen und versteckte Frage beantworten',
+              title: gameFormatById('open-the-box').displayName,
+              subtitle: S.t('format_open-the-box_subtitle'),
               icon: Icons.card_giftcard,
               onTap: () => _startOpenBox(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Find the Match',
-              subtitle: 'Memory: Deutsch und Englisch zusammenfinden',
+              title: gameFormatById('find-the-match').displayName,
+              subtitle: S.t('format_find-the-match_subtitle'),
               icon: Icons.grid_view,
               onTap: () => _startMatchPairs(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Random Wheel',
-              subtitle: 'Glücksrad drehen und Frage beantworten',
+              title: gameFormatById('random-wheel').displayName,
+              subtitle: S.t('format_random-wheel_subtitle'),
               icon: Icons.donut_large,
               onTap: () => _startRandomWheel(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Flip Tiles',
-              subtitle: 'Buchstaben raten und Wort Stück für Stück aufdecken',
+              title: gameFormatById('flip-tiles').displayName,
+              subtitle: S.t('format_flip-tiles_subtitle'),
               icon: Icons.view_module,
               onTap: () => _startFlipTiles(context),
             ),
-            const _SectionHeader('Drag-and-Drop'),
+            _SectionHeader(S.t('section_drag_drop')),
             _ModeCard(
-              title: 'Match Up',
-              subtitle: 'Deutsche Wörter zur englischen Übersetzung ziehen',
+              title: gameFormatById('match-up').displayName,
+              subtitle: S.t('format_match-up_subtitle'),
               icon: Icons.compare_arrows,
               onTap: () => _startMatchUp(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Word Magnets',
-              subtitle: 'Wortmagnete (inkl. Ablenkern) zum Satz zusammenziehen',
+              title: gameFormatById('word-magnets').displayName,
+              subtitle: S.t('format_word-magnets_subtitle'),
               icon: Icons.dashboard_customize,
               onTap: () => _startWordMagnets(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Group Sort',
-              subtitle: 'Wörter in die richtige Kategorie ziehen',
+              title: gameFormatById('group-sort').displayName,
+              subtitle: S.t('format_group-sort_subtitle'),
               icon: Icons.category,
               onTap: () => _startGroupSort(context),
             ),
             const SizedBox(height: 16),
             _ModeCard(
-              title: 'Rank Order',
-              subtitle: 'Zahlwörter der Größe nach sortieren',
+              title: gameFormatById('rank-order').displayName,
+              subtitle: S.t('format_rank-order_subtitle'),
               icon: Icons.sort,
               onTap: () => _startRankOrder(context),
             ),
-            const _SectionHeader('Mehrspieler'),
+            _SectionHeader(S.t('section_multiplayer')),
             _ModeCard(
-              title: 'Lokales Duell',
-              subtitle: 'Gegen ein anderes Gerät im selben WLAN antreten',
+              title: S.t('duel_title'),
+              subtitle: S.t('duel_subtitle'),
               icon: Icons.people_alt,
               onTap: () => _startDuel(context),
             ),
           ],
         ),
-      );
+      ),
+    );
     if (embedded) return body;
     return Scaffold(
-      appBar: AppBar(title: const Text('Lernmodus')),
+      appBar: AppBar(title: Text(S.t('tab_learn'))),
       body: body,
     );
   }

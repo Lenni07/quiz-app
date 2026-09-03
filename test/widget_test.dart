@@ -3,6 +3,7 @@
 // Hauptbereichen.
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:rank_up/l10n/app_language.dart';
 import 'package:rank_up/main.dart';
 
 void main() {
@@ -29,5 +30,23 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Allgemeinwissen-Quiz'), findsOneWidget);
+  });
+
+  testWidgets('Sprachwechsel (Abschnitt 19) übersetzt die Bedienoberfläche live, ohne Neustart',
+      (WidgetTester tester) async {
+    // appLanguage ist global - für diesen Test unabhängig von der
+    // Ausführungsreihenfolge sauber auf Deutsch zurücksetzen.
+    addTearDown(() => appLanguage.value = AppLanguage.de);
+
+    await tester.pumpWidget(const MyApp());
+    expect(find.text('Spiel starten'), findsOneWidget);
+    expect(find.text('Teste dein Wissen über die deutsche Sprache'), findsOneWidget);
+
+    appLanguage.value = AppLanguage.en;
+    await tester.pump();
+
+    expect(find.text('Start Game'), findsOneWidget);
+    expect(find.text('Test your knowledge of the German language'), findsOneWidget);
+    expect(find.text('Spiel starten'), findsNothing);
   });
 }

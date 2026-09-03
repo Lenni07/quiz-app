@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../models/ship.dart';
 import '../services/fleet_war_service.dart';
 import '../services/season.dart';
@@ -66,20 +68,22 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final loggedIn = _uid != null;
 
-    final body = Padding(
+    final body = ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) => Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Season ${currentSeasonKey()} · Punkte zählen für dein Schiff, Reset jeden Monatsanfang',
+            S.f('fleet_season_info', [currentSeasonKey()]),
             textAlign: TextAlign.center,
             style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
           ),
           const SizedBox(height: 20),
           if (!loggedIn)
             Text(
-              'Keine Verbindung zum Konto - Flottentreffen ist gerade nicht verfügbar.',
+              S.t('fleet_no_account'),
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.red),
             )
@@ -89,21 +93,22 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
             _buildJoinForm(colorScheme)
           else
             Text(
-              'Dein Schiff: $_myShipId',
+              S.f('fleet_my_ship', [_myShipId!]),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           const SizedBox(height: 24),
-          Text('Flottenrangliste:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
+          Text(S.t('fleet_ranking_label'), style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
           const SizedBox(height: 8),
           Expanded(child: _buildLeaderboard(colorScheme)),
         ],
+      ),
       ),
     );
 
     if (widget.embedded) return body;
     return Scaffold(
-      appBar: AppBar(title: const Text('Flottentreffen')),
+      appBar: AppBar(title: Text(S.t('tab_fleet'))),
       body: body,
     );
   }
@@ -113,19 +118,19 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Noch keinem Schiff beigetreten. Name eingeben, um mitzumachen:',
+          S.t('fleet_join_prompt'),
           textAlign: TextAlign.center,
           style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _shipNameController,
-          decoration: const InputDecoration(labelText: 'Schiffsname', hintText: 'z. B. MS Freedom'),
+          decoration: InputDecoration(labelText: S.t('fleet_ship_name_label'), hintText: S.t('fleet_ship_name_hint')),
         ),
         const SizedBox(height: 12),
         ElevatedButton(
           onPressed: _joining ? null : () => _joinShip(_shipNameController.text),
-          child: Text(_joining ? 'Beitreten ...' : 'Schiff beitreten'),
+          child: Text(_joining ? S.t('fleet_joining') : S.t('fleet_join_button')),
         ),
       ],
     );
@@ -139,15 +144,15 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(
-            child: Text('Rangliste gerade nicht verfügbar.', style: TextStyle(color: Colors.red)),
+          return Center(
+            child: Text(S.t('ranking_unavailable'), style: const TextStyle(color: Colors.red)),
           );
         }
         final ships = snapshot.data ?? [];
         if (ships.isEmpty) {
           return Center(
             child: Text(
-              'Noch keine Punkte diese Season - sei das erste Schiff!',
+              S.t('fleet_ranking_empty'),
               textAlign: TextAlign.center,
               style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
             ),
@@ -172,7 +177,7 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
                   Expanded(
                     child: Text(ship.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                   ),
-                  Text('${ship.seasonScore} Pkt.', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text('${ship.seasonScore} ${S.t('fleet_points_suffix')}', style: const TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
             );

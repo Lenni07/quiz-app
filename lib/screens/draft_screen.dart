@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../models/game_format.dart';
 import '../services/career_match_service.dart';
 import '../services/format_screen_builder.dart';
@@ -97,8 +99,10 @@ class _DraftScreenState extends State<DraftScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Draft-Phase'), automaticallyImplyLeading: false),
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) => Scaffold(
+      appBar: AppBar(title: Text(S.t('draft_title')), automaticallyImplyLeading: false),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: _service.watchMatch(widget.matchId),
         builder: (context, snapshot) {
@@ -124,8 +128,8 @@ class _DraftScreenState extends State<DraftScreen> {
               children: [
                 Text(
                   myTurn
-                      ? (isBanStep ? 'Du bist dran: Format bannen' : 'Du bist dran: Format wählen')
-                      : (isBanStep ? 'Gegner bannt ...' : 'Gegner wählt ...'),
+                      ? S.t(isBanStep ? 'draft_your_turn_ban' : 'draft_your_turn_pick')
+                      : S.t(isBanStep ? 'draft_opponent_ban' : 'draft_opponent_pick'),
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
@@ -193,6 +197,7 @@ class _DraftScreenState extends State<DraftScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

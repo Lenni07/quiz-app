@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../models/game_format.dart';
 import '../services/career_match_service.dart';
 
@@ -14,8 +16,10 @@ class MatchResultScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Match-Ergebnis'), automaticallyImplyLeading: false),
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) => Scaffold(
+      appBar: AppBar(title: Text(S.t('match_result_title')), automaticallyImplyLeading: false),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: CareerMatchService().watchMatch(matchId),
         builder: (context, snapshot) {
@@ -34,13 +38,13 @@ class MatchResultScreen extends StatelessWidget {
           final String headline;
           final Color headlineColor;
           if (winnerUid == null) {
-            headline = 'Unentschieden!';
+            headline = S.t('match_draw');
             headlineColor = colorScheme.primary;
           } else if (winnerUid == myUid) {
-            headline = 'Du hast gewonnen! 🎉';
+            headline = S.t('match_win');
             headlineColor = Colors.green;
           } else {
-            headline = 'Diesmal verloren.';
+            headline = S.t('match_loss');
             headlineColor = Colors.red;
           }
 
@@ -65,7 +69,7 @@ class MatchResultScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Runden: $myWins : $opponentWins',
+                    S.f('match_rounds_label', [myWins, opponentWins]),
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
@@ -77,7 +81,7 @@ class MatchResultScreen extends StatelessWidget {
                   if (myNewRating != null) ...[
                     const SizedBox(height: 24),
                     Text(
-                      'Neue Wertung: $myNewRating',
+                      S.f('match_new_rating', [myNewRating]),
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -86,7 +90,7 @@ class MatchResultScreen extends StatelessWidget {
                     width: 220,
                     child: ElevatedButton(
                       onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-                      child: const Text('Zurück zum Start'),
+                      child: Text(S.t('match_back_to_start')),
                     ),
                   ),
                 ],
@@ -94,6 +98,7 @@ class MatchResultScreen extends StatelessWidget {
             ),
           );
         },
+      ),
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../services/career_match_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/format_screen_builder.dart';
@@ -114,8 +116,13 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_inMatch) return _buildMatchRoundView(context);
-    return _buildSoloView(context);
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) {
+        if (_inMatch) return _buildMatchRoundView(context);
+        return _buildSoloView(context);
+      },
+    );
   }
 
   Widget _buildMatchRoundView(BuildContext context) {
@@ -139,7 +146,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Runde ${_roundIndex! + 1}: ${widget.score} von ${widget.total} richtig',
+                    S.f('round_label', [_roundIndex! + 1, widget.score, widget.total]),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
                   ),
@@ -148,7 +155,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
                     Text(
-                      'Warte auf Ergebnis des Gegners ...',
+                      S.t('round_waiting'),
                       style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
                     ),
                   ] else ...[
@@ -156,7 +163,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () => _continueAfterRound(status, data),
-                      child: Text(status == 'finished' ? 'Ergebnis ansehen' : 'Nächste Runde'),
+                      child: Text(S.t(status == 'finished' ? 'round_view_result' : 'round_next')),
                     ),
                   ],
                 ],
@@ -175,13 +182,13 @@ class _ResultScreenState extends State<ResultScreen> {
     final String text;
     final Color color;
     if (winner == null) {
-      text = 'Runde unentschieden.';
+      text = S.t('round_draw');
       color = Colors.grey;
     } else if (winner == myUid) {
-      text = 'Runde gewonnen!';
+      text = S.t('round_win');
       color = Colors.green;
     } else {
-      text = 'Runde verloren.';
+      text = S.t('round_loss');
       color = Colors.red;
     }
     return Text(text, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color));
@@ -209,9 +216,9 @@ class _ResultScreenState extends State<ResultScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Ergebnis',
-                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  Text(
+                    S.t('result_title'),
+                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   TweenAnimationBuilder<int>(
@@ -219,7 +226,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     duration: const Duration(milliseconds: 900),
                     curve: Curves.easeOutCubic,
                     builder: (context, value, _) => Text(
-                      '$value von ${widget.total} richtig',
+                      S.f('result_score_label', [value, widget.total]),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                     ),
@@ -229,7 +236,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     width: 220,
                     child: ElevatedButton(
                       onPressed: widget.onPlayAgain,
-                      child: const Text('Nochmal spielen'),
+                      child: Text(S.t('result_play_again')),
                     ),
                   ),
                 ],

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
+import '../l10n/strings.dart';
 import '../services/career_match_service.dart';
 import '../utils/page_transitions.dart';
 import 'draft_screen.dart';
@@ -48,14 +50,16 @@ class _OneVsOneQueueScreenState extends State<OneVsOneQueueScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('1 vs 1')),
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: appLanguage,
+      builder: (context, language, _) => Scaffold(
+      appBar: AppBar(title: Text(S.t('tab_1v1'))),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: uid == null
               ? Text(
-                  'Keine Verbindung zum Konto - 1 vs 1 ist gerade nicht verfügbar.',
+                  S.t('queue_no_account'),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: colorScheme.error),
                 )
@@ -68,26 +72,27 @@ class _OneVsOneQueueScreenState extends State<OneVsOneQueueScreen> {
                       children: [
                         const CircularProgressIndicator(),
                         const SizedBox(height: 24),
-                        const Text(
-                          'Suche Gegner ...',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                        Text(
+                          S.t('queue_searching'),
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Sobald ein ähnlich gerankter Spieler ebenfalls sucht, geht es automatisch weiter.',
+                          S.t('queue_hint'),
                           textAlign: TextAlign.center,
                           style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
                         ),
                         const SizedBox(height: 32),
                         OutlinedButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Abbrechen'),
+                          child: Text(S.t('queue_cancel')),
                         ),
                       ],
                     );
                   },
                 ),
         ),
+      ),
       ),
     );
   }
