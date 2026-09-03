@@ -92,6 +92,25 @@ exports.resetMonthlySeasons = onSchedule(
   }
 );
 
+/**
+ * Spiegelt Nickname + Position aus dem privaten users/{uid}-Dokument in die
+ * öffentliche careerRankings-Rangliste (siehe ROADMAP_QuizApp.md Abschnitt
+ * 18). Echter Name und Department werden bewusst NICHT gespiegelt - die
+ * bleiben laut Anforderung ausschließlich im eigenen Profil sichtbar, und
+ * users/{uid} ist per Regel ohnehin nur für den jeweiligen Nutzer lesbar.
+ * Legt dabei kein eloRating an - Rangliste zeigt weiterhin nur Nutzer mit
+ * mindestens einem gewerteten Match (siehe submitRoundResult unten).
+ */
+exports.onUserProfileWritten = onDocumentWritten("users/{uid}", async (event) => {
+  const after = event.data?.after?.exists ? event.data.after.data() : null;
+  if (!after) return;
+  const uid = event.params.uid;
+  await db.collection("careerRankings").doc(uid).set(
+    { nickname: after.nickname ?? null, position: after.position ?? null },
+    { merge: true }
+  );
+});
+
 // --- 1-vs-1-Live-Matchmaking + Draft-Phase (ROADMAP_QuizApp.md Abschnitt 16/17) ---
 // Ersetzt das frühere asynchrone Karriere-Matchmaking (matchCareerSubmission),
 // das nie live geschaltet war: eine Draft-Phase mit abwechselnden Zügen setzt

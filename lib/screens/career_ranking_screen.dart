@@ -53,9 +53,19 @@ class CareerRankingScreen extends StatelessWidget {
                     Text('${index + 1}.', style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        isMe ? '${entry.displayName} (du)' : entry.displayName,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isMe ? '${entry.displayName} (du)' : entry.displayName,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          if (entry.position != null && entry.position!.trim().isNotEmpty)
+                            Text(
+                              entry.position!,
+                              style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.6)),
+                            ),
+                        ],
                       ),
                     ),
                     Text('${entry.eloRating}', style: const TextStyle(fontWeight: FontWeight.bold)),

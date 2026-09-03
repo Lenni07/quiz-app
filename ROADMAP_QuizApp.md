@@ -187,14 +187,24 @@ Neue Spielmechanik für den "1 vs 1"-Reiter (Abschnitt 16), zusätzlich zum bere
 **Noch zu klären beim Umsetzen (kann mit Claude Code konkretisiert werden):**
 - Wie viele Formate werden insgesamt abwechselnd gebannt, bevor die Auswahl beginnt (z. B. je 2-3 Bans pro Spieler)?
 
-## 18. Status Abschnitt 16/17 – umgesetzt und im Emulator vollständig getestet
+## 18. Profil-Bereich (Reiter "Profil", Abschnitt 16)
 
-Beide Abschnitte sind fertig gebaut. Wichtigste Entscheidung dabei: Das bisher gebaute **asynchrone** 1-vs-1-Matchmaking (Abschnitt 15/Phase 4b-Bereich, "spielt blind, wird später zugeordnet auch wenn offline") wurde nie live deployt und deshalb durch eine **echte Live-Warteschlange** ersetzt – die Draft-Phase (Abschnitt 17) braucht zwingend einen gerade anwesenden Gegner, das war mit dem alten Async-Design nicht vereinbar.
+Felder im Nutzerprofil:
+- **Nickname** (Anzeigename, frei wählbar)
+- **Richtiger Name**
+- **Position** (z. B. Jobbezeichnung an Bord)
+- **Department** (Abteilung)
+- **Profilbild:** über **vordefinierte Avatare** (Auswahl aus einer kleinen Icon-/Avatar-Sammlung), **kein** echter Foto-Upload – dadurch kein Firebase Storage nötig, kein Datenschutz-Thema mit echten Fotos.
 
-- **Bans pro Spieler:** 3 (also 6 Bans insgesamt, abwechselnd), danach wählt jeder Spieler ein Format aus den verbleibenden 10. Das dritte Best-of-3-Format wird zufällig aus den übrigen 8 gezogen.
-- **Reiter-Icons:** einfache Flutter-Material-Icons als Platzhalter (Buch, Anker, gekreuzte Schwerter, Pokal, Person) – wie gewünscht noch nicht final gestaltet.
-- **Kompletter Ablauf im Firebase-Emulator End-to-End getestet** (zwei simulierte Testspieler, echte ID-Tokens, echte Firestore-Regeln statt Admin-Umgehung): Warteschlange → Zuordnung nach ähnlicher Wertung → Draft (abwechselndes Bannen mit Zug-Prüfung, Auswahl, zufälliges drittes Format) → drei Runden mit Teil-Einreichungs-Handling (wartet auf beide Spieler) → Sieger-Ermittlung → ELO-Update (K=32, gegenseitig: Gewinner +15, Verlierer −15 bei etwa gleicher Wertung) → Warteschlange wird zurückgesetzt → Ranglisten-Spiegel aktualisiert.
-- **Sicherheitsregeln geprüft:** direkte Schreibversuche auf `matches/{id}` werden abgelehnt (nur die Cloud Functions dürfen schreiben), Schreibversuche auf die Warteschlange eines anderen Nutzers werden abgelehnt, unbeteiligte Nutzer können ein fremdes Match nicht lesen.
-- `flutter analyze`, `flutter test` (14 Tests) und `flutter build web` laufen alle sauber durch.
+**Sichtbarkeit:**
+- Das Profilbild ist nur sichtbar, wenn man das eigene oder ein fremdes Profil direkt öffnet – nicht automatisch überall in der App present.
+- **Nickname und Position** sind zusätzlich **in der Rangliste** (Abschnitt 16, Reiter "Rangliste") sichtbar, neben der Wertung. Richtiger Name und Department bleiben nur im Profil selbst sichtbar.
 
-**Lektion für später:** Der allererste Aufruf einer neu geladenen Cloud Function im Emulator kann auf Windows über 30 Sekunden zum Hochfahren brauchen (Node-Modulauflösung) – der Emulator selbst gibt nach 30 Sekunden auf und meldet einen Fehler, obwohl die Funktion kurz danach doch noch bereit wird. Ein einfacher zweiter Versuch reicht dann.
+**Zusätzliche Felder (Ergänzung):**
+- **Crew-ID**
+- **Deutsch-Level** (1-6, passend zur Berlitz-Level-Struktur aus dem Unterricht)
+- **Zertifikat:** statt manueller Prüfung bei jeder Anmeldung nur das **Ausstellungsdatum** eintragen lassen, Ablauf (Ausstellung + 2 Jahre) wird automatisch berechnet und als "gültig"/"abgelaufen" angezeigt.
+
+**Verifizierung – bewusst KEINE Anbindung an das Bord-System:** Das angegebene Deutsch-Level ist **selbstangegeben**, ohne Abgleich mit einem externen/Bord-System – eine echte Systemanbindung wäre ein eigenes, deutlich größeres Projekt (unbekannte Schnittstelle, Zugriffsrechte, Datenschutz) und bewusst nicht Teil dieser App. Kann bei Bedarf später als eigene, separate Erweiterung angegangen werden.
+
+**Verknüpfung mit Karrieremodus/1-vs-1 (ELO-Start):** Das selbstangegebene Deutsch-Level bestimmt die **Start-Wertung** im 1-vs-1-Matchmaking: Level 1 = 1000 Start-EP, Level 2 = 2000, Level 3 = 3000, Level 4 = 4000, usw. (Level × 1000). Damit starten erfahrenere Sprecher nicht bei null gegen Anfänger.
