@@ -236,6 +236,12 @@ class S {
       AppLanguage.en: 'Only visible in your own profile',
     },
     'profile_department_label': {AppLanguage.de: 'Department', AppLanguage.en: 'Department'},
+    'department_unspecified': {AppLanguage.de: 'Nicht angegeben', AppLanguage.en: 'Not specified'},
+    'department_restaurant': {AppLanguage.de: 'Restaurant', AppLanguage.en: 'Restaurant'},
+    'department_housekeeping': {AppLanguage.de: 'Housekeeping', AppLanguage.en: 'Housekeeping'},
+    'department_rezeption': {AppLanguage.de: 'Rezeption', AppLanguage.en: 'Front Desk'},
+    'department_spa': {AppLanguage.de: 'Spa', AppLanguage.en: 'Spa'},
+    'department_security': {AppLanguage.de: 'Security', AppLanguage.en: 'Security'},
     'profile_crewid_label': {AppLanguage.de: 'Crew-ID', AppLanguage.en: 'Crew ID'},
     'profile_level_label': {AppLanguage.de: 'Deutsch-Level', AppLanguage.en: 'German Level'},
     'profile_level_helper': {

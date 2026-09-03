@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/department.dart';
 import '../models/flip_tile_word.dart';
 import '../models/group_sort.dart';
 import '../models/image_quiz.dart';
@@ -28,10 +29,14 @@ import '../screens/word_order_screen.dart';
 /// nach der Draft-Phase feststeht statt fest in der Modus-Auswahl verdrahtet
 /// zu sein. "Karteikarten üben" überspringt dabei die Sprachauswahl und
 /// nutzt direkt Englisch, damit eine Runde ohne Zusatzschritt startet.
+/// Question-basierte Formate werden bewusst NUR mit allgemeinen,
+/// abteilungsübergreifenden Inhalten geladen (siehe ROADMAP_QuizApp.md
+/// Abschnitt 18c) - im 1-vs-1-Modus wird nicht nach Department gefiltert
+/// oder gematcht, beide Seiten haben dieselben Voraussetzungen.
 Future<Widget> buildFormatScreen(String formatId) async {
   switch (formatId) {
     case 'allgemeinwissen-quiz':
-      final questions = await loadQuestions();
+      final questions = questionsForCompetitive(await loadQuestions());
       return QuestionScreen(questions: questions, formatId: formatId);
     case 'konversation-ueben':
       final sentences = await loadSentences();
@@ -49,16 +54,16 @@ Future<Widget> buildFormatScreen(String formatId) async {
     case 'wahr-oder-falsch':
       return TrueFalseScreen(statements: await loadTrueFalseStatements());
     case 'gameshow-quiz':
-      return GameshowQuizScreen(questions: await loadQuestions());
+      return GameshowQuizScreen(questions: questionsForCompetitive(await loadQuestions()));
     case 'bild-quiz':
       return ImageQuizScreen(items: await loadImageQuizItems());
     case 'open-the-box':
-      final questions = await loadQuestions();
+      final questions = questionsForCompetitive(await loadQuestions());
       return OpenBoxScreen(questions: questions.take(9).toList());
     case 'find-the-match':
       return MatchPairsScreen(sentences: await loadSentences());
     case 'random-wheel':
-      return RandomWheelScreen(questions: await loadQuestions());
+      return RandomWheelScreen(questions: questionsForCompetitive(await loadQuestions()));
     case 'flip-tiles':
       return FlipTilesScreen(words: await loadFlipTileWords());
     case 'match-up':

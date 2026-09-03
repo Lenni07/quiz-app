@@ -138,5 +138,77 @@
     "question": "Welches deutsche Wort wurde unverändert ins Englische übernommen?",
     "options": ["Kindergarten", "Nur englische Wörter werden übernommen", "Fahrrad", "Rechtschreibung"],
     "correctIndex": 0
+  },
+  {
+    "question": "Ein Gast fragt: \"Ist der Tisch für heute Abend reserviert?\" Was bedeutet \"reserviert\"?",
+    "options": ["vorbestellt", "kaputt", "kostenlos", "besetzt gewesen"],
+    "correctIndex": 0,
+    "department": "restaurant"
+  },
+  {
+    "question": "Wie fragt man höflich, ob ein Gast schon bestellt hat?",
+    "options": ["Haben Sie schon bestellt?", "Bestellen Sie schon?", "Haben Sie bestellt schon?", "Sie bestellt haben?"],
+    "correctIndex": 0,
+    "department": "restaurant"
+  },
+  {
+    "question": "Was bedeutet \"Die Rechnung, bitte\"?",
+    "options": ["Der Gast möchte zahlen", "Der Gast möchte bestellen", "Der Gast beschwert sich", "Der Gast möchte reservieren"],
+    "correctIndex": 0,
+    "department": "restaurant"
+  },
+  {
+    "question": "Ein Gast sagt: \"Können Sie bitte die Handtücher wechseln?\" Was möchte er?",
+    "options": ["Frische Handtücher", "Das Zimmer reinigen", "Die Minibar auffüllen", "Ein neues Bett"],
+    "correctIndex": 0,
+    "department": "housekeeping"
+  },
+  {
+    "question": "Was bedeutet \"Bitte nicht stören\" an einer Kabinentür?",
+    "options": ["Nicht klopfen/eintreten", "Bitte sauber machen", "Gast ist unterwegs", "Zimmer ist leer"],
+    "correctIndex": 0,
+    "department": "housekeeping"
+  },
+  {
+    "question": "Wie fragt man freundlich, wann man das Zimmer reinigen darf?",
+    "options": ["Wann passt es Ihnen, dass wir sauber machen?", "Wann Sie raus gehen?", "Machen wir jetzt sauber!", "Zimmer frei?"],
+    "correctIndex": 0,
+    "department": "housekeeping"
+  },
+  {
+    "question": "Ein Gast fragt an der Rezeption: \"Wann ist der Check-out?\" Was möchte er wissen?",
+    "options": ["Bis wann er das Zimmer verlassen muss", "Wann das Restaurant öffnet", "Wo das Schwimmbad ist", "Wie das WLAN heißt"],
+    "correctIndex": 0,
+    "department": "rezeption"
+  },
+  {
+    "question": "Wie begrüßt man einen neu ankommenden Gast höflich?",
+    "options": ["Herzlich willkommen an Bord!", "Was wollen Sie?", "Ja bitte?", "Sie hier neu?"],
+    "correctIndex": 0,
+    "department": "rezeption"
+  },
+  {
+    "question": "Ein Gast fragt nach einer Massage-Behandlung. Welches Wort passt?",
+    "options": ["Termin", "Rechnung", "Ausflug", "Rettungsboot"],
+    "correctIndex": 0,
+    "department": "spa"
+  },
+  {
+    "question": "Wie fragt man, ob ein Gast Allergien hat, bevor eine Behandlung beginnt?",
+    "options": ["Haben Sie Allergien, die ich wissen sollte?", "Sie Allergie haben?", "Allergien verboten!", "Mögen Sie Allergien?"],
+    "correctIndex": 0,
+    "department": "spa"
+  },
+  {
+    "question": "Was sagt man bei einer Sicherheitsübung (Muster-Drill) auf Deutsch zuerst?",
+    "options": ["Bitte begeben Sie sich zur Sammelstelle", "Das Schiff sinkt gleich", "Bleiben Sie im Zimmer", "Es ist nur ein Spiel"],
+    "correctIndex": 0,
+    "department": "security"
+  },
+  {
+    "question": "Wie erklärt man einem Gast höflich, dass ein Bereich gesperrt ist?",
+    "options": ["Dieser Bereich ist momentan leider gesperrt", "Hier nicht!", "Verboten für Sie", "Gehen Sie weg"],
+    "correctIndex": 0,
+    "department": "security"
   }
 ]

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/avatar_option.dart';
+import '../models/department.dart';
 import '../services/career_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/user_profile_service.dart';
@@ -26,10 +27,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nicknameController = TextEditingController();
   final _realNameController = TextEditingController();
   final _positionController = TextEditingController();
-  final _departmentController = TextEditingController();
   final _crewIdController = TextEditingController();
 
   String _avatarId = allAvatarOptions.first.id;
+  String? _department;
   int? _germanLevel;
   DateTime? _certificateIssuedAt;
   bool _loaded = false;
@@ -40,7 +41,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nicknameController.dispose();
     _realNameController.dispose();
     _positionController.dispose();
-    _departmentController.dispose();
     _crewIdController.dispose();
     super.dispose();
   }
@@ -53,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _nicknameController.text = (data?['nickname'] as String?) ?? '';
       _realNameController.text = (data?['realName'] as String?) ?? '';
       _positionController.text = (data?['position'] as String?) ?? '';
-      _departmentController.text = (data?['department'] as String?) ?? '';
+      _department = data?['department'] as String?;
       _crewIdController.text = (data?['crewId'] as String?) ?? '';
       _avatarId = (data?['avatarId'] as String?) ?? allAvatarOptions.first.id;
       _germanLevel = (data?['germanLevel'] as num?)?.toInt();
@@ -88,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         nickname: _nicknameController.text.trim(),
         realName: _realNameController.text.trim(),
         position: _positionController.text.trim(),
-        department: _departmentController.text.trim(),
+        department: _department ?? '',
         avatarId: _avatarId,
         crewId: _crewIdController.text.trim(),
         germanLevel: _germanLevel,
@@ -183,12 +183,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    TextField(
-                      controller: _departmentController,
+                    DropdownButtonFormField<String?>(
+                      initialValue: departmentIds.contains(_department) ? _department : null,
                       decoration: InputDecoration(
                         labelText: S.t('profile_department_label'),
                         helperText: S.t('profile_private_helper'),
                       ),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(S.t('department_unspecified'))),
+                        for (final id in departmentIds)
+                          DropdownMenuItem(value: id, child: Text(S.t('department_$id'))),
+                      ],
+                      onChanged: (value) => setState(() => _department = value),
                     ),
                     const SizedBox(height: 12),
                     TextField(

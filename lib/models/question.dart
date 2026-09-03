@@ -6,10 +6,17 @@ class Question {
   final List<String> options;
   final int correctIndex;
 
+  /// Department-Tag (siehe ROADMAP_QuizApp.md Abschnitt 18c), z. B.
+  /// "restaurant", "housekeeping" - oder "general" für abteilungsüber-
+  /// greifende Inhalte. Fehlt das Feld in den Rohdaten, gilt die Frage als
+  /// allgemein.
+  final String department;
+
   Question({
     required this.question,
     required this.options,
     required this.correctIndex,
+    this.department = 'general',
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
@@ -17,6 +24,7 @@ class Question {
       question: json['question'] as String,
       options: List<String>.from(json['options'] as List),
       correctIndex: json['correctIndex'] as int,
+      department: json['department'] as String? ?? 'general',
     );
   }
 
@@ -25,6 +33,7 @@ class Question {
       'question': question,
       'options': options,
       'correctIndex': correctIndex,
+      'department': department,
     };
   }
 }

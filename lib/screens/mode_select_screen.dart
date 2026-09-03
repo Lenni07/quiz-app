@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
+import '../models/department.dart';
 import '../models/flip_tile_word.dart';
 import '../models/game_format.dart';
 import '../models/group_sort.dart';
@@ -9,6 +11,7 @@ import '../models/number_word.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
+import '../services/user_profile_service.dart';
 import '../utils/page_transitions.dart';
 import 'duel_mode_screen.dart';
 import 'fill_blank_screen.dart';
@@ -35,8 +38,22 @@ class ModeSelectScreen extends StatelessWidget {
 
   const ModeSelectScreen({super.key, this.embedded = false});
 
+  /// Liest das eigene Department fürs Filtern von Question-Inhalten im
+  /// Lernmodus (siehe ROADMAP_QuizApp.md Abschnitt 18c). Robust gegen
+  /// fehlendes Firebase/fehlenden Login - dann einfach kein Filter (null).
+  Future<String?> _myDepartment() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return null;
+      final data = await UserProfileService().loadProfile(uid);
+      return data?['department'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _startGeneralQuiz(BuildContext context) async {
-    final questions = await loadQuestions();
+    final questions = questionsForLearning(await loadQuestions(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(
         context,
@@ -78,7 +95,7 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startGameshowQuiz(BuildContext context) async {
-    final questions = await loadQuestions();
+    final questions = questionsForLearning(await loadQuestions(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(GameshowQuizScreen(questions: questions)));
     }
@@ -92,7 +109,7 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startOpenBox(BuildContext context) async {
-    final questions = await loadQuestions();
+    final questions = questionsForLearning(await loadQuestions(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(OpenBoxScreen(questions: questions.take(9).toList())));
     }
@@ -106,7 +123,7 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startRandomWheel(BuildContext context) async {
-    final questions = await loadQuestions();
+    final questions = questionsForLearning(await loadQuestions(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(RandomWheelScreen(questions: questions)));
     }
