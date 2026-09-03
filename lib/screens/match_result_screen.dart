@@ -7,6 +7,7 @@ import '../models/game_format.dart';
 import '../services/career_match_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/game_button.dart';
+import '../widgets/maritime_icon.dart';
 
 class MatchResultScreen extends StatelessWidget {
   final String matchId;
@@ -58,11 +59,9 @@ class MatchResultScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    winnerUid == myUid ? Icons.emoji_events : Icons.sports_martial_arts,
-                    size: 90,
-                    color: headlineColor,
-                  ),
+                  winnerUid == myUid
+                      ? Icon(Icons.emoji_events, size: 90, color: headlineColor)
+                      : MaritimeIcon(MaritimeIconShape.crossedOars, size: 90, color: headlineColor),
                   const SizedBox(height: 24),
                   Text(
                     headline,

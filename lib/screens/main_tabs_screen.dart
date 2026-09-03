@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/game_button.dart';
 import '../widgets/game_panel.dart';
+import '../widgets/maritime_icon.dart';
 import '../widgets/maritime_painters.dart';
 import 'career_ranking_screen.dart';
 import 'fleet_war_screen.dart';
@@ -31,10 +32,10 @@ class MainTabsScreen extends StatefulWidget {
 class _MainTabsScreenState extends State<MainTabsScreen> {
   int _index = 2;
 
-  static const _tabIcons = [
+  static const List<IconData?> _tabIcons = [
     Icons.school_outlined,
-    Icons.groups_outlined,
-    Icons.sports_martial_arts,
+    Icons.directions_boat_filled,
+    null,
     Icons.emoji_events_outlined,
     Icons.person_outline,
   ];
@@ -97,7 +98,7 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                             BoxShadow(color: Colors.black54, offset: Offset(0, 3), blurRadius: 6),
                           ],
                         ),
-                        child: Icon(_tabIcons[i], color: AppColors.deepSeaDark),
+                        child: const MaritimeIcon(MaritimeIconShape.crossedOars, color: AppColors.deepSeaDark),
                       )
                     : Icon(_tabIcons[i]),
                 label: S.t(_tabLabelKeys[i]),
@@ -212,7 +213,7 @@ class _OneVsOneLanding extends StatelessWidget {
           GamePanel(
             child: Column(
               children: [
-                const Icon(Icons.sports_martial_arts, size: 56, color: AppColors.brassLight),
+                const MaritimeIcon(MaritimeIconShape.crossedOars, size: 56, color: AppColors.brassLight),
                 const SizedBox(height: 8),
                 Text(S.t('tab_1v1'), style: displayStyle(fontSize: 26, color: AppColors.canvas)),
                 const SizedBox(height: 6),

@@ -10,6 +10,7 @@ import '../services/fleet_war_service.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/game_button.dart';
+import '../widgets/maritime_icon.dart';
 import '../widgets/game_panel.dart';
 
 /// Profil/Optionen-Bildschirm (siehe ROADMAP_QuizApp.md Abschnitt 16/18):
@@ -150,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: CircleAvatar(
                           radius: 40,
                           backgroundColor: avatarById(_avatarId).color,
-                          child: Icon(avatarById(_avatarId).icon, size: 40, color: Colors.white),
+                          child: MaritimeIcon(avatarById(_avatarId).shape, size: 40, color: Colors.white),
                         ),
                       ),
                     ),
@@ -311,7 +312,7 @@ class _AvatarChoice extends StatelessWidget {
         child: CircleAvatar(
           radius: 24,
           backgroundColor: option.color,
-          child: Icon(option.icon, color: Colors.white),
+          child: MaritimeIcon(option.shape, color: Colors.white),
         ),
       ),
     );
