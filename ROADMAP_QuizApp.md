@@ -277,3 +277,19 @@ Felder im Nutzerprofil:
 ## 19. Englische Bedienoberfläche (Reiter "Optionen")
 
 In den Optionen soll es eine Sprachumschaltung Deutsch/Englisch geben – aber **nur für die Bedienoberfläche** (Menüs, Reiter-Beschriftungen, Buttons, Anleitungstexte, Systemmeldungen usw.). Die eigentlichen Deutsch-Lerninhalte/Fragen bleiben immer auf Deutsch, unabhängig von der gewählten Oberflächensprache – macht didaktisch Sinn, da das Ziel ja das Deutschlernen ist, nur die Bedienung soll für alle verständlich sein, unabhängig vom Englisch-Niveau.
+
+**Status: bereits umgesetzt** (`SegmentedButton` im Profil-Reiter, `lib/l10n/`) – deckt Reiter, Menüs, Profil, Rangliste, Flottentreffen, 1-vs-1-Warteschlange/Draft/Match-Ergebnis, Start-/Ergebnisbildschirm ab.
+
+## 21. Status Abschnitt 18c – alle drei Features umgesetzt (Stand 2026-09-03)
+
+**Hinweis:** Abschnitt 18c (oben) verweist noch darauf, dass die Rangliste "bereits nach Deutsch-Level segmentiert" sei - das ist durch Abschnitt 18b überholt (genau umgekehrt: ein einziger gemeinsamer Pool, keine Level-Segmentierung). Ändert aber nichts an der eigentlichen Regel ("kein Department-Matching") - die gilt mit einem einzigen Pool sogar noch klarer.
+
+**1. Hörverständnis (Text-to-Speech):** 17. Spielformat, `flutter_tts`, liest einen deutschen Satz aus den bestehenden sentences.json-Daten vor, vier englische Bedeutungs-Optionen zur Auswahl (bewusst keine Dopplung zu "Konversation üben", das dieselben Daten für die passende deutsche Erwiderung nutzt). Wie alle 16 bisherigen Formate im Katalog registriert, dadurch automatisch auch im 1-vs-1-Draft-Pool.
+
+**2. Department-Tags:** wie abgestimmt nur beim `Question`-Modell (Allgemeinwissen-Quiz, Gameshow-Quiz, Open the Box, Random Wheel) - die übrigen sechs Datenmodelle bleiben ungetaggt, **müssen das Feld aber bekommen, bevor echte Inhalte eingepflegt werden** (siehe Warnhinweis oben). Lernmodus zeigt eigenes Department + allgemeine Inhalte, 1 vs 1 bewusst nur allgemeine Inhalte (`lib/models/department.dart`, beide Filterfunktionen fallen auf die ungefilterte Liste zurück statt einen Nutzer ganz ohne Fragen dastehen zu lassen). Das Profil-Department-Feld wurde dafür von Freitext auf eine feste Auswahl umgestellt, damit die Filterung zuverlässig matcht. Ein Dutzend Platzhalter-Fragen mit Department-Tags ergänzt, damit überhaupt etwas zu filtern ist.
+
+**3. Tages-Challenge mit Streak:** die erste abgeschlossene Runde eines Tages (egal welches Format) zählt, verlängert einen Streak-Zähler und gibt einen Punkte-Bonus (10 Punkte, eigene Wahl da die Roadmap keinen Betrag vorgab) auf den Flottentreffen-Punktestand der laufenden Season - kein neues Punktesystem, nutzt die bestehende scoreSubmissions-Infrastruktur. "Noch kein Schiff" wird sinnvoll abgefangen: der Streak zählt trotzdem, nur der Punkte-Bonus entfällt (nutzt dafür `FleetWarService.submitScore()`, das genau das schon eingebaut hatte). Streak-Anzeige (🔥-Icon) im Kopfbereich der Reiter-Navigation, Datumsvergleich auf Basis der Gerätezeit (kein serverseitiger Zeitzonen-Abgleich - Schiffe reisen durch Zeitzonen, "heute" ist bewusst das, was der Nutzer gerade auf seinem Gerät sieht).
+
+**Getestet:** neue automatisierte Tests für die Department-Filterung (`test/department_test.dart`) und die Streak-Logik inkl. Tag-Sprung/Lücken-Verhalten (`test/daily_challenge_service_test.dart`, mit injizierbarer Uhrzeit für reproduzierbare Tests ohne echten Tageswechsel). `flutter analyze`, `flutter test` (27 Tests) und `flutter build web` laufen nach allen drei Teilschritten sauber. Sprachausgabe (TTS) konnte nicht tatsächlich gehört werden (kein Audio-Testwerkzeug in dieser Umgebung).
+
+**Noch nicht deployt** - wie angewiesen, wird gesammelt am Ende deployt.

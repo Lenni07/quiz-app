@@ -270,5 +270,12 @@ class S {
     'profile_language_title': {AppLanguage.de: 'Sprache', AppLanguage.en: 'Language'},
     'profile_language_de': {AppLanguage.de: 'Deutsch', AppLanguage.en: 'German'},
     'profile_language_en': {AppLanguage.de: 'English', AppLanguage.en: 'English'},
+
+    // Tages-Challenge / Streak
+    'daily_challenge_streak': {
+      AppLanguage.de: 'Tages-Challenge geschafft! 🔥 {0} Tage in Folge',
+      AppLanguage.en: 'Daily challenge complete! 🔥 {0}-day streak',
+    },
+    'streak_label': {AppLanguage.de: '{0} Tage', AppLanguage.en: '{0} days'},
   };
 }

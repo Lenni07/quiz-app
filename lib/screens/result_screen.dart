@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../services/career_match_service.dart';
+import '../services/daily_challenge_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/format_screen_builder.dart';
 import '../services/match_round_context.dart';
@@ -56,6 +57,7 @@ class _ResultScreenState extends State<ResultScreen> {
       _launchFireworks();
     }
     _submitToFleetWar();
+    _recordDailyChallenge();
 
     final matchContext = MatchRoundContext.consume();
     if (matchContext != null) {
@@ -69,6 +71,16 @@ class _ResultScreenState extends State<ResultScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
     FleetWarService().submitScore(uid: user.uid, score: widget.score, total: widget.total);
+  }
+
+  Future<void> _recordDailyChallenge() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    final streak = await DailyChallengeService().recordCompletion(user.uid);
+    if (streak == null || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(S.f('daily_challenge_streak', [streak]))),
+    );
   }
 
   Future<void> _submitMatchRound() async {

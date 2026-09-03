@@ -144,6 +144,7 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                 final rating = (snapshot.data?.data()?['eloRating'] as num?)?.toInt() ?? 1000;
                 final level = rating ~/ 100;
                 final progress = (rating % 100) / 100;
+                final streak = ((snapshot.data?.data()?['dailyChallenge'] as Map<String, dynamic>?)?['streak'] as num?)?.toInt() ?? 0;
                 return Row(
                   children: [
                     Expanded(
@@ -164,6 +165,16 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                         ],
                       ),
                     ),
+                    if (streak > 0) ...[
+                      const SizedBox(width: 12),
+                      Row(
+                        children: [
+                          const Text('🔥', style: TextStyle(fontSize: 16)),
+                          const SizedBox(width: 2),
+                          Text(S.f('streak_label', [streak]), style: const TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                    ],
                     const SizedBox(width: 16),
                     Row(
                       children: [
