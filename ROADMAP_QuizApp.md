@@ -153,10 +153,48 @@ Wichtige Struktur-Entscheidung, die die bisherige einfache "Modus wählen"-Liste
 - **Lernmodus:** Entspanntes Üben, ohne Zeitdruck und ohne Wertungsdruck. Bei falscher Antwort wird sofort die richtige Lösung gezeigt – zum Vokabeln-/Grammatik-Üben statt zum Wettkampf.
 - **Flottentreffen** (bisher "Flottenkrieg" – umbenannt, weniger martialisch): der monatliche Schiff-gegen-Schiff-Wettbewerb aus Phase 4b (Abschnitt 6), bleibt inhaltlich gleich, nur der Name ändert sich.
 
-**Wichtig:** Alle drei sind eigenständige, gleichrangige Hauptbereiche (wie eigene "Kacheln" auf der Startseite) – kein verschachteltes Untermenü, kein Modus in einer flachen Liste. Die bisherigen Spielformate (Quiz, True/False, Gameshow Quiz, Match Up, Rank Order, usw.) werden diesen drei Bereichen zugeordnet bzw. innerhalb von Karrieremodus/Lernmodus auswählbar gemacht.
+**Wichtig:** Alle drei sind eigenständige, gleichrangige Hauptbereiche – kein verschachteltes Untermenü, kein Modus in einer flachen Liste. Die bisherigen Spielformate (Quiz, True/False, Gameshow Quiz, Match Up, Rank Order, usw.) werden diesen drei Bereichen zugeordnet bzw. innerhalb von Karrieremodus/Lernmodus auswählbar gemacht.
+
+**Korrektur der Navigationstiefe (nach erstem Test):** Die drei Bereiche erscheinen NICHT direkt auf der Startseite als Kacheln, sondern die Startseite behält den bestehenden **"Spiel starten"**-Button. Erst nach dem Tippen darauf werden die drei Hauptbereiche (Karrieremodus, Lernmodus, Flottentreffen) angezeigt, und erst danach – innerhalb des gewählten Bereichs – die einzelnen Spielformate. Also: Startseite → "Spiel starten" → Bereich wählen → Format wählen.
 
 **Offen/zu klären beim Umbau:** Wie genau Ranking im Karrieremodus berechnet wird (z. B. ELO-artig, einfache Punktesumme) und ob Lernmodus alle Formate umfasst oder nur eine Teilmenge – das kann im nächsten Schritt mit Claude Code konkretisiert werden.
 
-**Konkretisiert (2026-08-27):**
-- **Ranking:** echtes ELO-System mit **asynchronem Matchmaking** (kein Echtzeit-Gegner, passend zum Satelliten-Internet-Prinzip aus Abschnitt 2/6). Ablauf: Format normal zu Ende spielen → Ergebnis wird eingereicht → eine Cloud Function sucht unter wartenden Einreichungen desselben Formats den Spieler mit der nächstgelegenen Wertung; findet sie einen, werden beide ELO-Werte aktualisiert (auch wenn der andere Spieler längst offline ist), sonst wird die eigene Einreichung selbst zur wartenden Einreichung. Kein Härte-Grenzwert bei der Wertungsnähe (immer der nächstbeste verfügbare Gegner), damit Matchmaking bei kleiner Nutzerzahl nicht ins Leere läuft.
-- **Formate:** alle 15 Formate sind sowohl unter Karriere- als auch unter Lernmodus wählbar (keine feste Aufteilung), kann später bei Bedarf geändert werden.
+## 16. Navigation im Clash-Royale-Stil (unterer Reiter-Leiste)
+
+Vorbild: Clash Royale (Screenshot als Referenz erhalten). Statt "Spiel starten"-Button + Bereichsauswahl (siehe Korrektur in Abschnitt 15) jetzt konkretes Layout mit **unterer Reiter-Leiste (5 Reiter)**, angelehnt an Clash Royale:
+
+- **Lernmodus** – Icon: Buch/Karteikarten
+- **Flottentreffen** – Icon: Anker/Schiff (bisher "Flottenkrieg")
+- **1 vs 1** (bisher "Karrieremodus", umbenannt) – Icon: gekreuzte Schwerter, **mittig platziert und optisch hervorgehoben**, da Hauptmodus (wie der Kampf-Button bei Clash Royale)
+- **Rangliste** – Icon: Pokal (neu, bisher nicht als eigener Reiter geplant – zeigt die ELO-Rangliste aus dem 1-vs-1-Matchmaking)
+- **Profil/Optionen** – Icon: Personen-Silhouette oder Zahnrad
+
+**Oberer Bereich (wie Clash Royale):** Level-Badge mit XP-Fortschrittsbalken links, aktuelle Wertung/Rang rechts (statt Gold/Diamanten wie im Vorbild – bei uns keine Ingame-Währung geplant).
+
+## 17. 1-vs-1-Modus: Draft-Phase vor dem Match
+
+Neue Spielmechanik für den "1 vs 1"-Reiter (Abschnitt 16), zusätzlich zum bereits gebauten ELO-Matchmaking (Abschnitt 15/Phase 4b-Bereich):
+
+- Nach dem Matchmaking (Gegner gefunden) folgt eine **Draft-Phase**: Beide Spieler können bestimmte Spielformate aus dem Pool eliminieren ("bannen").
+- Danach sucht sich **jeder Spieler ein Format aus** den verbleibenden, nicht eliminierten Formaten aus.
+- Format des Matches: **Best of 3** – zwei Formate sind durch die Spieler gewählt (je eins), das **dritte/letzte Format wird per Zufallsgenerator** aus den verbleibenden (nicht eliminierten, nicht bereits gewählten) Formaten bestimmt.
+- Sieger ist, wer von den drei Runden mehr gewinnt.
+
+**Ablauf der Draft-Phase (geklärt):**
+- Bans laufen **abwechselnd** ab, wie ein echter Draft (Spieler A bannt, dann Spieler B, usw.), nicht gleichzeitig.
+- Jeder Draft-Schritt (Ban oder Formatauswahl) hat ein **Zeitlimit von 15-20 Sekunden**. Läuft die Zeit ab, wird automatisch zufällig gebannt bzw. gewählt, damit kein Spieler den anderen ewig warten lässt.
+
+**Noch zu klären beim Umsetzen (kann mit Claude Code konkretisiert werden):**
+- Wie viele Formate werden insgesamt abwechselnd gebannt, bevor die Auswahl beginnt (z. B. je 2-3 Bans pro Spieler)?
+
+## 18. Status Abschnitt 16/17 – umgesetzt und im Emulator vollständig getestet
+
+Beide Abschnitte sind fertig gebaut. Wichtigste Entscheidung dabei: Das bisher gebaute **asynchrone** 1-vs-1-Matchmaking (Abschnitt 15/Phase 4b-Bereich, "spielt blind, wird später zugeordnet auch wenn offline") wurde nie live deployt und deshalb durch eine **echte Live-Warteschlange** ersetzt – die Draft-Phase (Abschnitt 17) braucht zwingend einen gerade anwesenden Gegner, das war mit dem alten Async-Design nicht vereinbar.
+
+- **Bans pro Spieler:** 3 (also 6 Bans insgesamt, abwechselnd), danach wählt jeder Spieler ein Format aus den verbleibenden 10. Das dritte Best-of-3-Format wird zufällig aus den übrigen 8 gezogen.
+- **Reiter-Icons:** einfache Flutter-Material-Icons als Platzhalter (Buch, Anker, gekreuzte Schwerter, Pokal, Person) – wie gewünscht noch nicht final gestaltet.
+- **Kompletter Ablauf im Firebase-Emulator End-to-End getestet** (zwei simulierte Testspieler, echte ID-Tokens, echte Firestore-Regeln statt Admin-Umgehung): Warteschlange → Zuordnung nach ähnlicher Wertung → Draft (abwechselndes Bannen mit Zug-Prüfung, Auswahl, zufälliges drittes Format) → drei Runden mit Teil-Einreichungs-Handling (wartet auf beide Spieler) → Sieger-Ermittlung → ELO-Update (K=32, gegenseitig: Gewinner +15, Verlierer −15 bei etwa gleicher Wertung) → Warteschlange wird zurückgesetzt → Ranglisten-Spiegel aktualisiert.
+- **Sicherheitsregeln geprüft:** direkte Schreibversuche auf `matches/{id}` werden abgelehnt (nur die Cloud Functions dürfen schreiben), Schreibversuche auf die Warteschlange eines anderen Nutzers werden abgelehnt, unbeteiligte Nutzer können ein fremdes Match nicht lesen.
+- `flutter analyze`, `flutter test` (14 Tests) und `flutter build web` laufen alle sauber durch.
+
+**Lektion für später:** Der allererste Aufruf einer neu geladenen Cloud Function im Emulator kann auf Windows über 30 Sekunden zum Hochfahren brauchen (Node-Modulauflösung) – der Emulator selbst gibt nach 30 Sekunden auf und meldet einen Fehler, obwohl die Funktion kurz danach doch noch bereit wird. Ein einfacher zweiter Versuch reicht dann.

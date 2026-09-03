@@ -1,13 +1,12 @@
 // Einfacher Smoke-Test: Startbildschirm mit "Spiel starten" führt zur
-// Bereichs-Auswahl (Karriere/Lernmodus/Flottentreffen, siehe
-// ROADMAP_QuizApp.md Abschnitt 15), von dort führt "Karrieremodus" zur
-// Formatauswahl.
+// Reiter-Navigation (siehe ROADMAP_QuizApp.md Abschnitt 16) mit den 5
+// Hauptbereichen.
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:rank_up/main.dart';
 
 void main() {
-  testWidgets('Spiel starten führt zur Bereichs-Auswahl und Karrieremodus zur Formatauswahl',
+  testWidgets('Spiel starten führt zur Reiter-Navigation mit allen 5 Bereichen',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
@@ -17,11 +16,16 @@ void main() {
     await tester.tap(find.text('Spiel starten'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Karrieremodus'), findsOneWidget);
     expect(find.text('Lernmodus'), findsOneWidget);
     expect(find.text('Flottentreffen'), findsOneWidget);
+    expect(find.text('1 vs 1'), findsWidgets);
+    expect(find.text('Rangliste'), findsOneWidget);
+    expect(find.text('Profil'), findsOneWidget);
 
-    await tester.tap(find.text('Karrieremodus'));
+    // Standardmäßig ist der 1-vs-1-Reiter aktiv (Hauptmodus).
+    expect(find.text('Kampf starten'), findsOneWidget);
+
+    await tester.tap(find.text('Lernmodus'));
     await tester.pumpAndSettle();
 
     expect(find.text('Allgemeinwissen-Quiz'), findsOneWidget);

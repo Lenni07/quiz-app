@@ -6,9 +6,7 @@ import '../models/number_word.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
-import '../services/game_mode_context.dart';
 import '../utils/page_transitions.dart';
-import 'career_ranking_screen.dart';
 import 'duel_mode_screen.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
@@ -27,9 +25,11 @@ import 'word_magnets_screen.dart';
 import 'word_order_screen.dart';
 
 class ModeSelectScreen extends StatelessWidget {
-  final GameMode mode;
+  /// Wenn true, wird kein eigenes Scaffold/AppBar gezeichnet - für die
+  /// Einbettung als Reiter-Inhalt (siehe main_tabs_screen.dart).
+  final bool embedded;
 
-  const ModeSelectScreen({super.key, required this.mode});
+  const ModeSelectScreen({super.key, this.embedded = false});
 
   Future<void> _startGeneralQuiz(BuildContext context) async {
     final questions = await loadQuestions();
@@ -156,25 +156,11 @@ class ModeSelectScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    GameModeContext.current = mode;
-    final title = mode == GameMode.career ? 'Karrieremodus' : 'Lernmodus';
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          if (mode == GameMode.career)
-            IconButton(
-              icon: const Icon(Icons.leaderboard_outlined),
-              tooltip: 'Rangliste',
-              onPressed: () => Navigator.push(context, buildFadeSlideRoute(const CareerRankingScreen())),
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+    final body = SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
             const _SectionHeader('Grundmodi'),
             _ModeCard(
               title: 'Allgemeinwissen-Quiz',
@@ -296,7 +282,11 @@ class ModeSelectScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      );
+    if (embedded) return body;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Lernmodus')),
+      body: body,
     );
   }
 }

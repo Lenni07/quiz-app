@@ -16,18 +16,6 @@ void main() {
     service = CareerService(firestore: firestore);
   });
 
-  test('submitResult legt eine careerSubmission mit den richtigen Feldern an', () async {
-    await service.submitResult(uid: 'user-1', format: 'wahr-oder-falsch', score: 7, total: 10);
-
-    final submissions = await firestore.collection('careerSubmissions').get();
-    expect(submissions.docs.length, 1);
-    final data = submissions.docs.first.data();
-    expect(data['uid'], 'user-1');
-    expect(data['format'], 'wahr-oder-falsch');
-    expect(data['score'], 7);
-    expect(data['total'], 10);
-  });
-
   test('currentRating liefert 1000 als Standardwert ohne gespeicherte Wertung', () async {
     await firestore.collection('users').doc('user-1').set({});
     expect(await service.currentRating('user-1'), 1000);

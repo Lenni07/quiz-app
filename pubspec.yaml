@@ -43,6 +43,7 @@ dependencies:
   shelf: ^1.4.2
   shelf_web_socket: ^3.0.0
   web_socket_channel: ^3.0.3
+  cloud_functions: ^6.4.0
 
 dev_dependencies:
   flutter_test:

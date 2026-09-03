@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../services/career_service.dart';
+import '../services/career_match_service.dart';
 import '../services/fleet_war_service.dart';
-import '../services/game_mode_context.dart';
+import '../services/format_screen_builder.dart';
+import '../services/match_round_context.dart';
+import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
+import 'match_result_screen.dart';
 
 class ResultScreen extends StatefulWidget {
   final int score;
@@ -28,6 +32,10 @@ class _ResultScreenState extends State<ResultScreen> {
   late final List<ConfettiController> _fireworkControllers;
   late final List<Alignment> _fireworkPositions;
 
+  String? _matchId;
+  int? _roundIndex;
+  bool get _inMatch => _matchId != null;
+
   bool get _isGoodResult => widget.score > widget.total / 2;
 
   @override
@@ -46,7 +54,13 @@ class _ResultScreenState extends State<ResultScreen> {
       _launchFireworks();
     }
     _submitToFleetWar();
-    _submitToCareerMode();
+
+    final matchContext = MatchRoundContext.consume();
+    if (matchContext != null) {
+      _matchId = matchContext.matchId;
+      _roundIndex = matchContext.roundIndex;
+      _submitMatchRound();
+    }
   }
 
   void _submitToFleetWar() {
@@ -55,16 +69,18 @@ class _ResultScreenState extends State<ResultScreen> {
     FleetWarService().submitScore(uid: user.uid, score: widget.score, total: widget.total);
   }
 
-  void _submitToCareerMode() {
-    if (GameModeContext.current != GameMode.career) return;
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    CareerService().submitResult(
-      uid: user.uid,
-      format: widget.formatId,
-      score: widget.score,
-      total: widget.total,
-    );
+  Future<void> _submitMatchRound() async {
+    try {
+      await CareerMatchService().submitRoundResult(
+        matchId: _matchId!,
+        roundIndex: _roundIndex!,
+        score: widget.score,
+        total: widget.total,
+      );
+    } catch (_) {
+      // Netzwerkfehler: Nutzer bleibt beim Warte-Zustand, App friert aber
+      // nicht ein - lässt sich normal weiter benutzen.
+    }
   }
 
   void _launchFireworks() async {
@@ -83,8 +99,95 @@ class _ResultScreenState extends State<ResultScreen> {
     super.dispose();
   }
 
+  Future<void> _continueAfterRound(String status, Map<String, dynamic> matchData) async {
+    if (status == 'finished') {
+      Navigator.pushReplacement(context, buildFadeSlideRoute(MatchResultScreen(matchId: _matchId!)));
+      return;
+    }
+    final formats = List<String>.from(matchData['formats'] as List);
+    final nextRound = matchData['currentRound'] as int;
+    MatchRoundContext.set(_matchId!, nextRound);
+    final screen = await buildFormatScreen(formats[nextRound]);
+    if (!mounted) return;
+    Navigator.pushReplacement(context, buildFadeSlideRoute(screen));
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_inMatch) return _buildMatchRoundView(context);
+    return _buildSoloView(context);
+  }
+
+  Widget _buildMatchRoundView(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: CareerMatchService().watchMatch(_matchId!),
+            builder: (context, snapshot) {
+              final data = snapshot.data?.data();
+              if (data == null) {
+                return const CircularProgressIndicator();
+              }
+              final status = data['status'] as String;
+              final currentRound = data['currentRound'] as int? ?? _roundIndex!;
+              final roundResolved = status == 'finished' || currentRound > _roundIndex!;
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Runde ${_roundIndex! + 1}: ${widget.score} von ${widget.total} richtig',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 32),
+                  if (!roundResolved) ...[
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Warte auf Ergebnis des Gegners ...',
+                      style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
+                    ),
+                  ] else ...[
+                    _buildRoundOutcomeText(data),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => _continueAfterRound(status, data),
+                      child: Text(status == 'finished' ? 'Ergebnis ansehen' : 'Nächste Runde'),
+                    ),
+                  ],
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoundOutcomeText(Map<String, dynamic> data) {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
+    final roundWinners = List<dynamic>.from(data['roundWinners'] as List);
+    final winner = roundWinners[_roundIndex!];
+    final String text;
+    final Color color;
+    if (winner == null) {
+      text = 'Runde unentschieden.';
+      color = Colors.grey;
+    } else if (winner == myUid) {
+      text = 'Runde gewonnen!';
+      color = Colors.green;
+    } else {
+      text = 'Runde verloren.';
+      color = Colors.red;
+    }
+    return Text(text, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color));
+  }
+
+  Widget _buildSoloView(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [

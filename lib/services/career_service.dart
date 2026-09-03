@@ -1,34 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/career_ranking_entry.dart';
 
-/// Karrieremodus-Ranking (siehe ROADMAP_QuizApp.md Abschnitt 15). Schreibt
-/// nie direkt eine ELO-Wertung - das darf laut Firestore-Regeln nur die
-/// Cloud Function matchCareerSubmission. Der Client reicht nur das rohe
-/// Ergebnis ein, das Matchmaking passiert serverseitig.
+/// Karriere-Rangliste (siehe ROADMAP_QuizApp.md Abschnitt 15/16). Die
+/// ELO-Wertung selbst wird ausschließlich von den 1-vs-1-Match-Cloud-
+/// Functions geschrieben (siehe career_match_service.dart) - dieser Dienst
+/// liest hier nur.
 class CareerService {
   CareerService({FirebaseFirestore? firestore}) : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
-
-  Future<void> submitResult({
-    required String uid,
-    required String format,
-    required int score,
-    required int total,
-  }) async {
-    try {
-      await _firestore.collection('careerSubmissions').add({
-        'uid': uid,
-        'format': format,
-        'score': score,
-        'total': total,
-        'submittedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (_) {
-      // Kein Internet oder Firebase nicht erreichbar: Runde zählt dann halt
-      // nicht fürs Ranking, blockiert aber nicht die App.
-    }
-  }
 
   Future<int> currentRating(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();

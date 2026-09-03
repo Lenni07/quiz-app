@@ -35,21 +35,26 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Karrieremodus-Einreichungen fürs Matchmaking: gleiches Prinzip wie
-    // scoreSubmissions - Clients dürfen nur eigene Ergebnisse einreichen,
-    // die eigentliche Zuordnung/Wertung übernimmt die Cloud Function.
-    match /careerSubmissions/{submissionId} {
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid;
-      allow read: if request.auth != null
-        && resource.data.uid == request.auth.uid;
-      allow update, delete: if false;
-    }
-
     // Karriere-Rangliste: für alle lesbar, nur die Cloud Function darf
     // schreiben.
     match /careerRankings/{uid} {
       allow read: if true;
+      allow write: if false;
+    }
+
+    // 1-vs-1-Warteschlange: jeder darf nur seinen eigenen Eintrag
+    // lesen/schreiben (Wertung wird serverseitig aus users/{uid} gelesen,
+    // hier also nichts Sicherheitsrelevantes zu schützen).
+    match /careerQueue/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // 1-vs-1-Matches: nur die beiden Teilnehmer dürfen lesen (für die
+    // Live-Anzeige von Draft-Zügen/Rundenergebnissen); geschrieben wird nur
+    // von den Cloud Functions (matchmakeCareerQueue, submitDraftAction,
+    // submitRoundResult), nie direkt vom Client.
+    match /matches/{matchId} {
+      allow read: if request.auth != null && request.auth.uid in resource.data.players;
       allow write: if false;
     }
   }

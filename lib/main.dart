@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
-import 'screens/home_area_screen.dart';
+import 'screens/main_tabs_screen.dart';
 import 'services/auth_service.dart';
 import 'services/user_profile_service.dart';
 import 'theme/app_theme.dart';
@@ -85,7 +85,7 @@ class StartScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        buildFadeSlideRoute(const HomeAreaScreen()),
+                        buildFadeSlideRoute(const MainTabsScreen()),
                       );
                     },
                     child: const Text('Spiel starten'),

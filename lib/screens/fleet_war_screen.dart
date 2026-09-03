@@ -5,7 +5,9 @@ import '../services/fleet_war_service.dart';
 import '../services/season.dart';
 
 class FleetWarScreen extends StatefulWidget {
-  const FleetWarScreen({super.key});
+  final bool embedded;
+
+  const FleetWarScreen({super.key, this.embedded = false});
 
   @override
   State<FleetWarScreen> createState() => _FleetWarScreenState();
@@ -64,42 +66,45 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final loggedIn = _uid != null;
 
+    final body = Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Season ${currentSeasonKey()} · Punkte zählen für dein Schiff, Reset jeden Monatsanfang',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
+          ),
+          const SizedBox(height: 20),
+          if (!loggedIn)
+            Text(
+              'Keine Verbindung zum Konto - Flottentreffen ist gerade nicht verfügbar.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            )
+          else if (_loadingShip)
+            const Center(child: CircularProgressIndicator())
+          else if (_myShipId == null)
+            _buildJoinForm(colorScheme)
+          else
+            Text(
+              'Dein Schiff: $_myShipId',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          const SizedBox(height: 24),
+          Text('Flottenrangliste:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
+          const SizedBox(height: 8),
+          Expanded(child: _buildLeaderboard(colorScheme)),
+        ],
+      ),
+    );
+
+    if (widget.embedded) return body;
     return Scaffold(
       appBar: AppBar(title: const Text('Flottentreffen')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Season ${currentSeasonKey()} · Punkte zählen für dein Schiff, Reset jeden Monatsanfang',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 20),
-            if (!loggedIn)
-              Text(
-                'Keine Verbindung zum Konto - Flottentreffen ist gerade nicht verfügbar.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
-              )
-            else if (_loadingShip)
-              const Center(child: CircularProgressIndicator())
-            else if (_myShipId == null)
-              _buildJoinForm(colorScheme)
-            else
-              Text(
-                'Dein Schiff: $_myShipId',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            const SizedBox(height: 24),
-            Text('Flottenrangliste:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
-            const SizedBox(height: 8),
-            Expanded(child: _buildLeaderboard(colorScheme)),
-          ],
-        ),
-      ),
+      body: body,
     );
   }
 
