@@ -277,5 +277,15 @@ class S {
       AppLanguage.en: 'Daily challenge complete! 🔥 {0}-day streak',
     },
     'streak_label': {AppLanguage.de: '{0} Tage', AppLanguage.en: '{0} days'},
+    'streak_tile_label': {AppLanguage.de: 'Streak', AppLanguage.en: 'Streak'},
+    'season_rank_label': {AppLanguage.de: 'Platz {0} diese Season', AppLanguage.en: 'Rank {0} this season'},
+    'recent_matches_title': {AppLanguage.de: 'Letzte Matches', AppLanguage.en: 'Recent Matches'},
+    'recent_matches_empty': {
+      AppLanguage.de: 'Noch keine gewerteten Matches gespielt.',
+      AppLanguage.en: 'No ranked matches played yet.',
+    },
+    'recent_match_win': {AppLanguage.de: 'Sieg', AppLanguage.en: 'Win'},
+    'recent_match_loss': {AppLanguage.de: 'Niederlage', AppLanguage.en: 'Loss'},
+    'recent_match_draw': {AppLanguage.de: 'Unentschieden', AppLanguage.en: 'Draw'},
   };
 }

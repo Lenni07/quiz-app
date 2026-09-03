@@ -23,8 +23,12 @@ void main() {
     expect(find.text('Rangliste'), findsOneWidget);
     expect(find.text('Profil'), findsOneWidget);
 
-    // Standardmäßig ist der 1-vs-1-Reiter aktiv (Hauptmodus).
-    expect(find.text('Kampf starten'), findsOneWidget);
+    // Standardmäßig ist der 1-vs-1-Reiter aktiv (Hauptmodus). Ohne
+    // initialisiertes Firebase (wie in diesem Test) zeigt er konsequent
+    // dieselbe "keine Verbindung zum Konto"-Meldung wie Profil/Flottentreffen,
+    // statt einen Button anzuzeigen, der sowieso fehlschlagen würde.
+    expect(find.text('Kampf starten'), findsNothing);
+    expect(find.textContaining('Keine Verbindung zum Konto'), findsOneWidget);
 
     await tester.tap(find.text('Lernmodus'));
     await tester.pumpAndSettle();

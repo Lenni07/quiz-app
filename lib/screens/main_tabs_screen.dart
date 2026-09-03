@@ -3,7 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
+import '../models/game_format.dart';
+import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/game_button.dart';
+import '../widgets/game_panel.dart';
 import 'career_ranking_screen.dart';
 import 'fleet_war_screen.dart';
 import 'mode_select_screen.dart';
@@ -66,6 +70,11 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
         body: _buildActiveTab(context),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
+          backgroundColor: AppColors.deepSea,
+          selectedItemColor: AppColors.brassLight,
+          unselectedItemColor: AppColors.canvas.withValues(alpha: 0.6),
+          selectedLabelStyle: displayStyle(fontSize: 11, fontWeight: FontWeight.w600),
+          unselectedLabelStyle: const TextStyle(fontSize: 11),
           currentIndex: _index,
           onTap: (index) => setState(() => _index = index),
           items: [
@@ -73,12 +82,16 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
               BottomNavigationBarItem(
                 icon: i == 2
                     ? Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(
+                          gradient: AppColors.buttonGradient,
                           shape: BoxShape.circle,
+                          border: Border.fromBorderSide(BorderSide(color: Colors.white24, width: 1.5)),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black54, offset: Offset(0, 3), blurRadius: 6),
+                          ],
                         ),
-                        child: Icon(_tabIcons[i], color: Theme.of(context).colorScheme.onPrimary),
+                        child: Icon(_tabIcons[i], color: AppColors.deepSeaDark),
                       )
                     : Icon(_tabIcons[i]),
                 label: S.t(_tabLabelKeys[i]),
@@ -90,39 +103,13 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
   }
 
   Widget _buildOneVsOneLanding(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.sports_martial_arts, size: 72, color: colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              S.t('tab_1v1'),
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              S.t('landing_1v1_subtitle'),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: 220,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context, buildFadeSlideRoute(const OneVsOneQueueScreen()));
-                },
-                child: Text(S.t('landing_1v1_button')),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    String? uid;
+    try {
+      uid = FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      uid = null;
+    }
+    return _OneVsOneLanding(uid: uid);
   }
 
   PreferredSizeWidget _buildHeader(BuildContext context) {
@@ -187,6 +174,238 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                 );
               },
             ),
+    );
+  }
+}
+
+/// Dichteres 1-vs-1-Startbild statt eines einzelnen Icons in großer Leere
+/// (siehe ROADMAP_QuizApp.md Abschnitt 13a/13b): aktuelle Wertung, Streak,
+/// Saison-Platzierung und die letzten Matches.
+class _OneVsOneLanding extends StatelessWidget {
+  final String? uid;
+
+  const _OneVsOneLanding({required this.uid});
+
+  @override
+  Widget build(BuildContext context) {
+    final myUid = uid;
+    if (myUid == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Text(S.t('queue_no_account'), textAlign: TextAlign.center),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          GamePanel(
+            child: Column(
+              children: [
+                const Icon(Icons.sports_martial_arts, size: 56, color: AppColors.brassLight),
+                const SizedBox(height: 8),
+                Text(S.t('tab_1v1'), style: displayStyle(fontSize: 26, color: AppColors.canvas)),
+                const SizedBox(height: 6),
+                Text(
+                  S.t('landing_1v1_subtitle'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.canvas.withValues(alpha: 0.8)),
+                ),
+                const SizedBox(height: 20),
+                GameButton(
+                  label: S.t('landing_1v1_button'),
+                  icon: Icons.flash_on,
+                  onPressed: () {
+                    Navigator.push(context, buildFadeSlideRoute(const OneVsOneQueueScreen()));
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
+            builder: (context, snapshot) {
+              final rating = (snapshot.data?.data()?['eloRating'] as num?)?.toInt() ?? 1000;
+              final streak = ((snapshot.data?.data()?['dailyChallenge'] as Map<String, dynamic>?)?['streak'] as num?)?.toInt() ?? 0;
+              return Row(
+                children: [
+                  Expanded(child: _StatTile(icon: Icons.emoji_events, label: S.t('profile_rating_label'), value: '$rating')),
+                  const SizedBox(width: 12),
+                  Expanded(child: _StatTile(icon: Icons.local_fire_department, label: S.t('streak_tile_label'), value: '$streak')),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _SeasonRankTile(uid: myUid),
+          const SizedBox(height: 24),
+          Text(S.t('recent_matches_title'), style: displayStyle(fontSize: 16, color: AppColors.canvas)),
+          const SizedBox(height: 8),
+          _RecentMatchesList(uid: myUid),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _StatTile({required this.icon, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return GamePanel(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      borderRadius: 14,
+      child: Column(
+        children: [
+          Icon(icon, color: AppColors.brassLight),
+          const SizedBox(height: 6),
+          Text(value, style: displayStyle(fontSize: 20, color: AppColors.canvas)),
+          Text(label, style: TextStyle(fontSize: 11, color: AppColors.canvas.withValues(alpha: 0.7))),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeasonRankTile extends StatelessWidget {
+  final String uid;
+
+  const _SeasonRankTile({required this.uid});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance.collection('careerRankings').doc(uid).snapshots(),
+      builder: (context, snapshot) {
+        final rating = (snapshot.data?.data()?['eloRating'] as num?)?.toInt();
+        if (rating == null) return const SizedBox.shrink();
+        return FutureBuilder<AggregateQuerySnapshot>(
+          future: FirebaseFirestore.instance
+              .collection('careerRankings')
+              .where('eloRating', isGreaterThan: rating)
+              .count()
+              .get(),
+          builder: (context, countSnapshot) {
+            final rank = (countSnapshot.data?.count ?? 0) + 1;
+            return GamePanel(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              borderRadius: 14,
+              child: Row(
+                children: [
+                  const Icon(Icons.leaderboard, color: AppColors.brassLight),
+                  const SizedBox(width: 10),
+                  Text(S.f('season_rank_label', [rank]), style: TextStyle(color: AppColors.canvas)),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _RecentMatchesList extends StatelessWidget {
+  final String uid;
+
+  const _RecentMatchesList({required this.uid});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('matches')
+          .where('players', arrayContains: uid)
+          .orderBy('createdAt', descending: true)
+          .limit(3)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final finished = snapshot.data!.docs.where((doc) => doc.data()['status'] == 'finished').toList();
+        if (finished.isEmpty) {
+          return Text(
+            S.t('recent_matches_empty'),
+            style: TextStyle(color: AppColors.canvas.withValues(alpha: 0.6)),
+          );
+        }
+        return GamePanel(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          borderRadius: 14,
+          child: Column(
+            children: [
+              for (var i = 0; i < finished.length; i++) ...[
+                if (i > 0) const Divider(color: Colors.white24, height: 16),
+                _RecentMatchRow(uid: uid, data: finished[i].data()),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _RecentMatchRow extends StatelessWidget {
+  final String uid;
+  final Map<String, dynamic> data;
+
+  const _RecentMatchRow({required this.uid, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final winnerUid = data['winnerUid'] as String?;
+    final formats = List<String>.from(data['formats'] as List? ?? []);
+
+    final String label;
+    final Color color;
+    final IconData icon;
+    if (winnerUid == null) {
+      label = S.t('recent_match_draw');
+      color = Colors.grey.shade400;
+      icon = Icons.remove;
+    } else if (winnerUid == uid) {
+      label = S.t('recent_match_win');
+      color = Colors.greenAccent.shade400;
+      icon = Icons.emoji_events;
+    } else {
+      label = S.t('recent_match_loss');
+      color = AppColors.signalRed;
+      icon = Icons.close;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          CircleAvatar(radius: 14, backgroundColor: color.withValues(alpha: 0.2), child: Icon(icon, size: 16, color: color)),
+          const SizedBox(width: 10),
+          Expanded(child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: color))),
+          if (formats.isNotEmpty)
+            Flexible(
+              child: Text(
+                formats.map((f) => gameFormatById(f).displayName).join(' · '),
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, color: AppColors.canvas.withValues(alpha: 0.6)),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

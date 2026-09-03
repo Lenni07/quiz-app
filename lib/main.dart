@@ -8,6 +8,8 @@ import 'services/auth_service.dart';
 import 'services/user_profile_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/page_transitions.dart';
+import 'widgets/game_button.dart';
+import 'widgets/maritime_painters.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,46 +73,52 @@ class StartScreen extends StatelessWidget {
             ),
           ),
           child: DecoratedBox(
-            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.25)),
-            child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.directions_boat_filled, size: 80, color: Colors.white),
-                  const SizedBox(height: 24),
-                  Text(
-                    S.t('app_title'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.35)),
+            child: Stack(
+              children: [
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.directions_boat_filled, size: 84, color: Colors.white, shadows: [
+                          Shadow(color: Colors.black54, offset: Offset(0, 4), blurRadius: 10),
+                        ]),
+                        const SizedBox(height: 24),
+                        Text(
+                          S.t('app_title'),
+                          textAlign: TextAlign.center,
+                          style: displayStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.white).copyWith(
+                            shadows: const [Shadow(color: Colors.black54, offset: Offset(0, 3), blurRadius: 8)],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          S.t('tagline'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                        const SizedBox(height: 48),
+                        GameButton(
+                          label: S.t('start_button'),
+                          icon: Icons.play_arrow_rounded,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              buildFadeSlideRoute(const MainTabsScreen()),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    S.t('tagline'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                  const SizedBox(height: 48),
-                  SizedBox(
-                    width: 220,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          buildFadeSlideRoute(const MainTabsScreen()),
-                        );
-                      },
-                      child: Text(S.t('start_button')),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: WaveDivider(height: 22, color: AppColors.deepSea),
+                ),
+              ],
             ),
           ),
         ),
