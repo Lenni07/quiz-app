@@ -5,6 +5,8 @@ import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/game_format.dart';
 import '../services/career_match_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/game_button.dart';
 
 class MatchResultScreen extends StatelessWidget {
   final String matchId;
@@ -42,10 +44,10 @@ class MatchResultScreen extends StatelessWidget {
             headlineColor = colorScheme.primary;
           } else if (winnerUid == myUid) {
             headline = S.t('match_win');
-            headlineColor = Colors.green;
+            headlineColor = Colors.greenAccent.shade400;
           } else {
             headline = S.t('match_loss');
-            headlineColor = Colors.red;
+            headlineColor = AppColors.signalRed;
           }
 
           final myNewRating = eloChange != null && myUid != null ? eloChange[myUid] as int? : null;
@@ -65,12 +67,12 @@ class MatchResultScreen extends StatelessWidget {
                   Text(
                     headline,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: headlineColor),
+                    style: displayStyle(fontSize: 30, color: headlineColor),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     S.f('match_rounds_label', [myWins, opponentWins]),
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: displayStyle(fontSize: 20, color: AppColors.canvas),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -86,12 +88,10 @@ class MatchResultScreen extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: 48),
-                  SizedBox(
-                    width: 220,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-                      child: Text(S.t('match_back_to_start')),
-                    ),
+                  GameButton(
+                    label: S.t('match_back_to_start'),
+                    icon: Icons.home_outlined,
+                    onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
                   ),
                 ],
               ),

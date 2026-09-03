@@ -9,8 +9,10 @@ import '../services/daily_challenge_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/format_screen_builder.dart';
 import '../services/match_round_context.dart';
+import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
+import '../widgets/game_button.dart';
 import 'match_result_screen.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -230,7 +232,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   const SizedBox(height: 24),
                   Text(
                     S.t('result_title'),
-                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                    style: displayStyle(fontSize: 32, color: AppColors.canvas),
                   ),
                   const SizedBox(height: 20),
                   TweenAnimationBuilder<int>(
@@ -240,16 +242,14 @@ class _ResultScreenState extends State<ResultScreen> {
                     builder: (context, value, _) => Text(
                       S.f('result_score_label', [value, widget.total]),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                      style: displayStyle(fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.brassLight),
                     ),
                   ),
                   const SizedBox(height: 48),
-                  SizedBox(
-                    width: 220,
-                    child: ElevatedButton(
-                      onPressed: widget.onPlayAgain,
-                      child: Text(S.t('result_play_again')),
-                    ),
+                  GameButton(
+                    label: S.t('result_play_again'),
+                    icon: Icons.replay,
+                    onPressed: widget.onPlayAgain,
                   ),
                 ],
               ),

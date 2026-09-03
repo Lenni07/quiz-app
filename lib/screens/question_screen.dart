@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../models/question.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
+import '../widgets/shake.dart';
 import 'result_screen.dart';
 
 class QuestionScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   int _score = 0;
   int _streak = 0;
   bool _showFlash = false;
+  int _shakeTrigger = 0;
   late final ConfettiController _confettiController;
 
   @override
@@ -51,6 +53,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         HapticFeedback.heavyImpact();
       } else {
         _streak = 0;
+        _shakeTrigger++;
         HapticFeedback.mediumImpact();
       }
     });
@@ -182,7 +185,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ),
                 const SizedBox(height: 12),
                 Expanded(
-                  child: AnimatedSwitcher(
+                  child: ShakeOnTrigger(
+                    trigger: _shakeTrigger,
+                    child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 350),
                     transitionBuilder: (child, animation) {
                       final offsetAnimation = Tween<Offset>(
@@ -247,6 +252,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           ),
                         ],
                       ),
+                    ),
                     ),
                   ),
                 ),

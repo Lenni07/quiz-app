@@ -5,6 +5,9 @@ import '../l10n/strings.dart';
 import '../models/ship.dart';
 import '../services/fleet_war_service.dart';
 import '../services/season.dart';
+import '../theme/app_theme.dart';
+import '../widgets/game_button.dart';
+import '../widgets/game_panel.dart';
 
 class FleetWarScreen extends StatefulWidget {
   final bool embedded;
@@ -127,10 +130,14 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
           controller: _shipNameController,
           decoration: InputDecoration(labelText: S.t('fleet_ship_name_label'), hintText: S.t('fleet_ship_name_hint')),
         ),
-        const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: _joining ? null : () => _joinShip(_shipNameController.text),
-          child: Text(_joining ? S.t('fleet_joining') : S.t('fleet_join_button')),
+        const SizedBox(height: 16),
+        Center(
+          child: GameButton(
+            label: _joining ? S.t('fleet_joining') : S.t('fleet_join_button'),
+            icon: Icons.anchor,
+            fontSize: 15,
+            onPressed: _joining ? null : () => _joinShip(_shipNameController.text),
+          ),
         ),
       ],
     );
@@ -164,20 +171,31 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
           itemBuilder: (context, index) {
             final ship = ships[index];
             final isMine = ship.id == _myShipId;
-            return Container(
+            final medalColor = switch (index) {
+              0 => const Color(0xFFFFD54F),
+              1 => const Color(0xFFCFD8DC),
+              2 => const Color(0xFFD7A86E),
+              _ => null,
+            };
+            return GamePanel(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isMine ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
+              borderRadius: 14,
+              borderColor: isMine ? AppColors.brassLight : null,
+              gradient: isMine ? const LinearGradient(colors: [AppColors.deepSeaLight, AppColors.brassDark]) : null,
               child: Row(
                 children: [
-                  Text('${index + 1}.', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  if (medalColor != null)
+                    Icon(Icons.emoji_events, color: medalColor, size: 22)
+                  else
+                    Text('${index + 1}.', style: displayStyle(fontSize: 15, color: AppColors.canvas.withValues(alpha: 0.7))),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(ship.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    child: Text(ship.name, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.canvas)),
                   ),
-                  Text('${ship.seasonScore} ${S.t('fleet_points_suffix')}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    '${ship.seasonScore} ${S.t('fleet_points_suffix')}',
+                    style: displayStyle(fontSize: 14, color: AppColors.brassLight),
+                  ),
                 ],
               ),
             );
