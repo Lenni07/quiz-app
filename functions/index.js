@@ -8,14 +8,24 @@ initializeApp();
 const db = getFirestore();
 
 const DEFAULT_ELO = 1000;
-const ELO_K_FACTOR = 32;
+const STANDARD_K_FACTOR = 32;
+// Platzierungsmatches (siehe ROADMAP_QuizApp.md Abschnitt 18b): die ersten
+// paar Matches eines Spielers zählen mit einem höheren K-Faktor, damit die
+// Wertung schneller auf das tatsächliche Niveau einpendelt, statt sich
+// langsam hocharbeiten zu müssen.
+const PLACEMENT_MATCHES = 5;
+const PLACEMENT_K_FACTOR = 64;
 
 function expectedScore(ratingA, ratingB) {
   return 1 / (1 + Math.pow(10, (ratingB - ratingA) / 400));
 }
 
-function updatedElo(rating, expected, actual) {
-  return Math.round(rating + ELO_K_FACTOR * (actual - expected));
+function updatedElo(rating, expected, actual, kFactor) {
+  return Math.round(rating + kFactor * (actual - expected));
+}
+
+function kFactorFor(matchesPlayed) {
+  return matchesPlayed < PLACEMENT_MATCHES ? PLACEMENT_K_FACTOR : STANDARD_K_FACTOR;
 }
 
 /** "YYYY-MM", z. B. "2026-08" — identifiziert eine Season eindeutig. */
@@ -95,22 +105,20 @@ exports.resetMonthlySeasons = onSchedule(
 /**
  * Spiegelt Nickname + Position aus dem privaten users/{uid}-Dokument in die
  * öffentliche careerRankings-Rangliste (siehe ROADMAP_QuizApp.md Abschnitt
- * 18). Echter Name, Department, Crew-ID und Zertifikat werden bewusst NICHT
- * gespiegelt - die bleiben laut Anforderung ausschließlich im eigenen Profil
+ * 18). Echter Name, Department, Crew-ID, Deutsch-Level und Zertifikat werden
+ * bewusst NICHT gespiegelt - die bleiben ausschließlich im eigenen Profil
  * sichtbar, und users/{uid} ist per Regel ohnehin nur für den jeweiligen
  * Nutzer lesbar. Legt dabei kein eloRating an - Rangliste zeigt weiterhin
  * nur Nutzer mit mindestens einem gewerteten Match (siehe submitRoundResult
  * unten).
  *
- * Setzt außerdem die Start-Wertung im 1-vs-1-Matchmaking aus dem
- * selbstangegebenen Deutsch-Level (Level x 1000), aber NUR solange der
- * Nutzer noch kein gewertetes Match gespielt hat (hasPlayedRanked, per
- * firestore.rules vor Client-Schreibzugriff geschützt) - sonst könnte man
- * die eigene Wertung durch erneute Level-Angabe manipulieren, nachdem echte
- * Matchergebnisse zählen.
+ * Das Deutsch-Level beeinflusst die Wertung/das Matchmaking NICHT mehr
+ * (siehe ROADMAP_QuizApp.md Abschnitt 18b - die frühere "Level x 1000
+ * Start-EP"-Logik wurde ersatzlos zurückgebaut, da sie Smurfing durch
+ * bewusstes Zu-niedrig-Einstufen nicht verhindern konnte). Das Level bleibt
+ * reine Profil-Information für Lernmodus-/Department-Zwecke.
  */
 exports.onUserProfileWritten = onDocumentWritten("users/{uid}", async (event) => {
-  const before = event.data?.before?.exists ? event.data.before.data() : null;
   const after = event.data?.after?.exists ? event.data.after.data() : null;
   if (!after) return;
   const uid = event.params.uid;
@@ -119,13 +127,43 @@ exports.onUserProfileWritten = onDocumentWritten("users/{uid}", async (event) =>
     { nickname: after.nickname ?? null, position: after.position ?? null },
     { merge: true }
   );
-
-  const levelChanged = (before?.germanLevel ?? null) !== (after.germanLevel ?? null);
-  const validLevel = Number.isInteger(after.germanLevel) && after.germanLevel >= 1 && after.germanLevel <= 6;
-  if (levelChanged && validLevel && after.hasPlayedRanked !== true) {
-    await db.collection("users").doc(uid).update({ eloRating: after.germanLevel * 1000 });
-  }
 });
+
+/**
+ * Weicher Season-Reset der 1-vs-1-Wertung (siehe ROADMAP_QuizApp.md
+ * Abschnitt 18b): läuft am 1. jedes Monats um Mitternacht (UTC), staucht die
+ * Wertung jedes gewerteten Spielers zur Mitte hin (neue Wertung = (alte
+ * Wertung + Grundwertung) / 2) statt sie auf 0 zu setzen - Fortschritt bleibt
+ * so spürbar erhalten, die Season bleibt aber trotzdem offen. Betrifft nur
+ * Spieler mit mindestens einem gewerteten Match (haben einen eloRating-Wert
+ * in careerRankings); rankedMatchesPlayed (Platzierungsmatch-Zähler) bleibt
+ * dabei unangetastet - das ist eine einmalige Kalibrierung, kein
+ * Season-Reset.
+ */
+exports.resetCareerSeason = onSchedule(
+  { schedule: "0 0 1 * *", timeZone: "Etc/UTC" },
+  async () => {
+    const newSeasonKey = seasonKeyForDate(new Date());
+    const rankingsSnapshot = await db.collection("careerRankings").get();
+    const batch = db.batch();
+
+    for (const rankingDoc of rankingsSnapshot.docs) {
+      const ranking = rankingDoc.data();
+      const closingSeasonKey = ranking.currentSeasonKey || newSeasonKey;
+      if (closingSeasonKey === newSeasonKey) {
+        // Schon in der neuen Season oder noch nie gewertet gespielt.
+        continue;
+      }
+      if (typeof ranking.eloRating !== "number") continue;
+
+      const newRating = Math.round((ranking.eloRating + DEFAULT_ELO) / 2);
+      batch.update(rankingDoc.ref, { eloRating: newRating, currentSeasonKey: newSeasonKey });
+      batch.update(db.collection("users").doc(rankingDoc.id), { eloRating: newRating });
+    }
+
+    await batch.commit();
+  }
+);
 
 // --- 1-vs-1-Live-Matchmaking + Draft-Phase (ROADMAP_QuizApp.md Abschnitt 16/17) ---
 // Ersetzt das frühere asynchrone Karriere-Matchmaking (matchCareerSubmission),
@@ -344,6 +382,8 @@ exports.submitRoundResult = onCall(async (request) => {
     const p2UserDoc = await tx.get(p2UserRef);
     const p1Rating = p1UserDoc.data()?.eloRating ?? DEFAULT_ELO;
     const p2Rating = p2UserDoc.data()?.eloRating ?? DEFAULT_ELO;
+    const p1MatchesPlayed = p1UserDoc.data()?.rankedMatchesPlayed ?? 0;
+    const p2MatchesPlayed = p2UserDoc.data()?.rankedMatchesPlayed ?? 0;
 
     let p1Actual = 0.5;
     let p2Actual = 0.5;
@@ -356,8 +396,8 @@ exports.submitRoundResult = onCall(async (request) => {
     }
 
     const p1Expected = expectedScore(p1Rating, p2Rating);
-    const p1NewRating = updatedElo(p1Rating, p1Expected, p1Actual);
-    const p2NewRating = updatedElo(p2Rating, 1 - p1Expected, p2Actual);
+    const p1NewRating = updatedElo(p1Rating, p1Expected, p1Actual, kFactorFor(p1MatchesPlayed));
+    const p2NewRating = updatedElo(p2Rating, 1 - p1Expected, p2Actual, kFactorFor(p2MatchesPlayed));
 
     tx.update(matchRef, {
       roundScores,
@@ -366,16 +406,16 @@ exports.submitRoundResult = onCall(async (request) => {
       winnerUid,
       eloChange: { [p1]: p1NewRating, [p2]: p2NewRating },
     });
-    tx.update(p1UserRef, { eloRating: p1NewRating, hasPlayedRanked: true });
-    tx.update(p2UserRef, { eloRating: p2NewRating, hasPlayedRanked: true });
+    tx.update(p1UserRef, { eloRating: p1NewRating, rankedMatchesPlayed: p1MatchesPlayed + 1 });
+    tx.update(p2UserRef, { eloRating: p2NewRating, rankedMatchesPlayed: p2MatchesPlayed + 1 });
     tx.set(
       db.collection("careerRankings").doc(p1),
-      { eloRating: p1NewRating, updatedAt: FieldValue.serverTimestamp() },
+      { eloRating: p1NewRating, updatedAt: FieldValue.serverTimestamp(), currentSeasonKey: seasonKeyForDate(new Date()) },
       { merge: true }
     );
     tx.set(
       db.collection("careerRankings").doc(p2),
-      { eloRating: p2NewRating, updatedAt: FieldValue.serverTimestamp() },
+      { eloRating: p2NewRating, updatedAt: FieldValue.serverTimestamp(), currentSeasonKey: seasonKeyForDate(new Date()) },
       { merge: true }
     );
     tx.update(db.collection("careerQueue").doc(p1), { status: "idle" });

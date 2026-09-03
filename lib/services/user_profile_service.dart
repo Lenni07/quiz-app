@@ -14,7 +14,7 @@ class UserProfileService {
         'createdAt': FieldValue.serverTimestamp(),
         'ship': null,
         'eloRating': 1000,
-        'hasPlayedRanked': false,
+        'rankedMatchesPlayed': 0,
         'nickname': null,
         'realName': null,
         'position': null,
@@ -34,11 +34,10 @@ class UserProfileService {
 
   /// Speichert die Profilangaben aus ROADMAP_QuizApp.md Abschnitt 18
   /// (Nickname/Position sind auch in der Rangliste sichtbar, alles andere
-  /// bleibt nur im eigenen Profil). Das Deutsch-Level setzt serverseitig
-  /// (Cloud Function onUserProfileWritten) die Start-Wertung im
-  /// 1-vs-1-Matchmaking, aber nur vor dem ersten gewerteten Match - eloRating
-  /// selbst wird hier bewusst NICHT geschrieben, das ist per Regel ohnehin
-  /// nur der Cloud Function erlaubt.
+  /// bleibt nur im eigenen Profil). Das Deutsch-Level hat seit Abschnitt 18b
+  /// keinen Einfluss mehr auf Wertung/Matchmaking - reine Profil-Information.
+  /// eloRating wird hier bewusst NICHT geschrieben, das ist per Regel
+  /// ohnehin nur den Cloud Functions erlaubt.
   Future<void> updateProfile({
     required String uid,
     required String nickname,

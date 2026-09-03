@@ -234,12 +234,8 @@ class S {
     'profile_crewid_label': {AppLanguage.de: 'Crew-ID', AppLanguage.en: 'Crew ID'},
     'profile_level_label': {AppLanguage.de: 'Deutsch-Level', AppLanguage.en: 'German Level'},
     'profile_level_helper': {
-      AppLanguage.de: 'Bestimmt deine Start-Wertung im 1-vs-1-Modus (nur vor deinem ersten gewerteten Match)',
-      AppLanguage.en: 'Sets your starting rating in 1 vs 1 mode (only before your first ranked match)',
-    },
-    'profile_level_locked_hint': {
-      AppLanguage.de: 'Du hast schon gewertete Matches gespielt - eine Änderung hier wirkt sich nicht mehr auf deine Wertung aus.',
-      AppLanguage.en: 'You\'ve already played ranked matches - changing this no longer affects your rating.',
+      AppLanguage.de: 'Selbsteinschätzung, ohne Einfluss auf deine Wertung im 1-vs-1-Modus',
+      AppLanguage.en: 'Self-assessment, has no effect on your 1 vs 1 rating',
     },
     'profile_level_option': {AppLanguage.de: 'Level {0}', AppLanguage.en: 'Level {0}'},
     'profile_certificate_title': {AppLanguage.de: 'Zertifikat', AppLanguage.en: 'Certificate'},

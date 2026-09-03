@@ -32,7 +32,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _avatarId = allAvatarOptions.first.id;
   int? _germanLevel;
   DateTime? _certificateIssuedAt;
-  bool _hasPlayedRanked = false;
   bool _loaded = false;
   bool _saving = false;
 
@@ -59,7 +58,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _avatarId = (data?['avatarId'] as String?) ?? allAvatarOptions.first.id;
       _germanLevel = (data?['germanLevel'] as num?)?.toInt();
       _certificateIssuedAt = (data?['certificateIssuedAt'] as Timestamp?)?.toDate();
-      _hasPlayedRanked = (data?['hasPlayedRanked'] as bool?) ?? false;
       _loaded = true;
     });
   }
@@ -213,14 +211,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                       onChanged: (value) => setState(() => _germanLevel = value),
                     ),
-                    if (_hasPlayedRanked)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          S.t('profile_level_locked_hint'),
-                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
-                        ),
-                      ),
                     const SizedBox(height: 16),
                     Text(S.t('profile_certificate_title'), style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
