@@ -312,3 +312,27 @@ Alle sechs angeforderten Punkte umgesetzt, in vier Teilschritten committet/gepus
 **Nicht angefasst (bewusst, wie mit 16 der Format-Bildschirme):** die Bedienelemente innerhalb der 17 einzelnen Spielformate selbst - das wäre ein deutlich größerer, separater Schritt, analog zur Entscheidung bei der Sprachumschaltung (Abschnitt 19).
 
 **Noch nicht deployt** - reine Flutter/Client-Änderung, kein Firebase-Deploy nötig.
+
+## 23. Status Optik-Runde 2 – umgesetzt in vier Teilschritten (Stand 2026-09-03)
+
+Aufbauend auf Abschnitt 22 (Design-Fundament), diesmal auf konkrete Kritikpunkte am zu generischen Standard-Flutter-Look:
+
+**1. Maritimes Icon-Set:** neues `MaritimeIcon`-Widget - selbstgezeichnet per `CustomPainter` (Leuchtturm, Steuerrad, Rettungsring, Möwe, Bullauge, Kapitänsmütze, gekreuzte Ruder), keine externen Icon-Pakete. "1 vs 1" zeigt jetzt gekreuzte Ruder statt der Karate-Figur, alle 10 Profil-Avatare sind komplett maritim statt zufällig.
+
+**2. Verlaufs-Hintergrund + Textur:** `MaritimeBackground` (Verlauf hell→dunkel plus sehr dezente Wellenlinien-Textur per `CustomPainter`) ersetzt die flache Fläche - über einen einzigen Wrap-Punkt auf allen fünf Reitern sowie den vier eigenständigen Bildschirmen (Warteschlange, Draft, Match-Ergebnis, Ergebnis) angewendet.
+
+**3. Handy-Proportionen:** `PhoneFrame`, einmalig über `MaterialApp.builder` gelegt statt pro Bildschirm - begrenzt die komplette App (inkl. AppBar/Reiter-Leiste) auf 480px Breite, mittig zentriert mit dunkler Blende drumherum. Im breiten Browser sieht die App dadurch wie auf einem Handy aus.
+
+**4. Gestaltete Leerzustände:** neues `EmptyState`-Widget (Icon + motivierende Zeile) ersetzt nackte Textzeilen bei "Letzte Matches", Rangliste und Flottentreffen-Leaderboard, auch für deren Fehlerzustände.
+
+**5. Mehr Tiefe:** `GamePanel`/`GameButton` simulieren jetzt eine Innenschattierung (Glanzlicht-Streifen oben, Schatten-Streifen unten) statt der vorherigen einfachen Fase - Flutter hat keine echten CSS-artigen Inset-Schatten, das ist die Annäherung.
+
+**6. Animation/Juice:** `CountUpNumber` (zählt vom zuletzt gezeigten zum neuen Wert hoch, nicht immer ab 0) für Wertung/Streak/Ranglisten-/Flottentreffen-Zahlen; `PopIn` (Panels poppen beim Erscheinen sanft auf) auf der 1-vs-1-Landing; `GameButton` hat einen optionalen `pulse`-Modus für die jeweils wichtigste Aktion (Start-/Kampf-Button) und federt beim Antippen jetzt spürbarer.
+
+**7. Abstände/Rhythmus:** nicht als eigener systematischer Durchgang gemacht, sondern dort vereinheitlicht, wo ohnehin Code angefasst wurde (z. B. 1-vs-1-Landing auf durchgängig 16px zwischen Abschnitten) - kein flächendeckendes Spacing-System eingeführt. Bei Bedarf als eigener, gezielter Schritt nachholbar.
+
+**Getestet:** `flutter analyze`, `flutter test` (27 Tests) und `flutter build web` laufen nach jedem der vier Teilschritte sauber. Echter visueller Eindruck im Browser konnte von mir weiterhin nicht geprüft werden (kein Browser-Werkzeug in dieser Umgebung).
+
+**Nicht angefasst (bewusst, wie schon in Runde 1):** die Bedienelemente innerhalb der 17 einzelnen Spielformate selbst.
+
+**Zurückgestellt (wie angewiesen):** Abschnitt 18d (Download-Seite). **Noch nicht deployt** - reine Flutter/Client-Änderung.
