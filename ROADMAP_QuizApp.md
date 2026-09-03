@@ -293,3 +293,22 @@ In den Optionen soll es eine Sprachumschaltung Deutsch/Englisch geben – aber *
 **Getestet:** neue automatisierte Tests für die Department-Filterung (`test/department_test.dart`) und die Streak-Logik inkl. Tag-Sprung/Lücken-Verhalten (`test/daily_challenge_service_test.dart`, mit injizierbarer Uhrzeit für reproduzierbare Tests ohne echten Tageswechsel). `flutter analyze`, `flutter test` (27 Tests) und `flutter build web` laufen nach allen drei Teilschritten sauber. Sprachausgabe (TTS) konnte nicht tatsächlich gehört werden (kein Audio-Testwerkzeug in dieser Umgebung).
 
 **Noch nicht deployt** - wie angewiesen, wird gesammelt am Ende deployt.
+
+## 22. Status Abschnitt 13b Schritt 1 – rein Flutter-basierte Optik-Verbesserungen umgesetzt (Stand 2026-09-03)
+
+Alle sechs angeforderten Punkte umgesetzt, in vier Teilschritten committet/gepusht:
+
+- **Display-Schrift:** Baloo 2 (fünf Schnitte), lokal als Font-Asset gebündelt statt über Google Fonts zur Laufzeit geladen - läuft damit auch beim allerersten App-Start ganz ohne Internet (Offline-first-Prinzip). Nur für Überschriften/Buttons/Zahlen, Fließtext bleibt auf der Systemschrift.
+- **Tiefe:** zwei wiederverwendbare Widgets (`GameButton`, `GamePanel` in `lib/widgets/`) mit Verlauf, Schlagschatten und Glanzlicht-Fase, angewendet auf die wichtigsten Buttons/Karten/Panels app-weit (Start-, 1-vs-1-, Lernmodus-, Profil-, Rangliste-, Flottentreffen- und Ergebnisbildschirme).
+- **Maritime Farbpalette:** Tiefseeblau/Messing-Gold/Segeltuch-Beige/Signalrot ersetzt das bisherige einfarbige Blau-auf-Dunkelblau, zentral in `lib/theme/app_theme.dart` - wirkt automatisch auf die ganze App über das globale Theme.
+- **Animationen:** federnde Antipp-Effekte auf `GameButton`/Lernmodus-Kacheln, ein neuer Wackel-Effekt (`lib/widgets/shake.dart`) bei falschen Antworten im meistgenutzten Frage-Bildschirm, animierte Fortschrittsbalken/Zahlen waren teils schon vorhanden und wurden nicht angetastet.
+- **Dichteres Layout:** die von der Analyse in Abschnitt 13a explizit kritisierte 1-vs-1-Leere (ein einzelnes Icon in großer Fläche) zeigt jetzt Wertung, Tages-Streak, Saison-Platzierung (per Firestore-Aggregations-Query) und die letzten drei gewerteten Matches.
+- **Programmatische Ornamente:** `WaveDivider` (Wellenband) und `RopeDivider` (gedrehtes Tau) über `CustomPainter`, ganz ohne Bild-Assets - eingesetzt am Startbildschirm, unter dem Kopfbereich der Reiter-Navigation und als Abschnitts-Trenner im Lernmodus.
+
+**Kleine Verhaltensänderung dabei:** die 1-vs-1-Ansicht zeigt jetzt konsequent wie Profil/Flottentreffen eine "keine Verbindung zum Konto"-Meldung statt eines Buttons ohne Login (der sowieso fehlschlagen würde) - der bestehende Smoke-Test wurde entsprechend angepasst.
+
+**Getestet:** `flutter analyze`, `flutter test` (27 Tests) und `flutter build web` laufen nach jedem der vier Teilschritte sauber; die beiden neuen Firestore-Abfragen für die 1-vs-1-Landing (letzte Matches, Saison-Rang) wurden im Emulator mit echtem Nutzer-Token gegen echte Sicherheitsregeln verifiziert, inkl. eines neuen Composite-Index in `firestore.indexes.json`. Echter visueller Eindruck im Browser konnte von mir nicht geprüft werden (kein Browser-Werkzeug in dieser Umgebung) - der lokale Server läuft unter `http://localhost:8768/` zur eigenen Ansicht.
+
+**Nicht angefasst (bewusst, wie mit 16 der Format-Bildschirme):** die Bedienelemente innerhalb der 17 einzelnen Spielformate selbst - das wäre ein deutlich größerer, separater Schritt, analog zur Entscheidung bei der Sprachumschaltung (Abschnitt 19).
+
+**Noch nicht deployt** - reine Flutter/Client-Änderung, kein Firebase-Deploy nötig.
