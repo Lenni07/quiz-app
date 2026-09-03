@@ -5,7 +5,10 @@ import '../l10n/strings.dart';
 import '../models/career_ranking_entry.dart';
 import '../services/career_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/count_up_number.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/game_panel.dart';
+import '../widgets/maritime_icon.dart';
 
 class CareerRankingScreen extends StatelessWidget {
   final bool embedded;
@@ -14,7 +17,6 @@ class CareerRankingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
     final body = ValueListenableBuilder<AppLanguage>(
@@ -28,18 +30,13 @@ class CareerRankingScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Text(S.t('ranking_unavailable'), style: const TextStyle(color: Colors.red)),
-            );
+            return EmptyState(icon: Icons.wifi_off, message: S.t('ranking_unavailable'));
           }
           final entries = snapshot.data ?? [];
           if (entries.isEmpty) {
-            return Center(
-              child: Text(
-                S.t('ranking_empty'),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
-              ),
+            return EmptyState(
+              iconWidget: const MaritimeIcon(MaritimeIconShape.shipWheel, size: 44, color: AppColors.brass),
+              message: S.t('ranking_empty'),
             );
           }
           return ListView.separated(
@@ -84,7 +81,7 @@ class CareerRankingScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Text('${entry.eloRating}', style: displayStyle(fontSize: 16, color: AppColors.brassLight)),
+                    CountUpNumber(entry.eloRating, style: displayStyle(fontSize: 16, color: AppColors.brassLight)),
                   ],
                 ),
               );

@@ -281,8 +281,8 @@ class S {
     'season_rank_label': {AppLanguage.de: 'Platz {0} diese Season', AppLanguage.en: 'Rank {0} this season'},
     'recent_matches_title': {AppLanguage.de: 'Letzte Matches', AppLanguage.en: 'Recent Matches'},
     'recent_matches_empty': {
-      AppLanguage.de: 'Noch keine gewerteten Matches gespielt.',
-      AppLanguage.en: 'No ranked matches played yet.',
+      AppLanguage.de: 'Noch keine Kämpfe – starte deinen ersten!',
+      AppLanguage.en: 'No battles yet – start your first one!',
     },
     'recent_match_win': {AppLanguage.de: 'Sieg', AppLanguage.en: 'Win'},
     'recent_match_loss': {AppLanguage.de: 'Niederlage', AppLanguage.en: 'Loss'},

@@ -6,6 +6,8 @@ import '../l10n/strings.dart';
 import '../models/game_format.dart';
 import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/count_up_number.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/game_button.dart';
 import '../widgets/game_panel.dart';
 import '../widgets/maritime_background.dart';
@@ -177,7 +179,7 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                       children: [
                         const Icon(Icons.emoji_events, size: 18),
                         const SizedBox(width: 4),
-                        Text('$rating'),
+                        CountUpNumber(rating),
                       ],
                     ),
                   ],
@@ -244,9 +246,9 @@ class _OneVsOneLanding extends StatelessWidget {
               final streak = ((snapshot.data?.data()?['dailyChallenge'] as Map<String, dynamic>?)?['streak'] as num?)?.toInt() ?? 0;
               return Row(
                 children: [
-                  Expanded(child: _StatTile(icon: Icons.emoji_events, label: S.t('profile_rating_label'), value: '$rating')),
+                  Expanded(child: _StatTile(icon: Icons.emoji_events, label: S.t('profile_rating_label'), value: rating)),
                   const SizedBox(width: 12),
-                  Expanded(child: _StatTile(icon: Icons.local_fire_department, label: S.t('streak_tile_label'), value: '$streak')),
+                  Expanded(child: _StatTile(icon: Icons.local_fire_department, label: S.t('streak_tile_label'), value: streak)),
                 ],
               );
             },
@@ -266,7 +268,7 @@ class _OneVsOneLanding extends StatelessWidget {
 class _StatTile extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String value;
+  final int value;
 
   const _StatTile({required this.icon, required this.label, required this.value});
 
@@ -279,7 +281,7 @@ class _StatTile extends StatelessWidget {
         children: [
           Icon(icon, color: AppColors.brassLight),
           const SizedBox(height: 6),
-          Text(value, style: displayStyle(fontSize: 20, color: AppColors.canvas)),
+          CountUpNumber(value, style: displayStyle(fontSize: 20, color: AppColors.canvas)),
           Text(label, style: TextStyle(fontSize: 11, color: AppColors.canvas.withValues(alpha: 0.7))),
         ],
       ),
@@ -348,9 +350,9 @@ class _RecentMatchesList extends StatelessWidget {
         }
         final finished = snapshot.data!.docs.where((doc) => doc.data()['status'] == 'finished').toList();
         if (finished.isEmpty) {
-          return Text(
-            S.t('recent_matches_empty'),
-            style: TextStyle(color: AppColors.canvas.withValues(alpha: 0.6)),
+          return EmptyState(
+            iconWidget: MaritimeIcon(MaritimeIconShape.crossedOars, size: 44, color: AppColors.brass.withValues(alpha: 0.55)),
+            message: S.t('recent_matches_empty'),
           );
         }
         return GamePanel(

@@ -6,8 +6,11 @@ import '../models/ship.dart';
 import '../services/fleet_war_service.dart';
 import '../services/season.dart';
 import '../theme/app_theme.dart';
+import '../widgets/count_up_number.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/game_button.dart';
 import '../widgets/game_panel.dart';
+import '../widgets/maritime_icon.dart';
 
 class FleetWarScreen extends StatefulWidget {
   final bool embedded;
@@ -151,18 +154,13 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(
-            child: Text(S.t('ranking_unavailable'), style: const TextStyle(color: Colors.red)),
-          );
+          return EmptyState(icon: Icons.wifi_off, message: S.t('ranking_unavailable'));
         }
         final ships = snapshot.data ?? [];
         if (ships.isEmpty) {
-          return Center(
-            child: Text(
-              S.t('fleet_ranking_empty'),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
-            ),
+          return EmptyState(
+            iconWidget: const MaritimeIcon(MaritimeIconShape.sailboat, size: 44, color: AppColors.brass),
+            message: S.t('fleet_ranking_empty'),
           );
         }
         return ListView.separated(
@@ -192,9 +190,11 @@ class _FleetWarScreenState extends State<FleetWarScreen> {
                   Expanded(
                     child: Text(ship.name, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.canvas)),
                   ),
-                  Text(
-                    '${ship.seasonScore} ${S.t('fleet_points_suffix')}',
-                    style: displayStyle(fontSize: 14, color: AppColors.brassLight),
+                  Row(
+                    children: [
+                      CountUpNumber(ship.seasonScore, style: displayStyle(fontSize: 14, color: AppColors.brassLight)),
+                      Text(' ${S.t('fleet_points_suffix')}', style: displayStyle(fontSize: 14, color: AppColors.brassLight)),
+                    ],
                   ),
                 ],
               ),
