@@ -5,6 +5,7 @@ import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../services/career_match_service.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/maritime_background.dart';
 import 'draft_screen.dart';
 
 class OneVsOneQueueScreen extends StatefulWidget {
@@ -54,7 +55,7 @@ class _OneVsOneQueueScreenState extends State<OneVsOneQueueScreen> {
       valueListenable: appLanguage,
       builder: (context, language, _) => Scaffold(
       appBar: AppBar(title: Text(S.t('tab_1v1'))),
-      body: Center(
+      body: MaritimeBackground(child: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: uid == null
@@ -92,7 +93,7 @@ class _OneVsOneQueueScreenState extends State<OneVsOneQueueScreen> {
                   },
                 ),
         ),
-      ),
+      )),
       ),
     );
   }

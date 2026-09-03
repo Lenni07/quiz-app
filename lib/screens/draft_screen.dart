@@ -8,6 +8,7 @@ import '../models/game_format.dart';
 import '../services/career_match_service.dart';
 import '../services/format_screen_builder.dart';
 import '../services/match_round_context.dart';
+import '../widgets/maritime_background.dart';
 import '../utils/page_transitions.dart';
 
 /// Draft-Phase vor einem 1-vs-1-Match (siehe ROADMAP_QuizApp.md Abschnitt
@@ -103,7 +104,7 @@ class _DraftScreenState extends State<DraftScreen> {
       valueListenable: appLanguage,
       builder: (context, language, _) => Scaffold(
       appBar: AppBar(title: Text(S.t('draft_title')), automaticallyImplyLeading: false),
-      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      body: MaritimeBackground(child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: _service.watchMatch(widget.matchId),
         builder: (context, snapshot) {
           final data = snapshot.data?.data();
@@ -197,7 +198,7 @@ class _DraftScreenState extends State<DraftScreen> {
             ),
           );
         },
-      ),
+      )),
       ),
     );
   }

@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/game_button.dart';
 import '../widgets/game_panel.dart';
+import '../widgets/maritime_background.dart';
 import '../widgets/maritime_icon.dart';
 import '../widgets/maritime_painters.dart';
 import 'career_ranking_screen.dart';
@@ -69,11 +70,13 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
       valueListenable: appLanguage,
       builder: (context, language, _) => Scaffold(
         appBar: _buildHeader(context),
-        body: Column(
-          children: [
-            const WaveDivider(height: 10, color: AppColors.deepSea, waveLength: 32),
-            Expanded(child: _buildActiveTab(context)),
-          ],
+        body: MaritimeBackground(
+          child: Column(
+            children: [
+              const WaveDivider(height: 10, color: AppColors.deepSea, waveLength: 32),
+              Expanded(child: _buildActiveTab(context)),
+            ],
+          ),
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,

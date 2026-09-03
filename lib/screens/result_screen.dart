@@ -13,6 +13,7 @@ import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
 import '../widgets/game_button.dart';
+import '../widgets/maritime_background.dart';
 import 'match_result_screen.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -142,7 +143,7 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget _buildMatchRoundView(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: Center(
+      body: MaritimeBackground(child: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -185,7 +186,7 @@ class _ResultScreenState extends State<ResultScreen> {
             },
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -210,7 +211,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Widget _buildSoloView(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: MaritimeBackground(child: Stack(
         children: [
           Center(
             child: Padding(
@@ -273,7 +274,7 @@ class _ResultScreenState extends State<ResultScreen> {
               ),
             ),
         ],
-      ),
+      )),
     );
   }
 }

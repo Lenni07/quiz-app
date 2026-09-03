@@ -7,6 +7,7 @@ import '../models/game_format.dart';
 import '../services/career_match_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/game_button.dart';
+import '../widgets/maritime_background.dart';
 import '../widgets/maritime_icon.dart';
 
 class MatchResultScreen extends StatelessWidget {
@@ -23,7 +24,7 @@ class MatchResultScreen extends StatelessWidget {
       valueListenable: appLanguage,
       builder: (context, language, _) => Scaffold(
       appBar: AppBar(title: Text(S.t('match_result_title')), automaticallyImplyLeading: false),
-      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      body: MaritimeBackground(child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: CareerMatchService().watchMatch(matchId),
         builder: (context, snapshot) {
           final data = snapshot.data?.data();
@@ -97,7 +98,7 @@ class MatchResultScreen extends StatelessWidget {
             ),
           );
         },
-      ),
+      )),
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'theme/app_theme.dart';
 import 'utils/page_transitions.dart';
 import 'widgets/game_button.dart';
 import 'widgets/maritime_painters.dart';
+import 'widgets/phone_frame.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
         title: S.t('app_title'),
         theme: buildAppTheme(),
         home: const StartScreen(),
+        builder: (context, child) => PhoneFrame(child: child ?? const SizedBox.shrink()),
       ),
     );
   }
