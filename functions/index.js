@@ -95,20 +95,36 @@ exports.resetMonthlySeasons = onSchedule(
 /**
  * Spiegelt Nickname + Position aus dem privaten users/{uid}-Dokument in die
  * öffentliche careerRankings-Rangliste (siehe ROADMAP_QuizApp.md Abschnitt
- * 18). Echter Name und Department werden bewusst NICHT gespiegelt - die
- * bleiben laut Anforderung ausschließlich im eigenen Profil sichtbar, und
- * users/{uid} ist per Regel ohnehin nur für den jeweiligen Nutzer lesbar.
- * Legt dabei kein eloRating an - Rangliste zeigt weiterhin nur Nutzer mit
- * mindestens einem gewerteten Match (siehe submitRoundResult unten).
+ * 18). Echter Name, Department, Crew-ID und Zertifikat werden bewusst NICHT
+ * gespiegelt - die bleiben laut Anforderung ausschließlich im eigenen Profil
+ * sichtbar, und users/{uid} ist per Regel ohnehin nur für den jeweiligen
+ * Nutzer lesbar. Legt dabei kein eloRating an - Rangliste zeigt weiterhin
+ * nur Nutzer mit mindestens einem gewerteten Match (siehe submitRoundResult
+ * unten).
+ *
+ * Setzt außerdem die Start-Wertung im 1-vs-1-Matchmaking aus dem
+ * selbstangegebenen Deutsch-Level (Level x 1000), aber NUR solange der
+ * Nutzer noch kein gewertetes Match gespielt hat (hasPlayedRanked, per
+ * firestore.rules vor Client-Schreibzugriff geschützt) - sonst könnte man
+ * die eigene Wertung durch erneute Level-Angabe manipulieren, nachdem echte
+ * Matchergebnisse zählen.
  */
 exports.onUserProfileWritten = onDocumentWritten("users/{uid}", async (event) => {
+  const before = event.data?.before?.exists ? event.data.before.data() : null;
   const after = event.data?.after?.exists ? event.data.after.data() : null;
   if (!after) return;
   const uid = event.params.uid;
+
   await db.collection("careerRankings").doc(uid).set(
     { nickname: after.nickname ?? null, position: after.position ?? null },
     { merge: true }
   );
+
+  const levelChanged = (before?.germanLevel ?? null) !== (after.germanLevel ?? null);
+  const validLevel = Number.isInteger(after.germanLevel) && after.germanLevel >= 1 && after.germanLevel <= 6;
+  if (levelChanged && validLevel && after.hasPlayedRanked !== true) {
+    await db.collection("users").doc(uid).update({ eloRating: after.germanLevel * 1000 });
+  }
 });
 
 // --- 1-vs-1-Live-Matchmaking + Draft-Phase (ROADMAP_QuizApp.md Abschnitt 16/17) ---
@@ -350,8 +366,8 @@ exports.submitRoundResult = onCall(async (request) => {
       winnerUid,
       eloChange: { [p1]: p1NewRating, [p2]: p2NewRating },
     });
-    tx.update(p1UserRef, { eloRating: p1NewRating });
-    tx.update(p2UserRef, { eloRating: p2NewRating });
+    tx.update(p1UserRef, { eloRating: p1NewRating, hasPlayedRanked: true });
+    tx.update(p2UserRef, { eloRating: p2NewRating, hasPlayedRanked: true });
     tx.set(
       db.collection("careerRankings").doc(p1),
       { eloRating: p1NewRating, updatedAt: FieldValue.serverTimestamp() },

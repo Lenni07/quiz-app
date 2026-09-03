@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/avatar_option.dart';
@@ -24,8 +25,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _realNameController = TextEditingController();
   final _positionController = TextEditingController();
   final _departmentController = TextEditingController();
+  final _crewIdController = TextEditingController();
 
   String _avatarId = allAvatarOptions.first.id;
+  int? _germanLevel;
+  DateTime? _certificateIssuedAt;
+  bool _hasPlayedRanked = false;
   bool _loaded = false;
   bool _saving = false;
 
@@ -35,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _realNameController.dispose();
     _positionController.dispose();
     _departmentController.dispose();
+    _crewIdController.dispose();
     super.dispose();
   }
 
@@ -47,9 +53,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _realNameController.text = (data?['realName'] as String?) ?? '';
       _positionController.text = (data?['position'] as String?) ?? '';
       _departmentController.text = (data?['department'] as String?) ?? '';
+      _crewIdController.text = (data?['crewId'] as String?) ?? '';
       _avatarId = (data?['avatarId'] as String?) ?? allAvatarOptions.first.id;
+      _germanLevel = (data?['germanLevel'] as num?)?.toInt();
+      _certificateIssuedAt = (data?['certificateIssuedAt'] as Timestamp?)?.toDate();
+      _hasPlayedRanked = (data?['hasPlayedRanked'] as bool?) ?? false;
       _loaded = true;
     });
+  }
+
+  Future<void> _pickCertificateDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _certificateIssuedAt ?? now,
+      firstDate: DateTime(now.year - 10),
+      lastDate: now,
+    );
+    if (picked != null) {
+      setState(() => _certificateIssuedAt = picked);
+    }
   }
 
   Future<void> _save(String uid) async {
@@ -62,6 +85,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         position: _positionController.text.trim(),
         department: _departmentController.text.trim(),
         avatarId: _avatarId,
+        crewId: _crewIdController.text.trim(),
+        germanLevel: _germanLevel,
+        certificateIssuedAt: _certificateIssuedAt,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil gespeichert.')));
@@ -146,6 +172,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         helperText: 'Nur in deinem Profil sichtbar',
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _crewIdController,
+                      decoration: const InputDecoration(
+                        labelText: 'Crew-ID',
+                        helperText: 'Nur in deinem Profil sichtbar',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      initialValue: _germanLevel,
+                      decoration: const InputDecoration(
+                        labelText: 'Deutsch-Level',
+                        helperText: 'Bestimmt deine Start-Wertung im 1-vs-1-Modus (nur vor deinem ersten gewerteten Match)',
+                      ),
+                      items: [
+                        for (var level = 1; level <= 6; level++)
+                          DropdownMenuItem(value: level, child: Text('Level $level')),
+                      ],
+                      onChanged: (value) => setState(() => _germanLevel = value),
+                    ),
+                    if (_hasPlayedRanked)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Du hast schon gewertete Matches gespielt - eine Änderung hier wirkt sich nicht mehr auf deine Wertung aus.',
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    Text('Zertifikat', style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 8),
+                    _CertificateStatus(
+                      issuedAt: _certificateIssuedAt,
+                      onPick: _pickCertificateDate,
+                    ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _saving ? null : () => _save(uid),
@@ -220,6 +282,60 @@ class _AvatarChoice extends StatelessWidget {
           backgroundColor: option.color,
           child: Icon(option.icon, color: Colors.white),
         ),
+      ),
+    );
+  }
+}
+
+/// Zeigt das Ausstellungsdatum des Zertifikats und den automatisch daraus
+/// berechneten Status (Ausstellung + 2 Jahre, siehe ROADMAP_QuizApp.md
+/// Abschnitt 18) - keine manuelle Ablaufprüfung nötig.
+class _CertificateStatus extends StatelessWidget {
+  final DateTime? issuedAt;
+  final VoidCallback onPick;
+
+  const _CertificateStatus({required this.issuedAt, required this.onPick});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final issued = issuedAt;
+    DateTime? expiry;
+    bool? isValid;
+    if (issued != null) {
+      expiry = DateTime(issued.year + 2, issued.month, issued.day);
+      isValid = DateTime.now().isBefore(expiry);
+    }
+
+    String formatDate(DateTime date) =>
+        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(issued == null ? 'Kein Ausstellungsdatum hinterlegt' : 'Ausgestellt am ${formatDate(issued)}'),
+                if (expiry != null)
+                  Text(
+                    isValid! ? 'Gültig bis ${formatDate(expiry)}' : 'Abgelaufen seit ${formatDate(expiry)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isValid ? Colors.green : Colors.red,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          TextButton(onPressed: onPick, child: const Text('Datum wählen')),
+        ],
       ),
     );
   }

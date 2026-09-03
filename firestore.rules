@@ -5,12 +5,16 @@ service cloud.firestore {
 
     // Jeder Nutzer darf nur sein eigenes Profil lesen/schreiben - aber die
     // ELO-Wertung darf nur die Cloud Function ändern, nicht der Client selbst
-    // (sonst könnte man sich einfach eine Top-Wertung eintragen).
+    // (sonst könnte man sich einfach eine Top-Wertung eintragen). Gleiches
+    // gilt für hasPlayedRanked (steuert, ob das Deutsch-Level noch die
+    // Start-Wertung setzen darf, siehe ROADMAP_QuizApp.md Abschnitt 18) -
+    // sonst könnte man die eigene Wertung durch Neu-Angabe des Levels
+    // manipulieren, nachdem man schon gewertete Matches gespielt hat.
     match /users/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow create: if request.auth != null && request.auth.uid == uid;
       allow update: if request.auth != null && request.auth.uid == uid
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['eloRating']);
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['eloRating', 'hasPlayedRanked']);
     }
 
     // Flottenrangliste: für alle lesbar, aber nur die Cloud Function (Admin

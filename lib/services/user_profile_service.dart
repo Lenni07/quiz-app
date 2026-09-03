@@ -14,11 +14,15 @@ class UserProfileService {
         'createdAt': FieldValue.serverTimestamp(),
         'ship': null,
         'eloRating': 1000,
+        'hasPlayedRanked': false,
         'nickname': null,
         'realName': null,
         'position': null,
         'department': null,
         'avatarId': allAvatarOptions.first.id,
+        'crewId': null,
+        'germanLevel': null,
+        'certificateIssuedAt': null,
       });
     }
   }
@@ -29,8 +33,12 @@ class UserProfileService {
   }
 
   /// Speichert die Profilangaben aus ROADMAP_QuizApp.md Abschnitt 18
-  /// (Nickname/Position sind auch in der Rangliste sichtbar, echter Name und
-  /// Department bleiben nur im eigenen Profil).
+  /// (Nickname/Position sind auch in der Rangliste sichtbar, alles andere
+  /// bleibt nur im eigenen Profil). Das Deutsch-Level setzt serverseitig
+  /// (Cloud Function onUserProfileWritten) die Start-Wertung im
+  /// 1-vs-1-Matchmaking, aber nur vor dem ersten gewerteten Match - eloRating
+  /// selbst wird hier bewusst NICHT geschrieben, das ist per Regel ohnehin
+  /// nur der Cloud Function erlaubt.
   Future<void> updateProfile({
     required String uid,
     required String nickname,
@@ -38,6 +46,9 @@ class UserProfileService {
     required String position,
     required String department,
     required String avatarId,
+    required String crewId,
+    required int? germanLevel,
+    required DateTime? certificateIssuedAt,
   }) {
     return _firestore.collection('users').doc(uid).set({
       'nickname': nickname,
@@ -45,6 +56,9 @@ class UserProfileService {
       'position': position,
       'department': department,
       'avatarId': avatarId,
+      'crewId': crewId,
+      'germanLevel': germanLevel,
+      'certificateIssuedAt': certificateIssuedAt == null ? null : Timestamp.fromDate(certificateIssuedAt),
     }, SetOptions(merge: true));
   }
 }
