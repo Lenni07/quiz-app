@@ -12,7 +12,9 @@ import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
 import '../services/user_profile_service.dart';
+import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/maritime_painters.dart';
 import 'duel_mode_screen.dart';
 import 'fill_blank_screen.dart';
 import 'flashcard_category_screen.dart';
@@ -340,21 +342,31 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 4),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-        ),
+      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: displayStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.brassLight,
+              letterSpacing: 0.6,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const RopeDivider(height: 8),
+        ],
       ),
     );
   }
 }
 
-class _ModeCard extends StatelessWidget {
+/// Plastische Format-Kachel mit Verlauf/Schatten/Fase und Antipp-Federung
+/// (siehe ROADMAP_QuizApp.md Abschnitt 13b) - Ersatz für die vorherige
+/// flache, einfarbige Karte.
+class _ModeCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final IconData icon;
@@ -367,37 +379,60 @@ class _ModeCard extends StatelessWidget {
     required this.onTap,
   });
 
-  bool get _enabled => onTap != null;
+  @override
+  State<_ModeCard> createState() => _ModeCardState();
+}
+
+class _ModeCardState extends State<_ModeCard> {
+  bool _pressed = false;
+
+  bool get _enabled => widget.onTap != null;
+
+  void _setPressed(bool value) {
+    if (!_enabled) return;
+    setState(() => _pressed = value);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final foreground = _enabled ? colorScheme.onSurface : colorScheme.onSurface.withValues(alpha: 0.4);
+    final foreground = _enabled ? AppColors.canvas : AppColors.canvas.withValues(alpha: 0.4);
 
-    return Material(
-      color: _enabled ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+    return GestureDetector(
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _pressed ? 0.98 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          padding: const EdgeInsets.all(18.0),
+          decoration: BoxDecoration(
+            gradient: _enabled ? AppColors.panelGradient : null,
+            color: _enabled ? null : Colors.white.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.brass.withValues(alpha: _enabled ? 0.35 : 0.1)),
+            boxShadow: _enabled && !_pressed
+                ? const [BoxShadow(color: Colors.black45, offset: Offset(0, 4), blurRadius: 8)]
+                : null,
+          ),
           child: Row(
             children: [
-              Icon(icon, size: 36, color: foreground),
-              const SizedBox(width: 20),
+              Icon(widget.icon, size: 34, color: _enabled ? AppColors.brassLight : foreground),
+              const SizedBox(width: 18),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: foreground),
+                      widget.title,
+                      style: displayStyle(fontSize: 17, color: foreground),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      subtitle,
-                      style: TextStyle(fontSize: 14, color: foreground.withValues(alpha: 0.8)),
+                      widget.subtitle,
+                      style: TextStyle(fontSize: 13, color: foreground.withValues(alpha: 0.75)),
                     ),
                   ],
                 ),

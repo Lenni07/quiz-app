@@ -4,6 +4,8 @@ import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/career_ranking_entry.dart';
 import '../services/career_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/game_panel.dart';
 
 class CareerRankingScreen extends StatelessWidget {
   final bool embedded;
@@ -46,15 +48,25 @@ class CareerRankingScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final entry = entries[index];
               final isMe = entry.uid == myUid;
-              return Container(
+              final medalColor = switch (index) {
+                0 => const Color(0xFFFFD54F),
+                1 => const Color(0xFFCFD8DC),
+                2 => const Color(0xFFD7A86E),
+                _ => null,
+              };
+              return GamePanel(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isMe ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                borderRadius: 14,
+                borderColor: isMe ? AppColors.brassLight : null,
+                gradient: isMe
+                    ? const LinearGradient(colors: [AppColors.deepSeaLight, AppColors.brassDark])
+                    : null,
                 child: Row(
                   children: [
-                    Text('${index + 1}.', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    if (medalColor != null)
+                      Icon(Icons.emoji_events, color: medalColor, size: 22)
+                    else
+                      Text('${index + 1}.', style: displayStyle(fontSize: 15, color: AppColors.canvas.withValues(alpha: 0.7))),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -62,17 +74,17 @@ class CareerRankingScreen extends StatelessWidget {
                         children: [
                           Text(
                             isMe ? '${entry.displayName} ${S.t('ranking_you_suffix')}' : entry.displayName,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.canvas),
                           ),
                           if (entry.position != null && entry.position!.trim().isNotEmpty)
                             Text(
                               entry.position!,
-                              style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.6)),
+                              style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.6)),
                             ),
                         ],
                       ),
                     ),
-                    Text('${entry.eloRating}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text('${entry.eloRating}', style: displayStyle(fontSize: 16, color: AppColors.brassLight)),
                   ],
                 ),
               );

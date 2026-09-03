@@ -8,6 +8,9 @@ import '../models/department.dart';
 import '../services/career_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/user_profile_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/game_button.dart';
+import '../widgets/game_panel.dart';
 
 /// Profil/Optionen-Bildschirm (siehe ROADMAP_QuizApp.md Abschnitt 16/18):
 /// Nickname, echter Name, Position, Department und ein vordefinierter
@@ -125,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(S.t('profile_language_title'), style: Theme.of(context).textTheme.titleSmall),
+                    Text(S.t('profile_language_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
                     const SizedBox(height: 8),
                     SegmentedButton<AppLanguage>(
                       segments: [
@@ -137,14 +140,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 24),
                     Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: avatarById(_avatarId).color,
-                        child: Icon(avatarById(_avatarId).icon, size: 40, color: Colors.white),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.fromBorderSide(BorderSide(color: AppColors.brass, width: 2.5)),
+                          boxShadow: [BoxShadow(color: Colors.black45, offset: Offset(0, 4), blurRadius: 10)],
+                        ),
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: avatarById(_avatarId).color,
+                          child: Icon(avatarById(_avatarId).icon, size: 40, color: Colors.white),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(S.t('profile_avatar_choose'), style: Theme.of(context).textTheme.titleSmall),
+                    Text(S.t('profile_avatar_choose'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 12,
@@ -218,22 +229,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onChanged: (value) => setState(() => _germanLevel = value),
                     ),
                     const SizedBox(height: 16),
-                    Text(S.t('profile_certificate_title'), style: Theme.of(context).textTheme.titleSmall),
+                    Text(S.t('profile_certificate_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
                     const SizedBox(height: 8),
                     _CertificateStatus(
                       issuedAt: _certificateIssuedAt,
                       onPick: _pickCertificateDate,
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _saving ? null : () => _save(uid),
+                    const SizedBox(height: 20),
+                    Center(
                       child: _saving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
                             )
-                          : Text(S.t('profile_save')),
+                          : GameButton(
+                              label: S.t('profile_save'),
+                              icon: Icons.save_outlined,
+                              fontSize: 16,
+                              onPressed: () => _save(uid),
+                            ),
                     ),
                     const SizedBox(height: 32),
                     FutureBuilder<List<dynamic>>(
@@ -315,7 +329,6 @@ class _CertificateStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final issued = issuedAt;
     DateTime? expiry;
     bool? isValid;
@@ -327,19 +340,19 @@ class _CertificateStatus extends StatelessWidget {
     String formatDate(DateTime date) =>
         '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
 
-    return Container(
+    return GamePanel(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      borderRadius: 14,
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(issued == null ? S.t('profile_certificate_none') : S.f('profile_certificate_issued', [formatDate(issued)])),
+                Text(
+                  issued == null ? S.t('profile_certificate_none') : S.f('profile_certificate_issued', [formatDate(issued)]),
+                  style: const TextStyle(color: AppColors.canvas),
+                ),
                 if (expiry != null)
                   Text(
                     isValid!
@@ -347,7 +360,7 @@ class _CertificateStatus extends StatelessWidget {
                         : S.f('profile_certificate_expired', [formatDate(expiry)]),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isValid ? Colors.green : Colors.red,
+                      color: isValid ? Colors.greenAccent.shade400 : AppColors.signalRed,
                     ),
                   ),
               ],
@@ -369,19 +382,15 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
+    return GamePanel(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      borderRadius: 14,
       child: Row(
         children: [
-          Icon(icon, color: colorScheme.onSurface.withValues(alpha: 0.7)),
+          Icon(icon, color: AppColors.brassLight),
           const SizedBox(width: 12),
-          Expanded(child: Text(label)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(child: Text(label, style: const TextStyle(color: AppColors.canvas))),
+          Text(value, style: displayStyle(fontSize: 15, color: AppColors.canvas)),
         ],
       ),
     );
