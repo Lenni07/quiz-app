@@ -129,6 +129,11 @@ class S {
       AppLanguage.de: 'Zahlwörter der Größe nach sortieren',
       AppLanguage.en: 'Sort number words by size',
     },
+    'format_hoerverstehen': {AppLanguage.de: 'Hörverständnis', AppLanguage.en: 'Listening Comprehension'},
+    'format_hoerverstehen_subtitle': {
+      AppLanguage.de: 'Deutschen Satz anhören und die Bedeutung erkennen',
+      AppLanguage.en: 'Listen to a German sentence and recognize its meaning',
+    },
     'duel_title': {AppLanguage.de: 'Lokales Duell', AppLanguage.en: 'Local Duel'},
     'duel_subtitle': {
       AppLanguage.de: 'Gegen ein anderes Gerät im selben WLAN antreten',

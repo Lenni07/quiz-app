@@ -12,6 +12,7 @@ import '../screens/flip_tiles_screen.dart';
 import '../screens/gameshow_quiz_screen.dart';
 import '../screens/group_sort_screen.dart';
 import '../screens/image_quiz_screen.dart';
+import '../screens/listening_screen.dart';
 import '../screens/match_pairs_screen.dart';
 import '../screens/match_up_screen.dart';
 import '../screens/open_box_screen.dart';
@@ -68,6 +69,8 @@ Future<Widget> buildFormatScreen(String formatId) async {
       return GroupSortScreen(data: await loadGroupSortData());
     case 'rank-order':
       return RankOrderScreen(words: await loadNumberWords());
+    case 'hoerverstehen':
+      return ListeningScreen(sentences: await loadSentences());
     default:
       throw ArgumentError('Unbekanntes Format: $formatId');
   }

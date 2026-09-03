@@ -17,6 +17,7 @@ import 'flip_tiles_screen.dart';
 import 'gameshow_quiz_screen.dart';
 import 'group_sort_screen.dart';
 import 'image_quiz_screen.dart';
+import 'listening_screen.dart';
 import 'match_pairs_screen.dart';
 import 'match_up_screen.dart';
 import 'open_box_screen.dart';
@@ -157,6 +158,13 @@ class ModeSelectScreen extends StatelessWidget {
     Navigator.push(context, buildFadeSlideRoute(const DuelModeScreen()));
   }
 
+  Future<void> _startListening(BuildContext context) async {
+    final sentences = await loadSentences();
+    if (context.mounted) {
+      Navigator.push(context, buildFadeSlideRoute(ListeningScreen(sentences: sentences)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Reagiert auf Sprachwechsel (siehe ROADMAP_QuizApp.md Abschnitt 19) -
@@ -170,6 +178,13 @@ class ModeSelectScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
             _SectionHeader(S.t('section_basics')),
+            _ModeCard(
+              title: gameFormatById('hoerverstehen').displayName,
+              subtitle: S.t('format_hoerverstehen_subtitle'),
+              icon: Icons.headphones,
+              onTap: () => _startListening(context),
+            ),
+            const SizedBox(height: 16),
             _ModeCard(
               title: gameFormatById('allgemeinwissen-quiz').displayName,
               subtitle: S.t('format_allgemeinwissen-quiz_subtitle'),

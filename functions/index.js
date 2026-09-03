@@ -176,7 +176,7 @@ const FORMAT_IDS = [
   "allgemeinwissen-quiz", "konversation-ueben", "lueckentext", "richtige-reihenfolge",
   "karteikarten", "wahr-oder-falsch", "gameshow-quiz", "bild-quiz", "open-the-box",
   "find-the-match", "random-wheel", "flip-tiles", "match-up", "word-magnets",
-  "group-sort", "rank-order",
+  "group-sort", "rank-order", "hoerverstehen",
 ];
 const BANS_PER_PLAYER = 3;
 const DRAFT_STEP_MS = 18000; // 18s, Mitte der geforderten 15-20s pro Zug.

@@ -37,6 +37,7 @@ const List<GameFormat> allGameFormats = [
   GameFormat(id: 'word-magnets', icon: Icons.dashboard_customize),
   GameFormat(id: 'group-sort', icon: Icons.category),
   GameFormat(id: 'rank-order', icon: Icons.sort),
+  GameFormat(id: 'hoerverstehen', icon: Icons.headphones),
 ];
 
 GameFormat gameFormatById(String id) {

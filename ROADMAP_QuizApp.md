@@ -134,6 +134,37 @@ Bewusste Trennung: Claude Code baut die App **funktional komplett** (alle Modi, 
 
 **Hinweis zur Abgrenzung:** Rein optische Anpassungen (Farben, Schriften, Icons, Layout) lassen sich später sauber "draufsetzen". Bei Interaktionen, die Optik und Logik eng verzahnen (z. B. Drag-and-Drop-Gefühl, Dreh-Animation), kann der Freelancer auch etwas am bestehenden Code anpassen müssen – das ist normal und kein Zeichen für einen Fehler im bisherigen Aufbau.
 
+### 13a. Konkrete Analyse: Warum der aktuelle Stand optisch weit von Clash Royale entfernt ist
+
+Bewertung des aktuellen Prototyps (Stand: 1-vs-1-Bildschirm mit Reiter-Leiste) im Vergleich zum Vorbild:
+
+1. **Leere vs. Dichte:** Aktuell schwebt ein einzelnes Icon mit Text und Button in großer leerer Fläche. Clash Royale füllt den Bildschirm mit Inhalt (Karten, Zähler, Abzeichen) – Leerraum wirkt "unfertig".
+2. **Flach vs. Tiefe:** Alle Elemente sind flach. Vorbild hat Schatten, Verläufe, Fasen, Glanzlichter – Buttons wirken physisch drückbar. Größter Unterschied im ersten Eindruck.
+3. **Standard-Icons vs. eigene Illustrationen:** Aktuell generische Material-Icons (z. B. Karate-Figur für 1 vs 1) ohne Wiedererkennungswert.
+4. **Typografie:** Dünne System-Schrift statt fetter, konturierter Display-Schrift mit Schatten.
+5. **Farbwelt/Textur:** Einfarbig Blau auf Dunkelblau statt warmer Palette mit echten Texturen (Holz, Papier, Metall).
+6. **Kein visuelles Thema:** Größte verpasste Chance – die App hat keine eigene Identität, obwohl sich das **maritime Thema** anbietet (Anker, Taue, Bullaugen, Wellen, Signalflaggen, Schiffsdeck-Holz, Rettungsringe). Das wäre das Gegenstück zu Clash Royales "mittelalterlicher Kampfarena".
+
+### 13b. Was mit Flutter direkt geht – und wofür externe Assets nötig sind
+
+**Ohne Zusatztools/Kosten direkt in Flutter umsetzbar (kann Claude Code jederzeit machen):**
+- Verläufe, Schlagschatten, Fasen, abgerundete Ecken, Weichzeichner
+- Eigene Schriftarten einbinden (behebt Punkt 4 sofort)
+- Animationen: federnde Buttons, Bildschirmübergänge, Partikel-Effekte bei richtigen Antworten, animierte Fortschrittsbalken
+- Eigene Formen/Ornamente programmatisch zeichnen (Wellen, Taue, Rahmen)
+- Dichteres, durchdachteres Layout und eine stimmige Farbpalette
+
+**Nur mit externen Assets möglich:**
+- Illustrationen, Charaktere, Texturen, Hintergrundbilder (Flutter zeigt sie nur an, erstellen muss sie jemand)
+- Komplexe animierte Illustrationen (über Rive oder Lottie extern gestaltet, in Flutter abgespielt)
+
+**Empfohlener Abkürzungsweg statt Freelancer-Beauftragung:** Fertige **Game-UI-Asset-Kits** kaufen (itch.io, Envato/GraphicRiver, kostenlos bei kenney.nl) – Sammlungen mit Holz-Panels, klobigen Buttons, Rahmen, Bannern, Icons im Spiele-Look, meist 10-50 €. Ein maritimes Kit würde perfekt zum Thema passen und liefert einen Großteil des gewünschten Looks ohne Designer-Auftrag.
+
+**Empfohlene Reihenfolge für Phase 5:**
+1. Zuerst die kostenlosen Flutter-Mittel ausschöpfen (Schrift, Tiefe/Schatten, Animationen, Farbpalette, dichteres Layout) – zeigt, wie weit man allein damit kommt.
+2. Danach entscheiden, ob gekaufte Asset-Kits ausreichen.
+3. Freelancer nur, falls darüber hinaus ein individueller, durchgestalteter Look gewünscht ist.
+
 ## 14. Status Phase 4a – abgeschlossen und auf echten Geräten bestätigt
 
 Phase 4a (lokales Mehrspieler-Duell) ist fertig, technisch: lokaler WLAN-Server (shelf/WebSocket, Option 1 aus Abschnitt 5 der ursprünglichen Optionen), nicht `nearby_connections` (Android-Umgebung war dafür zu instabil, außerdem hätte das iPhones ausgeschlossen).
@@ -237,24 +268,12 @@ Felder im Nutzerprofil:
 - **Flottentreffen:** ebenfalls nur allgemeine Inhalte, da schiffsübergreifend.
 - **Es wird also NICHT nach Department gematcht** – Housekeeper spielen ganz normal gegen alle anderen, nur eben mit allgemeinen Inhalten.
 
+**Umsetzungsumfang (Entscheidung):** Im ersten Durchgang bekommt **nur das `Question`-Datenmodell** ein Department-Feld samt Filterlogik (genutzt u. a. von Allgemeinwissen-Quiz, Gameshow-Quiz, Open the Box, Random Wheel). Die übrigen sechs Datenmodelle (Sentence, TrueFalse, ImageQuiz, GroupSort, FlipTileWord, NumberWord) bleiben vorerst ungetaggt und gelten damit automatisch als "allgemein". Begründung: Echte Inhalte existieren noch nicht, es gibt also aktuell nichts zu taggen; außerdem wurden nach dem ersten Testdurchgang bereits fünf Formate wieder entfernt – Tagging-Infrastruktur für Formate zu bauen, die möglicherweise wegfallen, wäre Arbeit auf Verdacht.
+
+**⚠️ Wichtige Bedingung:** Die restlichen sechs Datenmodelle **müssen das Department-Feld bekommen, bevor die echten Inhalte eingepflegt werden**. Sonst müssten sämtliche Inhalte später nochmal durchgegangen und nachträglich getaggt werden. Dieser Punkt ist Voraussetzung für den Arbeitsblock "echte Inhalte einpflegen".
+
 **Tages-Challenge mit Streak:** Eine tägliche Aufgabe, die Bonuspunkte bringt, plus Streak-Zähler (aufeinanderfolgende Tage). Passt zur monatlichen Season-Logik und zur Clash-Royale-Gamification aus Abschnitt 16; gibt Crew-Mitgliedern mit unregelmäßigen Schichten einen klaren, kleinen täglichen Anreiz.
 
 ## 19. Englische Bedienoberfläche (Reiter "Optionen")
 
 In den Optionen soll es eine Sprachumschaltung Deutsch/Englisch geben – aber **nur für die Bedienoberfläche** (Menüs, Reiter-Beschriftungen, Buttons, Anleitungstexte, Systemmeldungen usw.). Die eigentlichen Deutsch-Lerninhalte/Fragen bleiben immer auf Deutsch, unabhängig von der gewählten Oberflächensprache – macht didaktisch Sinn, da das Ziel ja das Deutschlernen ist, nur die Bedienung soll für alle verständlich sein, unabhängig vom Englisch-Niveau.
-
-**Status: bereits umgesetzt** (siehe vorheriger Commit, `SegmentedButton` im Profil-Reiter, `lib/l10n/`) – deckt Reiter, Menüs, Profil, Rangliste, Flottentreffen, 1-vs-1-Warteschlange/Draft/Match-Ergebnis, Start-/Ergebnisbildschirm ab. Keine weitere Arbeit hier nötig.
-
-## 20. Status Abschnitt 18b – umgesetzt und im Emulator verifiziert (Stand 2026-09-03)
-
-Die Level-basierte Start-EP-Logik aus Abschnitt 18 wurde vollständig zurückgebaut, nicht additiv erweitert:
-
-- **`onUserProfileWritten`** (functions/index.js) setzt keine `eloRating` mehr aus dem Deutsch-Level - spiegelt nur noch Nickname/Position in die Rangliste, wie schon vor Abschnitt 18.
-- **`hasPlayedRanked` (Boolean) → `rankedMatchesPlayed` (Zähler)**: dasselbe Feld, das vorher nur "gesperrt/nicht gesperrt" für die Level-Logik markierte, zählt jetzt die Anzahl gewerteter Matches - Grundlage für die Platzierungsphase. Bleibt wie zuvor per `firestore.rules` vor direktem Client-Schreibzugriff geschützt (zusammen mit `eloRating`).
-- **Platzierungsmatches:** die ersten `PLACEMENT_MATCHES = 5` Matches eines Spielers laufen mit `PLACEMENT_K_FACTOR = 64` (statt `STANDARD_K_FACTOR = 32`) - eigene Wahl, da die Roadmap nur "höherer K-Faktor" ohne genauen Wert vorgab; K-Faktor gilt pro Spieler einzeln (wer schon über 5 Matches hat, bekommt den Standard-Faktor, auch gegen einen Platzierungs-Gegner).
-- **Weicher Season-Reset:** neue Cloud Function `resetCareerSeason` (Scheduled, `0 0 1 * *` UTC, gleiches Muster wie `resetMonthlySeasons` für Flottentreffen) staucht die Wertung jedes gewerteten Spielers zur Mitte (`(alte Wertung + 1000) / 2`) statt sie auf 0 zu setzen. Season-Tracking über ein neues `currentSeasonKey`-Feld auf `careerRankings/{uid}` (idempotent wie beim Flottentreffen-Reset - mehrfaches Ausführen im selben Monat verändert nichts). `rankedMatchesPlayed` bleibt beim Season-Reset unangetastet (einmalige Kalibrierung, kein Season-Wert).
-- **Deutsch-Level bleibt im Profil**, Hilfetext klargestellt: "Selbsteinschätzung, ohne Einfluss auf deine Wertung im 1-vs-1-Modus".
-
-**Getestet im Emulator mit echten Nutzer-Tokens:** zwei Spieler (einer mit 0, einer mit 10 vorherigen Matches) spielen ein Match zu Ende - Wertungsänderung exakt wie von Hand berechnet (Platzierungsspieler: 1000→1032 mit K=64, etablierter Spieler: 1000→984 mit K=32), `rankedMatchesPlayed` korrekt erhöht; Season-Reset manuell ausgelöst (`currentSeasonKey` künstlich auf einen alten Monat zurückgesetzt) - Wertung korrekt zur Mitte gestaucht (1032→1016, 984→992), zweiter Aufruf im selben Monat verändert nichts (Idempotenz bestätigt); direkter Client-Schreibversuch auf `rankedMatchesPlayed` wird weiterhin mit 403 abgelehnt. `flutter analyze`, `flutter test` (15 Tests) und `flutter build web` laufen sauber.
-
-**Noch nicht deployt** - wie angewiesen, wird gesammelt am Ende deployt.
