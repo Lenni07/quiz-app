@@ -74,14 +74,32 @@ class _ListeningScreenState extends State<ListeningScreen> {
     }
   }
 
-  /// Sucht einmalig (Ergebnis wird gecacht) die beste verfügbare deutsche
-  /// Stimme und wählt sie explizit aus, statt sich auf `setLanguage`s
-  /// naive "erste passende Stimme"-Auswahl zu verlassen. Schlägt beim
-  /// ersten Versuch evtl. fehl, weil die Stimmenliste des Browsers noch
+  /// Wendet die beste bekannte deutsche Stimme an - bei jedem Aufruf neu,
+  /// nicht nur beim ersten Mal. Vorher wurde `setLanguage('de-DE')` bei
+  /// jeder Frage erneut aufgerufen, was die einmal gefundene gute Stimme
+  /// sofort wieder auf die naive erste Trefferstimme zurückgesetzt hat -
+  /// `_selectBestGermanVoice()` lief danach aber wegen des Caches nicht
+  /// erneut, die gute Wahl ging also nach der allerersten Frage verloren.
+  /// Jetzt: solange noch keine gute Stimme gefunden wurde, `setLanguage`
+  /// als sicherer Fallback plus neuer Auswahlversuch; sobald eine gefunden
+  /// ist, wird nur noch diese (per `setVoice`) erneut angewendet.
+  Future<void> _applyBestVoice() async {
+    final selected = _selectedVoice;
+    if (selected != null) {
+      await _tts.setVoice(selected);
+      debugPrint('Hörverständnis: angeforderte Stimme = "${selected['name']}" (${selected['locale']}) [erneut angewendet]');
+      return;
+    }
+    await _tts.setLanguage('de-DE');
+    await _selectBestGermanVoice();
+  }
+
+  /// Sucht die beste verfügbare deutsche Stimme und wählt sie explizit aus,
+  /// statt sich auf `setLanguage`s naive "erste passende Stimme"-Auswahl zu
+  /// verlassen. Schlägt evtl. fehl, weil die Stimmenliste des Browsers noch
   /// nicht geladen ist (siehe `_checkGermanVoice`) - wird dann bei der
-  /// nächsten Frage automatisch erneut versucht.
+  /// nächsten Frage über `_applyBestVoice()` automatisch erneut versucht.
   Future<void> _selectBestGermanVoice() async {
-    if (_selectedVoice != null) return;
     try {
       final raw = await _tts.getVoices;
       final voices = (raw as List)
@@ -95,13 +113,34 @@ class _ListeningScreenState extends State<ListeningScreen> {
       }
       german.sort((a, b) => rankTtsVoiceName(a['name'] ?? '').compareTo(rankTtsVoiceName(b['name'] ?? '')));
       final best = german.first;
+      debugPrint(
+        'Hörverständnis: angeforderte Stimme = "${best['name']}" (${best['locale']}, '
+        'Rang ${rankTtsVoiceName(best['name'] ?? '')} von 0-2, 0 = am besten) - '
+        '${german.length} deutsche Stimme(n) insgesamt verfügbar: '
+        '${german.map((v) => v['name']).join(', ')}',
+      );
       await _tts.setVoice(best);
       _selectedVoice = best;
-      debugPrint(
-        'Hörverständnis: gewählte Stimme = "${best['name']}" (${best['locale']}, '
-        'Rang ${rankTtsVoiceName(best['name'] ?? '')} von 0-2, 0 = am besten) - '
-        '${german.length} deutsche Stimme(n) insgesamt verfügbar',
-      );
+      // flutter_tts gibt auf Web nicht zurück, ob setVoice() die Stimme
+      // tatsächlich intern zugeordnet hat (die Zuordnung dort vergleicht
+      // Name+Sprachcode exakt gegen eine frisch abgefragte Browser-Liste
+      // und schlägt lautlos fehl, wenn nichts passt - siehe
+      // ROADMAP_QuizApp.md Abschnitt 18g). Deshalb hier zur Kontrolle
+      // erneut abfragen, ob genau dieser Name+Sprachcode gerade noch in
+      // der Liste steht - wenn nicht, würde setVoice() intern scheitern.
+      try {
+        final recheckRaw = await _tts.getVoices;
+        final recheck = (recheckRaw as List).whereType<Object>().map((v) => Map<String, String>.from(v as Map));
+        final stillMatches = recheck.any((v) => v['name'] == best['name'] && v['locale'] == best['locale']);
+        debugPrint(
+          'Hörverständnis: tatsächlich verwendete Stimme = "${best['name']}" (${best['locale']}) - '
+          'Name+Sprachcode ${stillMatches ? "stimmen" : "STIMMEN NICHT MEHR"} mit einer frisch '
+          'abgefragten Browser-Stimme überein',
+        );
+      } catch (_) {
+        // Kontrollabfrage rein diagnostisch - ihr Scheitern soll die
+        // eigentliche Stimmenauswahl nicht beeinträchtigen.
+      }
     } catch (e) {
       debugPrint('Hörverständnis: Stimmenauswahl fehlgeschlagen - $e');
     }
@@ -134,17 +173,11 @@ class _ListeningScreenState extends State<ListeningScreen> {
   Future<void> _speakCurrent() async {
     try {
       await _tts.stop();
-      // Bei jedem Aufruf erneut gesetzt (nicht nur einmal in initState) -
-      // die Stimmenliste des Browsers ist beim allerersten Aufruf direkt
-      // nach dem Laden der Seite oft noch leer (asynchrones Nachladen),
-      // wodurch "de-DE" fälschlich nicht gefunden würde. Spätere Aufrufe
-      // (z. B. bei der nächsten Frage) treffen auf eine bereits geladene
-      // Liste.
-      await _tts.setLanguage('de-DE');
-      // Überschreibt die naive "erste passende Stimme" von setLanguage mit
-      // der besten verfügbaren, sobald die Browser-/System-Stimmenliste
-      // geladen ist (siehe ROADMAP_QuizApp.md Abschnitt 18g).
-      await _selectBestGermanVoice();
+      // Wendet die einmal gefundene beste Stimme erneut an, oder versucht
+      // (mit setLanguage('de-DE') als sicherem Fallback) sie zu finden,
+      // falls die Browser-Stimmenliste noch nicht geladen war - siehe
+      // ROADMAP_QuizApp.md Abschnitt 18g.
+      await _applyBestVoice();
       await _tts.speak(_rounds[_currentIndex].sentence.question);
     } catch (e) {
       debugPrint('Hörverständnis: Sprachausgabe fehlgeschlagen - $e');
