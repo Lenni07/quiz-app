@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'audio/sound_effects.dart';
 import 'audio/sound_settings.dart';
 import 'firebase_options.dart';
 import 'l10n/app_language.dart';
@@ -30,6 +31,10 @@ void main() async {
     debugPrint('Firebase: startup failed: $e');
     debugPrint('$stack');
   }
+  // Nicht abgewartet - der App-Start soll nicht auf Sound-Assets warten,
+  // aber das Vorladen soll so früh wie möglich beginnen (siehe
+  // SoundEffects.preload()).
+  SoundEffects.instance.preload();
   runApp(const MyApp());
 }
 

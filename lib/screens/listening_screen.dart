@@ -48,10 +48,35 @@ class _ListeningScreenState extends State<ListeningScreen> {
   void initState() {
     super.initState();
     _tts = FlutterTts();
-    _tts.setLanguage('de-DE');
+    _tts.setErrorHandler((message) {
+      debugPrint('Hörverständnis: TTS-Fehler - $message');
+      _showTtsError();
+    });
+    _checkGermanVoice();
     _confettiController = ConfettiController(duration: const Duration(milliseconds: 900));
     _rounds = _buildRounds(widget.sentences);
     _speakCurrent();
+  }
+
+  /// Rein diagnostisch (loggt in die Browser-DevTools-Konsole) - blockiert
+  /// die eigentliche Sprachausgabe bewusst nicht, da `isLanguageAvailable`
+  /// im Web direkt nach dem Laden fälschlich "nicht verfügbar" melden kann
+  /// (die Stimmenliste des Browsers lädt asynchron nach, siehe
+  /// ROADMAP_QuizApp.md Abschnitt 18e).
+  Future<void> _checkGermanVoice() async {
+    try {
+      final available = await _tts.isLanguageAvailable('de-DE');
+      debugPrint('Hörverständnis: deutsche Stimme laut Browser verfügbar = $available');
+    } catch (e) {
+      debugPrint('Hörverständnis: Prüfung auf deutsche Stimme fehlgeschlagen - $e');
+    }
+  }
+
+  void _showTtsError() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sprachausgabe momentan nicht verfügbar.')),
+    );
   }
 
   List<_RoundData> _buildRounds(List<Sentence> sentences) {
@@ -72,8 +97,20 @@ class _ListeningScreenState extends State<ListeningScreen> {
   }
 
   Future<void> _speakCurrent() async {
-    await _tts.stop();
-    await _tts.speak(_rounds[_currentIndex].sentence.question);
+    try {
+      await _tts.stop();
+      // Bei jedem Aufruf erneut gesetzt (nicht nur einmal in initState) -
+      // die Stimmenliste des Browsers ist beim allerersten Aufruf direkt
+      // nach dem Laden der Seite oft noch leer (asynchrones Nachladen),
+      // wodurch "de-DE" fälschlich nicht gefunden würde. Spätere Aufrufe
+      // (z. B. bei der nächsten Frage) treffen auf eine bereits geladene
+      // Liste.
+      await _tts.setLanguage('de-DE');
+      await _tts.speak(_rounds[_currentIndex].sentence.question);
+    } catch (e) {
+      debugPrint('Hörverständnis: Sprachausgabe fehlgeschlagen - $e');
+      _showTtsError();
+    }
   }
 
   @override
