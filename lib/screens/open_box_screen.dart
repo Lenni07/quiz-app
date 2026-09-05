@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
 import 'result_screen.dart';
 
 class OpenBoxScreen extends StatefulWidget {
@@ -12,7 +13,7 @@ class OpenBoxScreen extends StatefulWidget {
   State<OpenBoxScreen> createState() => _OpenBoxScreenState();
 }
 
-class _OpenBoxScreenState extends State<OpenBoxScreen> {
+class _OpenBoxScreenState extends State<OpenBoxScreen> with AnswerFeedbackMixin {
   final Set<int> _openedBoxes = {};
   int _score = 0;
   int? _activeBox;
@@ -35,6 +36,11 @@ class _OpenBoxScreenState extends State<OpenBoxScreen> {
       if (isCorrect) _score++;
       _openedBoxes.add(_activeBox!);
     });
+    if (isCorrect) {
+      triggerCorrectFeedback();
+    } else {
+      triggerWrongFeedback();
+    }
   }
 
   void _backToBoxes() {
@@ -71,9 +77,14 @@ class _OpenBoxScreenState extends State<OpenBoxScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text('Open the Box (${_openedBoxes.length} von ${widget.questions.length})')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: _activeBox == null ? _buildGrid(colorScheme) : _buildQuestion(colorScheme),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: _activeBox == null ? _buildGrid(colorScheme) : _buildQuestion(colorScheme),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }
@@ -119,12 +130,33 @@ class _OpenBoxScreenState extends State<OpenBoxScreen> {
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 24),
-        for (var i = 0; i < question.options.length; i++) ...[
-          _buildOptionButton(context, i, question),
-          const SizedBox(height: 12),
-        ],
+        wrapWithShake(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < question.options.length; i++) ...[
+                _buildOptionButton(context, i, question),
+                const SizedBox(height: 12),
+              ],
+            ],
+          ),
+        ),
         const SizedBox(height: 12),
-        if (answered)
+        if (answered) ...[
+          Center(
+            child: Text(
+              _selectedOption == question.correctIndex
+                  ? 'Richtig!'
+                  : 'Leider falsch. Richtig wäre: "${question.options[question.correctIndex]}"',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: _selectedOption == question.correctIndex ? Colors.green : Colors.red,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           Center(
             child: ElevatedButton(
               onPressed: _backToBoxes,
@@ -133,6 +165,7 @@ class _OpenBoxScreenState extends State<OpenBoxScreen> {
               ),
             ),
           ),
+        ],
       ],
     );
   }

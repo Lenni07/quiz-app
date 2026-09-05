@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
+import '../widgets/count_up_number.dart';
 import 'result_screen.dart';
 
 class _Magnet {
@@ -20,7 +22,7 @@ class WordMagnetsScreen extends StatefulWidget {
   State<WordMagnetsScreen> createState() => _WordMagnetsScreenState();
 }
 
-class _WordMagnetsScreenState extends State<WordMagnetsScreen> {
+class _WordMagnetsScreenState extends State<WordMagnetsScreen> with AnswerFeedbackMixin {
   int _currentIndex = 0;
   int _score = 0;
   late List<_Magnet> _pool;
@@ -84,6 +86,11 @@ class _WordMagnetsScreenState extends State<WordMagnetsScreen> {
       _isCorrect = isCorrect;
       if (isCorrect) _score++;
     });
+    if (isCorrect) {
+      triggerCorrectFeedback();
+    } else {
+      triggerWrongFeedback();
+    }
   }
 
   void _next() {
@@ -117,14 +124,19 @@ class _WordMagnetsScreenState extends State<WordMagnetsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text('Word Magnets ${_currentIndex + 1} von ${widget.sentences.length}')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Stufe: $_score von ${widget.sentences.length}',
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7)),
+            Row(
+              children: [
+                Text('Stufe: ', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                CountUpNumber(_score, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                Text(' von ${widget.sentences.length}', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+              ],
             ),
             const SizedBox(height: 16),
             Text(
@@ -134,12 +146,14 @@ class _WordMagnetsScreenState extends State<WordMagnetsScreen> {
             const SizedBox(height: 20),
             Text('Satz bauen:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (var i = 0; i < _slots.length; i++) _buildSlot(context, i),
-              ],
+            wrapWithShake(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (var i = 0; i < _slots.length; i++) _buildSlot(context, i),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
             Text('Wort-Magnete:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
@@ -177,8 +191,11 @@ class _WordMagnetsScreenState extends State<WordMagnetsScreen> {
                 ),
               ),
             ],
-          ],
-        ),
+              ],
+            ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }

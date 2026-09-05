@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
+import '../widgets/count_up_number.dart';
 import 'result_screen.dart';
 
 class WordOrderScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class WordOrderScreen extends StatefulWidget {
   State<WordOrderScreen> createState() => _WordOrderScreenState();
 }
 
-class _WordOrderScreenState extends State<WordOrderScreen> {
+class _WordOrderScreenState extends State<WordOrderScreen> with AnswerFeedbackMixin {
   int _currentIndex = 0;
   int _score = 0;
   bool _answered = false;
@@ -35,14 +37,23 @@ class _WordOrderScreenState extends State<WordOrderScreen> {
 
   void _placeWord(int poolIndex) {
     if (_answered) return;
+    var justFinished = false;
     setState(() {
       _placed.add(_pool.removeAt(poolIndex));
       if (_placed.length == widget.sentences[_currentIndex].words.length) {
         _answered = true;
         _isCorrect = _wordsMatch(_placed, widget.sentences[_currentIndex].words);
+        justFinished = true;
         if (_isCorrect) _score++;
       }
     });
+    if (justFinished) {
+      if (_isCorrect) {
+        triggerCorrectFeedback();
+      } else {
+        triggerWrongFeedback();
+      }
+    }
   }
 
   void _removePlacedWord(int placedIndex) {
@@ -109,89 +120,99 @@ class _WordOrderScreenState extends State<WordOrderScreen> {
       appBar: AppBar(
         title: Text('Richtige Reihenfolge ${_currentIndex + 1} von ${widget.sentences.length}'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: (_currentIndex + 1) / widget.sentences.length),
-                duration: const Duration(milliseconds: 300),
-                builder: (context, value, _) => LinearProgressIndicator(value: value, minHeight: 8),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Stufe: $_score von ${widget.sentences.length}',
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              sentence.question,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 20),
-            Text('Deine Antwort:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              constraints: const BoxConstraints(minHeight: 64),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(color: colorScheme.outline),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (var i = 0; i < _placed.length; i++)
-                    _buildChip(
-                      _placed[i],
-                      color: _answered
-                          ? (_isCorrect ? Colors.green : Colors.red)
-                          : colorScheme.secondaryContainer,
-                      onTap: () => _removePlacedWord(i),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text('Verfügbare Wörter:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var i = 0; i < _pool.length; i++)
-                  _buildChip(
-                    _pool[i],
-                    color: colorScheme.primaryContainer,
-                    onTap: () => _placeWord(i),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: (_currentIndex + 1) / widget.sentences.length),
+                    duration: const Duration(milliseconds: 300),
+                    builder: (context, value, _) => LinearProgressIndicator(value: value, minHeight: 8),
                   ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Text('Stufe: ', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    CountUpNumber(_score, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    Text(' von ${widget.sentences.length}', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  sentence.question,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 20),
+                Text('Deine Antwort:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                const SizedBox(height: 8),
+                wrapWithShake(
+                  Container(
+                    width: double.infinity,
+                    constraints: const BoxConstraints(minHeight: 64),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: colorScheme.outline),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (var i = 0; i < _placed.length; i++)
+                          _buildChip(
+                            _placed[i],
+                            color: _answered
+                                ? (_isCorrect ? Colors.green : Colors.red)
+                                : colorScheme.secondaryContainer,
+                            onTap: () => _removePlacedWord(i),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text('Verfügbare Wörter:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (var i = 0; i < _pool.length; i++)
+                      _buildChip(
+                        _pool[i],
+                        color: colorScheme.primaryContainer,
+                        onTap: () => _placeWord(i),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                if (_answered) ...[
+                  Text(
+                    _isCorrect ? 'Richtig!' : 'Leider falsch. Richtig wäre: "${sentence.correctAnswer}"',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: _isCorrect ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _next,
+                    child: Text(isLast ? 'Fertig' : 'Weiter'),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 24),
-            if (_answered) ...[
-              Text(
-                _isCorrect ? 'Richtig!' : 'Leider falsch. Richtig wäre: "${sentence.correctAnswer}"',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: _isCorrect ? Colors.green : Colors.red,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _next,
-                child: Text(isLast ? 'Fertig' : 'Weiter'),
-              ),
-            ],
-          ],
-        ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }

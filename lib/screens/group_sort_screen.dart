@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/group_sort.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
 import 'result_screen.dart';
 
 class GroupSortScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class GroupSortScreen extends StatefulWidget {
   State<GroupSortScreen> createState() => _GroupSortScreenState();
 }
 
-class _GroupSortScreenState extends State<GroupSortScreen> {
+class _GroupSortScreenState extends State<GroupSortScreen> with AnswerFeedbackMixin {
   late List<GroupSortItem> _pool;
   late Map<String, List<GroupSortItem>> _buckets;
   int _attempts = 0;
@@ -26,15 +28,17 @@ class _GroupSortScreenState extends State<GroupSortScreen> {
   }
 
   void _handleDrop(GroupSortItem item, String targetCategory) {
+    final isCorrect = item.category == targetCategory;
     setState(() {
       _attempts++;
-      if (item.category == targetCategory) {
+      if (isCorrect) {
         _pool.remove(item);
         _buckets[targetCategory]!.add(item);
       }
     });
 
     if (_pool.isEmpty) {
+      triggerCorrectFeedback();
       Future.delayed(const Duration(milliseconds: 400), () {
         if (!mounted) return;
         Navigator.push(
@@ -49,6 +53,10 @@ class _GroupSortScreenState extends State<GroupSortScreen> {
           ),
         );
       });
+    } else if (isCorrect) {
+      HapticFeedback.mediumImpact();
+    } else {
+      triggerWrongFeedback();
     }
   }
 
@@ -60,31 +68,38 @@ class _GroupSortScreenState extends State<GroupSortScreen> {
       appBar: AppBar(
         title: Text('Group Sort (${widget.data.items.length - _pool.length} von ${widget.data.items.length})'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Wörter einsortieren:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [for (var item in _pool) _buildDraggable(context, item)],
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Wörter einsortieren:', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                const SizedBox(height: 8),
+                wrapWithShake(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [for (var item in _pool) _buildDraggable(context, item)],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: Row(
+                    children: [
+                      for (var category in widget.data.categories) ...[
+                        Expanded(child: _buildBucket(context, category)),
+                        if (category != widget.data.categories.last) const SizedBox(width: 12),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: Row(
-                children: [
-                  for (var category in widget.data.categories) ...[
-                    Expanded(child: _buildBucket(context, category)),
-                    if (category != widget.data.categories.last) const SizedBox(width: 12),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }

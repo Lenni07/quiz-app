@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/flip_tile_word.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
+import '../widgets/count_up_number.dart';
 import 'result_screen.dart';
 
 const int _maxWrongGuesses = 6;
@@ -19,7 +21,7 @@ class FlipTilesScreen extends StatefulWidget {
   State<FlipTilesScreen> createState() => _FlipTilesScreenState();
 }
 
-class _FlipTilesScreenState extends State<FlipTilesScreen> {
+class _FlipTilesScreenState extends State<FlipTilesScreen> with AnswerFeedbackMixin {
   int _currentIndex = 0;
   int _score = 0;
   late Set<String> _guessedLetters;
@@ -43,9 +45,12 @@ class _FlipTilesScreenState extends State<FlipTilesScreen> {
   void _guessLetter(String letter) {
     if (_roundOver || _guessedLetters.contains(letter)) return;
     final word = widget.words[_currentIndex].word;
+    var wasWrongGuess = false;
+    var justWonRound = false;
     setState(() {
       _guessedLetters.add(letter);
       if (!word.contains(letter)) {
+        wasWrongGuess = true;
         _wrongGuesses++;
         if (_wrongGuesses >= _maxWrongGuesses) {
           _roundOver = true;
@@ -56,10 +61,16 @@ class _FlipTilesScreenState extends State<FlipTilesScreen> {
         if (solved) {
           _roundOver = true;
           _roundWon = true;
+          justWonRound = true;
           _score++;
         }
       }
     });
+    if (justWonRound) {
+      triggerCorrectFeedback();
+    } else if (wasWrongGuess) {
+      triggerWrongFeedback();
+    }
   }
 
   void _next() {
@@ -92,70 +103,80 @@ class _FlipTilesScreenState extends State<FlipTilesScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text('Flip Tiles ${_currentIndex + 1} von ${widget.words.length}')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Stufe: $_score von ${widget.words.length}',
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Fehlversuche: $_wrongGuesses von $_maxWrongGuesses',
-              style: TextStyle(
-                fontSize: 14,
-                color: _wrongGuesses >= _maxWrongGuesses - 1
-                    ? Colors.red
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Englischer Hinweis: "${entry.clue}"',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 20),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var i = 0; i < entry.word.length; i++) _buildTile(context, entry.word[i]),
-              ],
-            ),
-            const SizedBox(height: 24),
-            if (!_roundOver)
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 6,
-                runSpacing: 6,
-                children: [for (var letter in _keyboardLetters) _buildKey(context, letter, entry.word)],
-              )
-            else ...[
-              Center(
-                child: Text(
-                  _roundWon ? 'Richtig erraten!' : 'Leider nicht geschafft. Das Wort war "${entry.word}".',
-                  textAlign: TextAlign.center,
+                Row(
+                  children: [
+                    Text('Stufe: ', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    CountUpNumber(_score, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    Text(' von ${widget.words.length}', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Fehlversuche: $_wrongGuesses von $_maxWrongGuesses',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: _roundWon ? Colors.green : Colors.red,
+                    fontSize: 14,
+                    color: _wrongGuesses >= _maxWrongGuesses - 1
+                        ? Colors.red
+                        : colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _next,
-                  child: Text(isLast ? 'Fertig' : 'Nächstes Wort'),
+                const SizedBox(height: 16),
+                Text(
+                  'Englischer Hinweis: "${entry.clue}"',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
-              ),
-            ],
-          ],
-        ),
+                const SizedBox(height: 20),
+                wrapWithShake(
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (var i = 0; i < entry.word.length; i++) _buildTile(context, entry.word[i]),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                if (!_roundOver)
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [for (var letter in _keyboardLetters) _buildKey(context, letter, entry.word)],
+                  )
+                else ...[
+                  Center(
+                    child: Text(
+                      _roundWon ? 'Richtig erraten!' : 'Leider nicht geschafft. Das Wort war "${entry.word}".',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: _roundWon ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _next,
+                      child: Text(isLast ? 'Fertig' : 'Nächstes Wort'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }

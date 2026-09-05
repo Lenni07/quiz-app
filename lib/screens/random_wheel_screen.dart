@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
+import '../widgets/count_up_number.dart';
 import 'result_screen.dart';
 
 const int _segmentCount = 8;
@@ -26,7 +28,8 @@ class RandomWheelScreen extends StatefulWidget {
   State<RandomWheelScreen> createState() => _RandomWheelScreenState();
 }
 
-class _RandomWheelScreenState extends State<RandomWheelScreen> with SingleTickerProviderStateMixin {
+class _RandomWheelScreenState extends State<RandomWheelScreen>
+    with SingleTickerProviderStateMixin, AnswerFeedbackMixin {
   late final List<Question> _roundQuestions;
   late final AnimationController _spinController;
   late Animation<double> _spinAnimation;
@@ -85,6 +88,11 @@ class _RandomWheelScreenState extends State<RandomWheelScreen> with SingleTicker
       _selectedIndex = index;
       if (isCorrect) _score++;
     });
+    if (isCorrect) {
+      triggerCorrectFeedback();
+    } else {
+      triggerWrongFeedback();
+    }
   }
 
   void _next() {
@@ -116,19 +124,27 @@ class _RandomWheelScreenState extends State<RandomWheelScreen> with SingleTicker
 
     return Scaffold(
       appBar: AppBar(title: Text('Random Wheel ${_round + 1} von ${_roundQuestions.length}')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Stufe: $_score von ${_roundQuestions.length}',
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7)),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Text('Stufe: ', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    CountUpNumber(_score, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    Text(' von ${_roundQuestions.length}', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (!_revealed) _buildWheel() else Expanded(child: _buildQuestion(context, colorScheme)),
+              ],
             ),
-            const SizedBox(height: 16),
-            if (!_revealed) _buildWheel() else Expanded(child: _buildQuestion(context, colorScheme)),
-          ],
-        ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }
@@ -182,18 +198,40 @@ class _RandomWheelScreenState extends State<RandomWheelScreen> with SingleTicker
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
-          for (var i = 0; i < question.options.length; i++) ...[
-            _buildOption(context, i, question),
-            const SizedBox(height: 12),
-          ],
+          wrapWithShake(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < question.options.length; i++) ...[
+                  _buildOption(context, i, question),
+                  const SizedBox(height: 12),
+                ],
+              ],
+            ),
+          ),
           const SizedBox(height: 12),
-          if (answered)
+          if (answered) ...[
+            Center(
+              child: Text(
+                _selectedIndex == question.correctIndex
+                    ? 'Richtig!'
+                    : 'Leider falsch. Richtig wäre: "${question.options[question.correctIndex]}"',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: _selectedIndex == question.correctIndex ? Colors.green : Colors.red,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
             Center(
               child: ElevatedButton(
                 onPressed: _next,
                 child: Text(isLast ? 'Fertig' : 'Nächste Runde'),
               ),
             ),
+          ],
         ],
       ),
     );

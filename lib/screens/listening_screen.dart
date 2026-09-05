@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
+import '../widgets/shake.dart';
 import 'result_screen.dart';
 
 /// Hörverständnis-Format (siehe ROADMAP_QuizApp.md Abschnitt 18c): ein
@@ -39,6 +40,7 @@ class _ListeningScreenState extends State<ListeningScreen> {
   int _currentIndex = 0;
   int? _selectedIndex;
   int _score = 0;
+  int _shakeTrigger = 0;
   late final ConfettiController _confettiController;
 
   @override
@@ -91,6 +93,7 @@ class _ListeningScreenState extends State<ListeningScreen> {
         _confettiController.play();
         HapticFeedback.heavyImpact();
       } else {
+        _shakeTrigger++;
         HapticFeedback.mediumImpact();
       }
     });
@@ -172,38 +175,48 @@ class _ListeningScreenState extends State<ListeningScreen> {
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
-                for (var i = 0; i < round.options.length; i++) ...[
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    decoration: BoxDecoration(
-                      color: _colorForOption(i, round.correctIndex) ?? colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => _selectAnswer(i),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                          child: Text(
-                            round.options[i],
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: _selectedIndex == null ? colorScheme.onPrimaryContainer : Colors.white,
+                ShakeOnTrigger(
+                  trigger: _shakeTrigger,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < round.options.length; i++) ...[
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          decoration: BoxDecoration(
+                            color: _colorForOption(i, round.correctIndex) ?? colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _selectAnswer(i),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                                child: Text(
+                                  round.options[i],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: _selectedIndex == null ? colorScheme.onPrimaryContainer : Colors.white,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
+                        const SizedBox(height: 12),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                ],
+                ),
                 if (answered) ...[
                   Text(
-                    isCorrect ? '🎉 Richtig!' : 'Leider falsch.',
+                    isCorrect
+                        ? '🎉 Richtig!'
+                        : 'Leider falsch. Richtig wäre: "${round.options[round.correctIndex]}"',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isCorrect ? Colors.green : Colors.red),
                   ),

@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
 import 'result_screen.dart';
 
 class _Pair {
@@ -22,7 +24,7 @@ class MatchUpScreen extends StatefulWidget {
   State<MatchUpScreen> createState() => _MatchUpScreenState();
 }
 
-class _MatchUpScreenState extends State<MatchUpScreen> {
+class _MatchUpScreenState extends State<MatchUpScreen> with AnswerFeedbackMixin {
   late final List<_Pair> _allPairs;
   late final List<List<_Pair>> _rounds;
   int _roundIndex = 0;
@@ -61,15 +63,21 @@ class _MatchUpScreenState extends State<MatchUpScreen> {
   }
 
   void _handleDrop(int draggedPairId, int targetPairId) {
+    final isCorrect = draggedPairId == targetPairId;
     setState(() {
       _attempts++;
-      if (draggedPairId == targetPairId) {
+      if (isCorrect) {
         _matchedPairIds.add(draggedPairId);
       }
     });
 
     if (_matchedPairIds.length == _rounds[_roundIndex].length) {
+      triggerCorrectFeedback();
       Future.delayed(const Duration(milliseconds: 500), _advance);
+    } else if (isCorrect) {
+      HapticFeedback.mediumImpact();
+    } else {
+      triggerWrongFeedback();
     }
   }
 
@@ -102,31 +110,38 @@ class _MatchUpScreenState extends State<MatchUpScreen> {
       appBar: AppBar(
         title: Text('Match Up (Runde ${_roundIndex + 1} von ${_rounds.length}, $_attempts Versuche)'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: wrapWithShake(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (var pair in _germanOrder)
-                    if (!_matchedPairIds.contains(pair.id)) _buildDraggable(context, pair),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var pair in _germanOrder)
+                          if (!_matchedPairIds.contains(pair.id)) _buildDraggable(context, pair),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var pair in _englishOrder) _buildTarget(context, pair),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var pair in _englishOrder) _buildTarget(context, pair),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }

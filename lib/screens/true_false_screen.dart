@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/true_false.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
+import '../widgets/count_up_number.dart';
 import 'result_screen.dart';
 
 class TrueFalseScreen extends StatefulWidget {
@@ -12,7 +14,7 @@ class TrueFalseScreen extends StatefulWidget {
   State<TrueFalseScreen> createState() => _TrueFalseScreenState();
 }
 
-class _TrueFalseScreenState extends State<TrueFalseScreen> {
+class _TrueFalseScreenState extends State<TrueFalseScreen> with AnswerFeedbackMixin {
   int _currentIndex = 0;
   int _score = 0;
   bool? _selectedAnswer;
@@ -24,6 +26,11 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
       _selectedAnswer = answer;
       if (isCorrect) _score++;
     });
+    if (isCorrect) {
+      triggerCorrectFeedback();
+    } else {
+      triggerWrongFeedback();
+    }
   }
 
   void _next() {
@@ -105,57 +112,69 @@ class _TrueFalseScreenState extends State<TrueFalseScreen> {
       appBar: AppBar(
         title: Text('Wahr oder Falsch ${_currentIndex + 1} von ${widget.statements.length}'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: (_currentIndex + 1) / widget.statements.length),
-                duration: const Duration(milliseconds: 300),
-                builder: (context, value, _) => LinearProgressIndicator(value: value, minHeight: 8),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Stufe: $_score von ${widget.statements.length}',
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              statement.statement,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 40),
-            Row(
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildAnswerButton(context, value: true, icon: Icons.check, label: 'Wahr'),
-                const SizedBox(width: 16),
-                _buildAnswerButton(context, value: false, icon: Icons.close, label: 'Falsch'),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: (_currentIndex + 1) / widget.statements.length),
+                    duration: const Duration(milliseconds: 300),
+                    builder: (context, value, _) => LinearProgressIndicator(value: value, minHeight: 8),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Text('Stufe: ', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    CountUpNumber(_score, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    Text(' von ${widget.statements.length}', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                wrapWithShake(
+                  Text(
+                    statement.statement,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Row(
+                  children: [
+                    _buildAnswerButton(context, value: true, icon: Icons.check, label: 'Wahr'),
+                    const SizedBox(width: 16),
+                    _buildAnswerButton(context, value: false, icon: Icons.close, label: 'Falsch'),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                if (answered) ...[
+                  Text(
+                    isCorrect
+                        ? 'Richtig!'
+                        : 'Leider falsch. Richtig wäre: "${statement.isTrue ? 'Wahr' : 'Falsch'}"',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isCorrect ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _next,
+                    child: Text(isLast ? 'Fertig' : 'Weiter'),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 24),
-            if (answered) ...[
-              Text(
-                isCorrect ? 'Richtig!' : 'Leider falsch.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isCorrect ? Colors.green : Colors.red,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _next,
-                child: Text(isLast ? 'Fertig' : 'Weiter'),
-              ),
-            ],
-          ],
-        ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }

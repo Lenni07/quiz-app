@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
 import 'result_screen.dart';
 
 class _Tile {
@@ -21,7 +23,7 @@ class MatchPairsScreen extends StatefulWidget {
   State<MatchPairsScreen> createState() => _MatchPairsScreenState();
 }
 
-class _MatchPairsScreenState extends State<MatchPairsScreen> {
+class _MatchPairsScreenState extends State<MatchPairsScreen> with AnswerFeedbackMixin {
   late final List<_Tile> _tiles;
   final List<int> _flippedIndices = [];
   final Set<int> _matchedPairIds = {};
@@ -69,6 +71,7 @@ class _MatchPairsScreenState extends State<MatchPairsScreen> {
           _flippedIndices.clear();
         });
         if (_matchedPairIds.length == _totalPairs) {
+          triggerCorrectFeedback();
           Future.delayed(const Duration(milliseconds: 400), () {
             if (!mounted) return;
             Navigator.push(
@@ -83,9 +86,12 @@ class _MatchPairsScreenState extends State<MatchPairsScreen> {
               ),
             );
           });
+        } else {
+          HapticFeedback.mediumImpact();
         }
       } else {
         _checking = true;
+        triggerWrongFeedback();
         Future.delayed(const Duration(milliseconds: 800), () {
           if (!mounted) return;
           setState(() {
@@ -105,45 +111,52 @@ class _MatchPairsScreenState extends State<MatchPairsScreen> {
       appBar: AppBar(
         title: Text('Find the Match (${_matchedPairIds.length} von $_totalPairs, $_attempts Versuche)'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          itemCount: _tiles.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 1.1,
-          ),
-          itemBuilder: (context, index) {
-            final tile = _tiles[index];
-            final revealed = tile.matched || _flippedIndices.contains(index);
-            return Material(
-              color: tile.matched
-                  ? Colors.green.withValues(alpha: 0.4)
-                  : revealed
-                      ? colorScheme.secondaryContainer
-                      : colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => _tapTile(index),
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: revealed
-                        ? Text(
-                            tile.text,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                          )
-                        : Icon(Icons.help_outline, color: colorScheme.onPrimaryContainer),
-                  ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: wrapWithShake(
+              GridView.builder(
+                itemCount: _tiles.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 1.1,
                 ),
+                itemBuilder: (context, index) {
+                  final tile = _tiles[index];
+                  final revealed = tile.matched || _flippedIndices.contains(index);
+                  return Material(
+                    color: tile.matched
+                        ? Colors.green.withValues(alpha: 0.4)
+                        : revealed
+                            ? colorScheme.secondaryContainer
+                            : colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => _tapTile(index),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: revealed
+                              ? Text(
+                                  tile.text,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                )
+                              : Icon(Icons.help_outline, color: colorScheme.onPrimaryContainer),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
+            ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/number_word.dart';
 import '../utils/page_transitions.dart';
+import '../widgets/answer_feedback.dart';
+import '../widgets/count_up_number.dart';
 import 'result_screen.dart';
 
 class RankOrderScreen extends StatefulWidget {
@@ -20,7 +22,7 @@ class RankOrderScreen extends StatefulWidget {
   State<RankOrderScreen> createState() => _RankOrderScreenState();
 }
 
-class _RankOrderScreenState extends State<RankOrderScreen> {
+class _RankOrderScreenState extends State<RankOrderScreen> with AnswerFeedbackMixin {
   int _round = 0;
   int _score = 0;
   late List<NumberWord> _current;
@@ -56,6 +58,11 @@ class _RankOrderScreenState extends State<RankOrderScreen> {
       _isCorrect = isSorted;
       if (isSorted) _score++;
     });
+    if (isSorted) {
+      triggerCorrectFeedback();
+    } else {
+      triggerWrongFeedback();
+    }
   }
 
   void _next() {
@@ -87,79 +94,93 @@ class _RankOrderScreenState extends State<RankOrderScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text('Rank Order ${_round + 1} von ${widget.roundCount}')),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Stufe: $_score von ${widget.roundCount}',
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Ordne die Zahlwörter von klein nach groß (ziehen zum Sortieren):',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ReorderableListView.builder(
-                itemCount: _current.length,
-                onReorderItem: _reorder,
-                itemBuilder: (context, index) {
-                  final word = _current[index];
-                  return Container(
-                    key: ValueKey(word.word),
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Text('${index + 1}.', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6))),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(word.word, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                        ),
-                        const Icon(Icons.drag_handle),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (!_checked)
-              Center(
-                child: ElevatedButton(
-                  onPressed: _check,
-                  child: const Text('Prüfen'),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Text('Stufe: ', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    CountUpNumber(_score, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                    Text(' von ${widget.roundCount}', style: TextStyle(fontSize: 16, color: colorScheme.onSurface.withValues(alpha: 0.7))),
+                  ],
                 ),
-              )
-            else ...[
-              Center(
-                child: Text(
-                  _isCorrect == true ? 'Richtig sortiert!' : 'Leider nicht ganz richtig.',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: _isCorrect == true ? Colors.green : Colors.red,
+                const SizedBox(height: 12),
+                Text(
+                  'Ordne die Zahlwörter von klein nach groß (ziehen zum Sortieren):',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: wrapWithShake(
+                    ReorderableListView.builder(
+                      itemCount: _current.length,
+                      onReorderItem: _reorder,
+                      itemBuilder: (context, index) {
+                        final word = _current[index];
+                        return Container(
+                          key: ValueKey(word.word),
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Text('${index + 1}.', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6))),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(word.word, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                              ),
+                              const Icon(Icons.drag_handle),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _next,
-                  child: Text(isLast ? 'Fertig' : 'Nächste Runde'),
-                ),
-              ),
-            ],
-          ],
-        ),
+                const SizedBox(height: 16),
+                if (!_checked)
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _check,
+                      child: const Text('Prüfen'),
+                    ),
+                  )
+                else ...[
+                  Center(
+                    child: Text(
+                      _isCorrect == true
+                          ? 'Richtig sortiert!'
+                          : 'Leider nicht ganz richtig. Richtig wäre: '
+                              '${(List<NumberWord>.from(_current)..sort((a, b) => a.value.compareTo(b.value))).map((w) => w.word).join(', ')}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: _isCorrect == true ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _next,
+                      child: Text(isLast ? 'Fertig' : 'Nächste Runde'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          ...feedbackOverlayLayers(),
+        ],
       ),
     );
   }
