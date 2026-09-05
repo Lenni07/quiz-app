@@ -39,7 +39,7 @@ class S {
       AppLanguage.de: 'Gegner mit ähnlicher Wertung, Draft-Phase, Best of 3.',
       AppLanguage.en: 'Opponent with a similar rating, draft phase, best of 3.',
     },
-    'landing_1v1_button': {AppLanguage.de: 'Kampf starten', AppLanguage.en: 'Start Battle'},
+    'landing_1v1_button': {AppLanguage.de: 'Quiz-Duell starten', AppLanguage.en: 'Start Quiz Duel'},
 
     // Lernmodus: Abschnitts-Überschriften
     'section_basics': {AppLanguage.de: 'Grundmodi', AppLanguage.en: 'Basics'},
@@ -313,8 +313,12 @@ class S {
     'season_rank_label': {AppLanguage.de: 'Platz {0} diese Season', AppLanguage.en: 'Rank {0} this season'},
     'recent_matches_title': {AppLanguage.de: 'Letzte Matches', AppLanguage.en: 'Recent Matches'},
     'recent_matches_empty': {
-      AppLanguage.de: 'Noch keine Kämpfe – starte deinen ersten!',
-      AppLanguage.en: 'No battles yet – start your first one!',
+      AppLanguage.de: 'Noch keine Quiz-Duelle – starte dein erstes!',
+      AppLanguage.en: 'No quiz duels yet – start your first one!',
+    },
+    'recent_matches_unavailable': {
+      AppLanguage.de: 'Letzte Matches gerade nicht verfügbar.',
+      AppLanguage.en: 'Recent matches currently unavailable.',
     },
     'recent_match_win': {AppLanguage.de: 'Sieg', AppLanguage.en: 'Win'},
     'recent_match_loss': {AppLanguage.de: 'Niederlage', AppLanguage.en: 'Loss'},

@@ -6,7 +6,7 @@ import '../theme/app_theme.dart';
 /// unten, federt beim Antippen spürbar ein und wieder zurück. Optional ein
 /// dezentes Dauer-Pulsieren für die wichtigste Aktion auf einem Bildschirm
 /// (siehe [pulse]). Für die wichtigsten Haupt-Buttons gedacht (Spiel
-/// starten, Kampf starten, ...) - die vielen übrigen Buttons in der App
+/// starten, Quiz-Duell starten, ...) - die vielen übrigen Buttons in der App
 /// nutzen weiterhin den globalen ElevatedButton-Stil aus app_theme.dart.
 class GameButton extends StatefulWidget {
   final String label;

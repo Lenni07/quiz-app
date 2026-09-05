@@ -212,36 +212,45 @@ class _MaritimeIconPainter extends CustomPainter {
     canvas.drawCircle(const Offset(12, 11), 1.6, emblem);
   }
 
+  /// Ein Ruder von [handle] (Griff) bis [tip] (Blattspitze) - mit einem
+  /// deutlich ausgearbeiteten, länglichen Ruderblatt (statt der vorherigen
+  /// kleinen runden Nubben), damit die Form auch bei kleiner Darstellung
+  /// noch als Ruder statt als schlichtes X erkennbar bleibt.
+  void _paintOar(Canvas canvas, Offset handle, Offset tip, Paint shaft, Paint blade, Paint bladeOutline) {
+    final direction = tip - handle;
+    final length = direction.distance;
+    final unit = Offset(direction.dx / length, direction.dy / length);
+    final bladeLength = length * 0.4;
+    final bladeBase = tip - unit * bladeLength;
+
+    canvas.drawLine(handle, bladeBase, shaft);
+    canvas.drawCircle(handle, 1.3, Paint()..color = shaft.color);
+
+    canvas.save();
+    canvas.translate((bladeBase.dx + tip.dx) / 2, (bladeBase.dy + tip.dy) / 2);
+    canvas.rotate(math.atan2(direction.dy, direction.dx));
+    final bladeRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: Offset.zero, width: bladeLength, height: 5.2),
+      const Radius.circular(2.4),
+    );
+    canvas.drawRRect(bladeRect, blade);
+    canvas.drawRRect(bladeRect, bladeOutline);
+    canvas.restore();
+  }
+
   void _paintCrossedOars(Canvas canvas) {
     final shaft = Paint()
       ..color = color
-      ..strokeWidth = 2.2
+      ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round;
     final blade = Paint()..color = color;
+    final bladeOutline = Paint()
+      ..color = const Color(0xFF071B29)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1;
 
-    canvas.drawLine(const Offset(4, 4), const Offset(20, 20), shaft);
-    canvas.save();
-    canvas.translate(4, 4);
-    canvas.rotate(0.785398);
-    canvas.drawOval(const Rect.fromLTWH(-2.6, -1.6, 5.2, 3.2), blade);
-    canvas.restore();
-    canvas.save();
-    canvas.translate(20, 20);
-    canvas.rotate(0.785398);
-    canvas.drawOval(const Rect.fromLTWH(-2.6, -1.6, 5.2, 3.2), blade);
-    canvas.restore();
-
-    canvas.drawLine(const Offset(20, 4), const Offset(4, 20), shaft);
-    canvas.save();
-    canvas.translate(20, 4);
-    canvas.rotate(-0.785398);
-    canvas.drawOval(const Rect.fromLTWH(-2.6, -1.6, 5.2, 3.2), blade);
-    canvas.restore();
-    canvas.save();
-    canvas.translate(4, 20);
-    canvas.rotate(-0.785398);
-    canvas.drawOval(const Rect.fromLTWH(-2.6, -1.6, 5.2, 3.2), blade);
-    canvas.restore();
+    _paintOar(canvas, const Offset(5, 21), const Offset(19, 4), shaft, blade, bladeOutline);
+    _paintOar(canvas, const Offset(19, 21), const Offset(5, 4), shaft, blade, bladeOutline);
   }
 
   @override

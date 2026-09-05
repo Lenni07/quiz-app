@@ -178,7 +178,7 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                     const SizedBox(width: 16),
                     Row(
                       children: [
-                        const Icon(Icons.emoji_events, size: 18),
+                        const MaritimeIcon(MaritimeIconShape.shipWheel, size: 18, color: AppColors.canvas),
                         const SizedBox(width: 4),
                         CountUpNumber(rating),
                       ],
@@ -252,9 +252,9 @@ class _OneVsOneLanding extends StatelessWidget {
                 final streak = ((snapshot.data?.data()?['dailyChallenge'] as Map<String, dynamic>?)?['streak'] as num?)?.toInt() ?? 0;
                 return Row(
                   children: [
-                    Expanded(child: _StatTile(icon: Icons.emoji_events, label: S.t('profile_rating_label'), value: rating)),
+                    Expanded(child: _StatTile(shape: MaritimeIconShape.shipWheel, label: S.t('profile_rating_label'), value: rating)),
                     const SizedBox(width: 12),
-                    Expanded(child: _StatTile(icon: Icons.local_fire_department, label: S.t('streak_tile_label'), value: streak)),
+                    Expanded(child: _StatTile(shape: MaritimeIconShape.lighthouse, label: S.t('streak_tile_label'), value: streak)),
                   ],
                 );
               },
@@ -273,11 +273,11 @@ class _OneVsOneLanding extends StatelessWidget {
 }
 
 class _StatTile extends StatelessWidget {
-  final IconData icon;
+  final MaritimeIconShape shape;
   final String label;
   final int value;
 
-  const _StatTile({required this.icon, required this.label, required this.value});
+  const _StatTile({required this.shape, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -286,7 +286,7 @@ class _StatTile extends StatelessWidget {
       borderRadius: 14,
       child: Column(
         children: [
-          Icon(icon, color: AppColors.brassLight),
+          MaritimeIcon(shape, color: AppColors.brassLight),
           const SizedBox(height: 6),
           CountUpNumber(value, style: displayStyle(fontSize: 20, color: AppColors.canvas)),
           Text(label, style: TextStyle(fontSize: 11, color: AppColors.canvas.withValues(alpha: 0.7))),
@@ -321,7 +321,7 @@ class _SeasonRankTile extends StatelessWidget {
               borderRadius: 14,
               child: Row(
                 children: [
-                  const Icon(Icons.leaderboard, color: AppColors.brassLight),
+                  const MaritimeIcon(MaritimeIconShape.compass, color: AppColors.brassLight),
                   const SizedBox(width: 10),
                   Text(S.f('season_rank_label', [rank]), style: TextStyle(color: AppColors.canvas)),
                 ],
@@ -349,6 +349,14 @@ class _RecentMatchesList extends StatelessWidget {
           .limit(3)
           .snapshots(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          // Kann z. B. auftreten, solange der für diese Abfrage nötige
+          // Firestore-Composite-Index (siehe firestore.indexes.json) noch
+          // nicht live deployt ist - dann bricht die Abfrage sonst
+          // dauerhaft mit einem nie behandelten Fehler ab, statt den
+          // gestalteten Leerzustand zu zeigen.
+          return EmptyState(icon: Icons.wifi_off, message: S.t('recent_matches_unavailable'));
+        }
         if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),

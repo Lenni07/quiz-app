@@ -2,10 +2,12 @@
 
 ## ▶ AKTUELLE ARBEITSREIHENFOLGE (zuerst lesen)
 
-1. **Nachbesserungen am aktuellen Optik-Stand** *(angestoßen)* – Ruder-Icon lesbar machen, kaputten Leerzustand bei "Letzte Matches" beheben, Statistik-Kacheln auf maritime Icons umstellen, Button "Kampf starten" → "Quiz-Duell starten" (inkl. englischer Fassung und aller weiteren "Kampf"-Formulierungen).
+1. **Nachbesserungen am aktuellen Optik-Stand** *(erledigt, siehe Status-Notiz am Dateiende)* – Ruder-Icon lesbar machen, kaputten Leerzustand bei "Letzte Matches" beheben, Statistik-Kacheln auf maritime Icons umstellen, Button "Kampf starten" → "Quiz-Duell starten" (inkl. englischer Fassung und aller weiteren "Kampf"-Formulierungen).
 2. **Asset-Kits sichten** *(Lance)* – bessere Quellen als itch.io: GameDev Market, Unity Asset Store (Dateien lassen sich ohne Unity nutzen), CraftPix, Envato Elements (Abo ca. 16 €/Monat, bei diesem Bedarf günstiger als Einzelkäufe), ArtStation Marketplace.
 3. **Die 17 Spielmodi im Detail durchgehen** – gemeinsam bewerten, welche wirklich Spaß machen und welche verzichtbar sind. Empfehlung: auf 6-8 gute Modi reduzieren, statt 17 mittelmäßige zu pflegen.
 4. **Modi überarbeiten – Optik UND Spielgefühl.** Nicht alle gleichzeitig: zuerst 2-3 Modi als Referenz-Qualität ausarbeiten (Vorschlag: Quiz/Multiple Choice, True/False, Hörverständnis), dann die restlichen daran ausrichten. Stellschrauben fürs Spielgefühl: Tempo/Countdown, Combo-Mechanik bei Serien, sofortiges Feedback ohne Wartezeit, befriedigender Rundenabschluss mit hochzählenden Zahlen, Sound-Design.
+
+5. **Personalisierte Fragen aus Profildaten** (Abschnitt 18f) – Profilfelder Geburtsdatum und Geschlecht ergänzen, Platzhalter-System für Fragen einbauen.
 
 **Zurückgestellt:** Abschnitt 18d (Download-Seite/Hosting), Abschnitt 18e (Ligen- und EP-System – Ranking-Konzept noch nicht final), Live-Deployment aller bisher nur lokal getesteten Server-Logik.
 
@@ -324,6 +326,22 @@ Damit sind die beiden Bereiche auch inhaltlich sauber getrennt: **Lernmodus = Pr
 
 **Bewusst nicht übernommen:** Mechaniken, die auf Verlustangst und künstliche Dringlichkeit setzen (ablaufende Timer mit Druckaufbau, "dein Streak stirbt in 2 Stunden!", Lootboxen). Die App hat echten beruflichen Nutzen – Motivation über sichtbaren Fortschritt und Wettbewerb mit Kollegen trägt hier weiter als künstlicher Druck, und es besteht sonst das Risiko, dass die App als nervig empfunden und deinstalliert wird.
 
+## 18f. Personalisierte Fragen aus Profildaten
+
+**Idee:** Fragen nach persönlichen Angaben werden mit den echten Profildaten des Nutzers beantwortet, statt mit erfundenen Beispielwerten. Bei "Wie heißen Sie?" ist die richtige Antwort der eigene Vorname, bei "Wie alt sind Sie?" das eigene Alter, bei Berufsbezeichnungen die passende Form (Kellner/Kellnerin).
+
+**Warum das wertvoll ist:** Wenn ein Gast an Bord fragt "Wie heißen Sie?", muss das Crew-Mitglied den eigenen Namen sagen, nicht einen auswendig gelernten Beispielnamen. Man übt damit genau das, was später tatsächlich gebraucht wird.
+
+**Zusätzliche Profilfelder:**
+- **Geburtsdatum** (nicht "Alter" als feste Zahl – sonst stimmt die Angabe nach einem Jahr nicht mehr; die App berechnet das Alter daraus selbst)
+- **Geschlecht** (männlich/weiblich/divers). Das ist hier **grammatisch nötig**, nicht kosmetisch: Kellner/Kellnerin, "Ich bin Deutscher/Deutsche", Adjektivendungen. Bei "divers" gibt es im Deutschen keine saubere neutrale Berufsform – die Person wählt dann selbst, welche Form sie lernen möchte.
+
+**Technische Umsetzung:** Fragen enthalten Platzhalter im Text (z. B. `{vorname}`, `{alter}`, `{position}`), die beim Anzeigen durch die echten Profildaten ersetzt werden. Bei Multiple Choice wird die richtige Antwortoption aus dem Profil erzeugt, die falschen Optionen aus anderen plausiblen Werten.
+
+**Abgrenzung und Randbedingungen:**
+- Nur ein Teil der Fragen ist personalisierbar (Vorstellung, persönliche Angaben) – es handelt sich um eine Eigenschaft bestimmter Fragen-Vorlagen, nicht um einen Ausbau über alle Inhalte.
+- **Im 1 vs 1 sieht jeder Spieler seine eigene Fassung.** Der Gegner darf die persönlichen Daten nicht sehen; beide bekommen ihre personalisierte Version derselben Frage, die Bewertung bleibt gleichwertig.
+
 ## 18d. Verteilung: Web-Version + APK-Download über Firebase Hosting
 
 **Entscheidung:** Erster Verteilweg ist **nicht** der App Store, sondern eine eigene Adresse über **Firebase Hosting** (bereits Teil des Projekts, kostenlos im bestehenden Tarif, keine zusätzliche Plattform nötig – Vercel o. Ä. wäre redundant).
@@ -341,16 +359,16 @@ Damit sind die beiden Bereiche auch inhaltlich sauber getrennt: **Lernmodus = Pr
 
 In den Optionen soll es eine Sprachumschaltung Deutsch/Englisch geben – aber **nur für die Bedienoberfläche** (Menüs, Reiter-Beschriftungen, Buttons, Anleitungstexte, Systemmeldungen usw.). Die eigentlichen Deutsch-Lerninhalte/Fragen bleiben immer auf Deutsch, unabhängig von der gewählten Oberflächensprache – macht didaktisch Sinn, da das Ziel ja das Deutschlernen ist, nur die Bedienung soll für alle verständlich sein, unabhängig vom Englisch-Niveau.
 
-## Status Abschnitt 18e Teil 1 – Antwort-Feedback + Lernmodus-Fortschritt (Stand 2026-09-05)
+## Status: Nachbesserungen am Optik-Stand (Punkt 1 der aktuellen Arbeitsreihenfolge) – Stand 2026-09-05
 
-Wie angewiesen **nur** die beiden unten stehenden Punkte umgesetzt – Ligen-System und Aktivitäts-EP bewusst ausgelassen, da das Ranking-Konzept laut Statuszeile oben noch nicht final ist. In zwei Teilschritten committet/gepusht:
+Alle vier Punkte umgesetzt, in einem Schritt committet/gepusht:
 
-**1. Stärkeres Antwort-Feedback in allen Formaten:** Bisher hatten nur "Allgemeinwissen-Quiz" und "Hörverständnis" Konfetti/Wackel-Effekt/Haptik. Neuer `AnswerFeedbackMixin` (`lib/widgets/answer_feedback.dart`) bündelt Konfetti, grünes Aufblitzen, Wackeln und Haptik und wurde in allen 14 verbleibenden Formaten ergänzt (Wahr/Falsch, Lückentext, Richtige Reihenfolge, Gameshow-Quiz, Bild-Quiz, Open the Box, Random Wheel, Duell, Rank Order, Word Magnets, Find the Match, Flip Tiles, Match Up, Group Sort). Punktzahlen zählen jetzt hoch (`CountUpNumber`) statt zu springen, und wo bisher nicht vorhanden, wird die richtige Lösung bei falscher Antwort jetzt explizit als Text angezeigt (Multiple-Choice-Formate zeigten sie vorher nur indirekt über die grüne Einfärbung der richtigen Option). Karteikarten bewusst ausgenommen (Selbsteinschätzung, kein Richtig/Falsch). Für die Sounds gab es kein Audio-Package im Projekt und keine unbedenkliche Quelle für fertige Sound-Dateien - stattdessen werden kurze Töne zur Laufzeit per Sinus-Synthese erzeugt (`lib/audio/tone_generator.dart`, `lib/audio/sound_effects.dart`, neues Package `audioplayers`), kein Lizenzrisiko.
+**1. Ruder-Icon lesbar gemacht.** Die bisherigen "gekreuzten Ruder" bestanden aus zwei X-Linien mit vier winzigen, fast runden Blättchen an den Enden – bei kleiner Darstellung kaum von einem einfachen X zu unterscheiden. Neu gezeichnet (`lib/widgets/maritime_icon.dart`): zwei Ruder mit deutlich länglichen, abgerundeten Blättern (mit dunkler Kontur-Linie für Lesbarkeit) an den beiden oberen Enden, Griffe mit kleinem Knauf an den unteren Enden – als Alternative wie Steuerrad oder gekreuzte Signalflaggen wurde nicht gebraucht, die Ausarbeitung reicht.
 
-**2. Fortschrittsanzeige im Lernmodus:** `Question`-Modell um `level` (1-6) und `topic` (grammatisches Schlagwort, z. B. "Kasus", "Höflichkeitsformen") ergänzt, analog zum bisherigen Scoping der Department-Tags nur für dieses eine Datenmodell. Der bestehende Fragenkatalog (`assets/questions.json`, 37 Fragen) wurde mit plausiblen Level-/Themen-Werten befüllt. Neuer `QuestionMasteryService` (`lib/services/question_mastery_service.dart`) speichert rein lokal über `shared_preferences` pro Frage Versuche und aktuellen Richtig-Serien-Zähler (2 in Folge richtig = "sicher") - bewusst kein Firestore, da der Lernmodus offline-first bleiben und keine EP vergeben soll. Neuer `ProgressScreen`, erreichbar über eine neue Kachel oben im Lernmodus-Reiter, zeigt Fortschritt pro Level, die (mindestens einmal versuchten) drei schwächsten Themen und die Liste noch nicht sicher sitzender Fragen. Mastery wird bei jeder Antwort in Allgemeinwissen-Quiz, Gameshow-Quiz, Open the Box, Random Wheel und Duell mitgeschrieben (nicht bei "Konversation üben", das keine echten Katalogfragen, sondern aus Sentence-Daten synthetisierte nutzt).
+**2. Leerzustand bei "Letzte Matches" repariert.** Ursache gefunden: `_RecentMatchesList` (main_tabs_screen.dart) behandelte nur den Lade- und den Daten-Fall, aber nie `snapshot.hasError` – lief die zugrunde liegende Firestore-Abfrage (players array-contains + orderBy createdAt) auf einen Fehler, blieb die Ansicht in einem unbehandelten Zustand hängen statt den gestalteten Leerzustand zu zeigen. Sehr wahrscheinliche Fehlerquelle: der dafür nötige Firestore-Composite-Index (`firestore.indexes.json`) ist noch nicht live deployt (das ganze 1-vs-1-Backend ist es laut Roadmap-Status bisher nicht), wodurch die Abfrage auf der echten Firestore-Instanz mit "index required" fehlschlägt. Fix: `hasError` wird jetzt abgefangen und zeigt einen eigenen Fehler-Leerzustand ("Letzte Matches gerade nicht verfügbar"), analog zum bestehenden Muster in der Rangliste. Zusammen mit der Icon-Reparatur aus Punkt 1 (dasselbe Ruder-Icon wird auch im echten Leerzustand verwendet) sollte das Problem behoben sein – **da mir kein Browser-Werkzeug zur Verfügung steht, konnte ich das nicht visuell verifizieren, bitte selbst gegenprüfen.**
 
-Bewusst nicht umgesetzt: Ligen-System, Aktivitäts-EP, Timer mit Drohkulisse, Lootboxen.
+**3. Statistik-Kacheln auf maritime Icons umgestellt.** "Wertung" nutzt jetzt das Steuerrad-Icon (passt zu "Können/Kontrolle", wird konsistent auch im Kopfbereich statt des Pokal-Icons verwendet), "Streak" den Leuchtturm (Sinnbild für eine Lichtquelle, die Nacht für Nacht brennt – passt zum Gedanken "jeden Tag dabei"). Der Saison-Rang-Kachel wurde zusätzlich von einem generischen Ranglisten-Icon auf den Kompass umgestellt (eigene Positionsbestimmung), da er direkt neben den beiden anderen jetzt-maritimen Kacheln lag und sonst inkonsistent gewirkt hätte – nicht explizit angefordert, aber naheliegend aus demselben Grund.
 
-**Getestet:** `flutter analyze`, `flutter test` (32 Tests, davon 5 neu für den Mastery-Service inkl. Schwachstellen-Sortierung) und `flutter build web` laufen sauber. Echter visueller/akustischer Eindruck konnte von mir nicht geprüft werden (kein Browser-/Audio-Werkzeug in dieser Umgebung).
+**4. "Kampf" durchgängig durch "Quiz-Duell" ersetzt.** Button-Text (Deutsch + Englisch), der Leerzustand-Text bei "Letzte Matches" ("Noch keine Kämpfe" → "Noch keine Quiz-Duelle"/"No battles" → "No quiz duels") und ein Code-Kommentar. Geprüft: "Duell"/"duel" selbst kommt an vielen weiteren Stellen vor, gehört dort aber zum separat existierenden **lokalen Mehrspieler-Duell** (Abschnitt 5/Phase 4a, eigenes Feature) und wurde bewusst nicht angefasst, da nicht gemeint.
 
-**Noch nicht deployt** - wie angewiesen, wird gesammelt am Ende deployt.
+**Getestet:** `flutter analyze` clean, `flutter test` (32 Tests, inkl. einer aktualisierten Textassertion im Smoke-Test) und `flutter build web` laufen sauber. **Noch nicht deployt** – reine Flutter/Client-Änderung, aber wie immer erst nach explizitem Signal.
