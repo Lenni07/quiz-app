@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../audio/sound_effects.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../services/career_match_service.dart';
@@ -59,6 +60,7 @@ class _ResultScreenState extends State<ResultScreen> {
     if (_isGoodResult) {
       _launchFireworks();
     }
+    SoundEffects.instance.playRoundEnd();
     _submitToFleetWar();
     _recordDailyChallenge();
 

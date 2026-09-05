@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../audio/sound_settings.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/avatar_option.dart';
@@ -71,6 +72,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() {});
   }
 
+  Future<void> _toggleSound(bool enabled) async {
+    await setSoundEnabled(enabled);
+    if (mounted) setState(() {});
+  }
+
   Future<void> _pickCertificateDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -138,6 +144,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                       selected: {language},
                       onSelectionChanged: (selection) => _changeLanguage(selection.first),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(S.t('profile_sound_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
+                    const SizedBox(height: 4),
+                    Text(
+                      S.t('profile_sound_subtitle'),
+                      style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.7)),
+                    ),
+                    const SizedBox(height: 8),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: soundEnabled,
+                      builder: (context, enabled, _) => SegmentedButton<bool>(
+                        segments: [
+                          ButtonSegment(value: true, label: Text(S.t('profile_sound_on'))),
+                          ButtonSegment(value: false, label: Text(S.t('profile_sound_off'))),
+                        ],
+                        selected: {enabled},
+                        onSelectionChanged: (selection) => _toggleSound(selection.first),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Center(

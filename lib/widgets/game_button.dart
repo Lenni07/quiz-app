@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../audio/sound_effects.dart';
 import '../theme/app_theme.dart';
 
 /// Plastischer, "drückbarer" Button (siehe ROADMAP_QuizApp.md Abschnitt
@@ -56,6 +57,13 @@ class _GameButtonState extends State<GameButton> with SingleTickerProviderStateM
     setState(() => _pressed = value);
   }
 
+  void _handleTap() {
+    final onPressed = widget.onPressed;
+    if (onPressed == null) return;
+    SoundEffects.instance.playClick();
+    onPressed();
+  }
+
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onPressed != null;
@@ -65,7 +73,7 @@ class _GameButtonState extends State<GameButton> with SingleTickerProviderStateM
       onTapDown: (_) => _setPressed(true),
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
-      onTap: widget.onPressed,
+      onTap: _handleTap,
       child: AnimatedScale(
         scale: _pressed ? 0.92 : 1.0,
         duration: Duration(milliseconds: _pressed ? 90 : 220),

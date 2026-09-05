@@ -105,6 +105,10 @@ flutter:
     - assets/flip_tiles.json
     - assets/group_sort.json
     - assets/images/ocean_sunset_bg.png
+    - assets/sounds/correct.ogg
+    - assets/sounds/wrong.ogg
+    - assets/sounds/click.ogg
+    - assets/sounds/round_end.ogg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

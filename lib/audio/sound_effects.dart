@@ -1,32 +1,33 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'tone_generator.dart';
+import 'sound_settings.dart';
 
-/// Kurze, synthetisch erzeugte Antwort-Töne (siehe ROADMAP_QuizApp.md
-/// Abschnitt 18e) - kein Sound-Asset nötig, daher kein Lizenzrisiko. Fehler
-/// (z. B. kein Audio-Ausgabegerät, Browser blockiert Autoplay) werden
-/// bewusst verschluckt, damit ein fehlender Ton nie das Spiel unterbricht.
+/// Kurze UI-/Antwort-Sounds (siehe ROADMAP_QuizApp.md Abschnitt 18e) - echte
+/// Sound-Dateien aus Kenneys "Interface Sounds"-Paket (kenney.nl, CC0/
+/// gemeinfrei, siehe assets/sounds/KENNEY_LICENSE.txt), lokal in
+/// assets/sounds/ gebündelt statt zur Laufzeit nachgeladen, damit sie auch
+/// offline funktionieren. Fehler (z. B. kein Audio-Ausgabegerät, Browser
+/// blockiert Autoplay) werden bewusst verschluckt, damit ein fehlender Ton
+/// nie das Spiel unterbricht. Jeder Sound bekommt einen eigenen
+/// [AudioPlayer], damit sich schnell aufeinanderfolgende Sounds (z. B.
+/// Klick direkt gefolgt von Antwort-Feedback) nicht gegenseitig abschneiden.
 class SoundEffects {
   SoundEffects._();
   static final SoundEffects instance = SoundEffects._();
 
-  final AudioPlayer _player = AudioPlayer();
+  final AudioPlayer _correctPlayer = AudioPlayer();
+  final AudioPlayer _wrongPlayer = AudioPlayer();
+  final AudioPlayer _clickPlayer = AudioPlayer();
+  final AudioPlayer _roundEndPlayer = AudioPlayer();
 
-  late final BytesSource _correctTone = BytesSource(
-    generateWavTone(frequencies: const [880, 1318.51]),
-  );
-  late final BytesSource _wrongTone = BytesSource(
-    generateWavTone(frequencies: const [220], noteDuration: const Duration(milliseconds: 220)),
-  );
-
-  Future<void> playCorrect() async {
+  Future<void> _play(AudioPlayer player, String assetPath) async {
+    if (!soundEnabled.value) return;
     try {
-      await _player.play(_correctTone);
+      await player.play(AssetSource(assetPath));
     } catch (_) {}
   }
 
-  Future<void> playWrong() async {
-    try {
-      await _player.play(_wrongTone);
-    } catch (_) {}
-  }
+  Future<void> playCorrect() => _play(_correctPlayer, 'sounds/correct.ogg');
+  Future<void> playWrong() => _play(_wrongPlayer, 'sounds/wrong.ogg');
+  Future<void> playClick() => _play(_clickPlayer, 'sounds/click.ogg');
+  Future<void> playRoundEnd() => _play(_roundEndPlayer, 'sounds/round_end.ogg');
 }

@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'audio/sound_settings.dart';
 import 'firebase_options.dart';
 import 'l10n/app_language.dart';
 import 'l10n/strings.dart';
@@ -15,6 +16,7 @@ import 'widgets/phone_frame.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await loadSavedLanguage();
+  await loadSavedSoundSetting();
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     debugPrint('Firebase: initialized');

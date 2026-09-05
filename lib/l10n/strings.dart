@@ -302,6 +302,13 @@ class S {
     'profile_language_title': {AppLanguage.de: 'Sprache', AppLanguage.en: 'Language'},
     'profile_language_de': {AppLanguage.de: 'Deutsch', AppLanguage.en: 'German'},
     'profile_language_en': {AppLanguage.de: 'English', AppLanguage.en: 'English'},
+    'profile_sound_title': {AppLanguage.de: 'Sound', AppLanguage.en: 'Sound'},
+    'profile_sound_subtitle': {
+      AppLanguage.de: 'Antwort- und Button-Sounds - z. B. in gemeinsamen Räumen an Bord stummschalten.',
+      AppLanguage.en: 'Answer and button sounds - e.g. mute in shared rooms on board.',
+    },
+    'profile_sound_on': {AppLanguage.de: 'An', AppLanguage.en: 'On'},
+    'profile_sound_off': {AppLanguage.de: 'Aus', AppLanguage.en: 'Off'},
 
     // Tages-Challenge / Streak
     'daily_challenge_streak': {
