@@ -4,6 +4,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../audio/sound_effects.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
@@ -92,9 +93,11 @@ class _ListeningScreenState extends State<ListeningScreen> {
         _score++;
         _confettiController.play();
         HapticFeedback.heavyImpact();
+        SoundEffects.instance.playCorrect();
       } else {
         _shakeTrigger++;
         HapticFeedback.mediumImpact();
+        SoundEffects.instance.playWrong();
       }
     });
   }

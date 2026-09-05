@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../audio/sound_effects.dart';
 import '../models/question.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
@@ -51,10 +52,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
         _showFlash = true;
         _confettiController.play();
         HapticFeedback.heavyImpact();
+        SoundEffects.instance.playCorrect();
       } else {
         _streak = 0;
         _shakeTrigger++;
         HapticFeedback.mediumImpact();
+        SoundEffects.instance.playWrong();
       }
     });
     if (isCorrect) {

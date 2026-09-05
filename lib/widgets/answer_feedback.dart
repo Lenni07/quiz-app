@@ -1,6 +1,7 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../audio/sound_effects.dart';
 import 'firework_particle.dart';
 import 'shake.dart';
 
@@ -17,6 +18,7 @@ mixin AnswerFeedbackMixin<T extends StatefulWidget> on State<T> {
 
   void triggerCorrectFeedback() {
     HapticFeedback.heavyImpact();
+    SoundEffects.instance.playCorrect();
     _feedbackConfetti.play();
     setState(() => _feedbackShowFlash = true);
     Future.delayed(const Duration(milliseconds: 250), () {
@@ -26,6 +28,7 @@ mixin AnswerFeedbackMixin<T extends StatefulWidget> on State<T> {
 
   void triggerWrongFeedback() {
     HapticFeedback.mediumImpact();
+    SoundEffects.instance.playWrong();
     setState(() => _feedbackShakeTrigger++);
   }
 
