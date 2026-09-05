@@ -176,6 +176,38 @@ class S {
     },
     'ranking_you_suffix': {AppLanguage.de: '(du)', AppLanguage.en: '(you)'},
 
+    // Lernmodus-Fortschritt (siehe ROADMAP_QuizApp.md Abschnitt 18e)
+    'progress_card_title': {AppLanguage.de: 'Mein Fortschritt', AppLanguage.en: 'My Progress'},
+    'progress_card_subtitle': {
+      AppLanguage.de: 'Level-Fortschritt, Schwachstellen und offene Fragen',
+      AppLanguage.en: 'Level progress, weak spots and open questions',
+    },
+    'progress_title': {AppLanguage.de: 'Mein Fortschritt', AppLanguage.en: 'My Progress'},
+    'progress_levels_heading': {AppLanguage.de: 'Fortschritt pro Level', AppLanguage.en: 'Progress by Level'},
+    'progress_level_label': {AppLanguage.de: 'Level {0}', AppLanguage.en: 'Level {0}'},
+    'progress_level_detail': {
+      AppLanguage.de: '{0} von {1} Fragen sicher',
+      AppLanguage.en: '{0} of {1} questions mastered',
+    },
+    'progress_weak_spots_heading': {AppLanguage.de: 'Deine Schwachstellen', AppLanguage.en: 'Your Weak Spots'},
+    'progress_weak_spots_empty': {
+      AppLanguage.de: 'Noch keine Daten - spiel ein paar Runden im Lernmodus!',
+      AppLanguage.en: 'No data yet - play a few rounds in Learning Mode!',
+    },
+    'progress_weak_spot_detail': {
+      AppLanguage.de: '{0} von {1} sicher',
+      AppLanguage.en: '{0} of {1} mastered',
+    },
+    'progress_open_questions_heading': {AppLanguage.de: 'Noch nicht sicher', AppLanguage.en: 'Not Yet Mastered'},
+    'progress_open_questions_empty': {
+      AppLanguage.de: 'Alles sicher! Du beherrschst aktuell den ganzen Fragenkatalog.',
+      AppLanguage.en: 'All mastered! You currently know the entire question catalog.',
+    },
+    'progress_unavailable': {
+      AppLanguage.de: 'Fortschritt konnte nicht geladen werden.',
+      AppLanguage.en: 'Progress could not be loaded.',
+    },
+
     // 1-vs-1-Warteschlange
     'queue_no_account': {
       AppLanguage.de: 'Keine Verbindung zum Konto - 1 vs 1 ist gerade nicht verfügbar.',

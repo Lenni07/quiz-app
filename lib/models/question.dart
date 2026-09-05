@@ -12,11 +12,23 @@ class Question {
   /// allgemein.
   final String department;
 
+  /// Berlitz-Level (1-6, siehe ROADMAP_QuizApp.md Abschnitt 18e), zu dem die
+  /// Frage inhaltlich passt - Grundlage für die Fortschrittsanzeige im
+  /// Lernmodus. Fehlt das Feld, gilt Level 1 als Standard.
+  final int level;
+
+  /// Grammatisches/thematisches Schlagwort (z. B. "Kasus", "Artikel",
+  /// "Höflichkeitsformen") für die Schwachstellen-Erkennung im Lernmodus.
+  /// Fehlt das Feld, gilt "Allgemein".
+  final String topic;
+
   Question({
     required this.question,
     required this.options,
     required this.correctIndex,
     this.department = 'general',
+    this.level = 1,
+    this.topic = 'Allgemein',
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
@@ -25,6 +37,8 @@ class Question {
       options: List<String>.from(json['options'] as List),
       correctIndex: json['correctIndex'] as int,
       department: json['department'] as String? ?? 'general',
+      level: json['level'] as int? ?? 1,
+      topic: json['topic'] as String? ?? 'Allgemein',
     );
   }
 
@@ -34,6 +48,8 @@ class Question {
       'options': options,
       'correctIndex': correctIndex,
       'department': department,
+      'level': level,
+      'topic': topic,
     };
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/question.dart';
+import '../services/question_mastery_service.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/answer_feedback.dart';
 import '../widgets/count_up_number.dart';
@@ -83,7 +84,9 @@ class _RandomWheelScreenState extends State<RandomWheelScreen>
 
   void _selectAnswer(int index) {
     if (_selectedIndex != null) return;
-    final isCorrect = index == _roundQuestions[_round].correctIndex;
+    final question = _roundQuestions[_round];
+    final isCorrect = index == question.correctIndex;
+    QuestionMasteryService().recordAnswer(question, wasCorrect: isCorrect);
     setState(() {
       _selectedIndex = index;
       if (isCorrect) _score++;

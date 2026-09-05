@@ -26,6 +26,7 @@ import 'listening_screen.dart';
 import 'match_pairs_screen.dart';
 import 'match_up_screen.dart';
 import 'open_box_screen.dart';
+import 'progress_screen.dart';
 import 'question_screen.dart';
 import 'random_wheel_screen.dart';
 import 'rank_order_screen.dart';
@@ -177,6 +178,10 @@ class ModeSelectScreen extends StatelessWidget {
     Navigator.push(context, buildFadeSlideRoute(const DuelModeScreen()));
   }
 
+  void _openProgress(BuildContext context) {
+    Navigator.push(context, buildFadeSlideRoute(const ProgressScreen()));
+  }
+
   Future<void> _startListening(BuildContext context) async {
     final sentences = await loadSentences();
     if (context.mounted) {
@@ -196,6 +201,13 @@ class ModeSelectScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+            _ModeCard(
+              title: S.t('progress_card_title'),
+              subtitle: S.t('progress_card_subtitle'),
+              icon: Icons.insights,
+              onTap: () => _openProgress(context),
+            ),
+            const SizedBox(height: 20),
             _SectionHeader(S.t('section_basics')),
             _ModeCard(
               title: gameFormatById('hoerverstehen').displayName,

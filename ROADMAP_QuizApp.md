@@ -1,5 +1,14 @@
 # Quiz-App – Erweiterte Vision & Roadmap (über das MVP hinaus)
 
+## ▶ AKTUELLE ARBEITSREIHENFOLGE (zuerst lesen)
+
+1. **Nachbesserungen am aktuellen Optik-Stand** *(angestoßen)* – Ruder-Icon lesbar machen, kaputten Leerzustand bei "Letzte Matches" beheben, Statistik-Kacheln auf maritime Icons umstellen, Button "Kampf starten" → "Quiz-Duell starten" (inkl. englischer Fassung und aller weiteren "Kampf"-Formulierungen).
+2. **Asset-Kits sichten** *(Lance)* – bessere Quellen als itch.io: GameDev Market, Unity Asset Store (Dateien lassen sich ohne Unity nutzen), CraftPix, Envato Elements (Abo ca. 16 €/Monat, bei diesem Bedarf günstiger als Einzelkäufe), ArtStation Marketplace.
+3. **Die 17 Spielmodi im Detail durchgehen** – gemeinsam bewerten, welche wirklich Spaß machen und welche verzichtbar sind. Empfehlung: auf 6-8 gute Modi reduzieren, statt 17 mittelmäßige zu pflegen.
+4. **Modi überarbeiten – Optik UND Spielgefühl.** Nicht alle gleichzeitig: zuerst 2-3 Modi als Referenz-Qualität ausarbeiten (Vorschlag: Quiz/Multiple Choice, True/False, Hörverständnis), dann die restlichen daran ausrichten. Stellschrauben fürs Spielgefühl: Tempo/Countdown, Combo-Mechanik bei Serien, sofortiges Feedback ohne Wartezeit, befriedigender Rundenabschluss mit hochzählenden Zahlen, Sound-Design.
+
+**Zurückgestellt:** Abschnitt 18d (Download-Seite/Hosting), Abschnitt 18e (Ligen- und EP-System – Ranking-Konzept noch nicht final), Live-Deployment aller bisher nur lokal getesteten Server-Logik.
+
 Dieses Dokument ergänzt die bestehende `CLAUDE.md`. Die dortige Phase 1 (MVP) bleibt technisch das Fundament und wird **nicht** rückgebaut – die folgenden Phasen bauen schrittweise darauf auf. Am Ende steht eine Zusammenfassung, welche Punkte der ursprünglichen "Kein X"-Liste aus der MVP-Phase jetzt bewusst aufgehoben werden.
 
 ## 1. Gesamtvision
@@ -264,7 +273,7 @@ Felder im Nutzerprofil:
 
 **Wichtig – wo die Department-Tags greifen und wo nicht:**
 - **Lernmodus (allein üben):** Department-Tags greifen voll. Nutzer bekommen überwiegend Inhalte ihrer eigenen Abteilung (Housekeeping-Vokabular für Housekeeper, Check-in-Wortschatz für die Rezeption usw.) – hier bringt Relevanz den größten Lerneffekt.
-- **1 vs 1 / Wettkampf:** Bewusst **nur allgemeine, abteilungsübergreifende Inhalte**. Grund: Die Rangliste ist bereits nach Deutsch-Level segmentiert (Abschnitt 18b); käme Department dazu, entstünden 30-48 getrennte Matchmaking-Pools – bei ein paar hundert Crew-Mitgliedern pro Schiff wären viele Pools praktisch leer und die Warteschlange fände keinen Gegner. Außerdem haben so beide Spieler dieselben fairen Voraussetzungen, unabhängig von ihrer Abteilung.
+- **1 vs 1 / Wettkampf:** Bewusst **nur allgemeine, abteilungsübergreifende Inhalte**. Grund: Es gibt bewusst **einen einzigen gemeinsamen Matchmaking-Pool** ohne jede Segmentierung (siehe Abschnitt 18b – auch die ursprünglich geplante Level-Segmentierung wurde verworfen). Käme eine Department-Segmentierung dazu, entstünden 5-8 getrennte Pools – bei ein paar hundert Crew-Mitgliedern pro Schiff wären viele davon praktisch leer und die Warteschlange fände keinen Gegner. Außerdem haben so beide Spieler dieselben fairen Voraussetzungen, unabhängig von ihrer Abteilung.
 - **Flottentreffen:** ebenfalls nur allgemeine Inhalte, da schiffsübergreifend.
 - **Es wird also NICHT nach Department gematcht** – Housekeeper spielen ganz normal gegen alle anderen, nur eben mit allgemeinen Inhalten.
 
@@ -274,65 +283,74 @@ Felder im Nutzerprofil:
 
 **Tages-Challenge mit Streak:** Eine tägliche Aufgabe, die Bonuspunkte bringt, plus Streak-Zähler (aufeinanderfolgende Tage). Passt zur monatlichen Season-Logik und zur Clash-Royale-Gamification aus Abschnitt 16; gibt Crew-Mitgliedern mit unregelmäßigen Schichten einen klaren, kleinen täglichen Anreiz.
 
+## 18e. Ligen-System und stärkeres Antwort-Feedback (Motivation/Nutzungshäufigkeit)
+
+Ziel: Die App soll häufig und regelmäßig genutzt werden. Vorbild ist hier bewusst **Duolingo**, nicht Mobile Legends – Duolingo hat genau dieses Problem (Leute zum täglichen Lernen bringen) mit vergleichsweise einfacher Grafik gelöst, während der MLBB-Look aufwendig gezeichnete Assets erfordern würde und thematisch nicht zu einer Vokabel-App für Crew-Mitglieder passt.
+
+> **Status: noch nicht endgültig entschieden.** Die Grundrichtung (Aktivitäts-EP im Wettkampf, Fortschrittsanzeige im Lernmodus) steht, die konkrete Ausgestaltung des Ranking-Systems ist aber offen und kann bei Bedarf verschoben werden.
+
+**Grundlage: Aktivitäts-EP – aber nur im Wettkampfbereich**
+
+Es wird eine **Aktivitäts-Punktzahl (EP)** eingeführt, getrennt von der ELO-Wertung:
+- EP gibt es **ausschließlich für 1 vs 1 und die Tages-Challenge**, nicht für den Lernmodus.
+- EP messen **Fleiß/Aktivität**, ELO misst weiterhin ausschließlich **Können** und bestimmt nur noch, *gegen wen* man im 1 vs 1 antritt.
+- **Warum EP nötig sind:** Eine Liga, die nach ELO rankt, belohnt Untätigkeit – wer oben steht und aufhört zu spielen, bleibt oben ("Rank Camping"), weil ELO nicht mit Aktivität wächst.
+
+**Lernmodus: bewusst keine EP, stattdessen Fortschrittsanzeige**
+
+Der Lernmodus bekommt ausdrücklich **keine Punktebelohnung**. Die Motivation ist dort bereits intrinsisch vorhanden: Die Crew lernt für die Level-Prüfungen, von denen Zertifikat und berufliches Weiterkommen abhängen. Punkte draufzusetzen wäre nicht nur überflüssig, sondern potenziell schädlich – wenn Lernen Punkte bringt, verschiebt sich der Fokus leicht vom Verstehen zum Punktesammeln.
+
+Was stattdessen wirklich hilft, ist **Orientierung für die Prüfungsvorbereitung**:
+- Fortschritt pro Level/Einheit ("Du beherrschst 60 % des Level-3-Wortschatzes")
+- Erkennung von Schwachstellen ("Deine Schwachstelle sind Dativ-Präpositionen")
+- Liste der noch nicht sitzenden Inhalte ("Diese 12 Vokabeln sitzen noch nicht")
+
+Damit sind die beiden Bereiche auch inhaltlich sauber getrennt: **Lernmodus = Prüfungsvorbereitung** (Motivation durch sichtbaren Lernfortschritt), **1 vs 1 = Wettkampf** (Motivation durch Liga und EP). Keine einheitliche Punktewährung über alles.
+
+**Ligen-System (wöchentlich):**
+- Ligen ranken nach **in dieser Woche gesammelten Aktivitäts-EP**, nicht nach ELO und ausdrücklich nicht nach dem selbstangegebenen Deutsch-Level (das würde die in Abschnitt 18b bewusst abgeschaffte Segmentierung wieder einführen).
+- Spieler werden nach Wertung in Gruppen von ca. **30 Personen** einsortiert (Bronze, Silber, Gold, …). Pro Woche steigen die besten ca. 7 auf, die schlechtesten ca. 5 ab.
+- **Warum das wirkt:** In einer Rangliste mit mehreren hundert Leuten hängt der Durchschnittsspieler anonym im Mittelfeld fest. In einer Gruppe von 30 steht man immer knapp an einer Auf- oder Abstiegsgrenze – das erzeugt die eigentliche Spannung. Und weil nach Wochen-EP gerankt wird, hilft es nichts, sich auf einem Platz auszuruhen: Wer pausiert, wird von den anderen überholt.
+- **Rhythmus:** wöchentlich. Ergänzt den monatlichen Flottenwettbewerb (Abschnitt 6) sinnvoll – schneller Wochenrhythmus für den Einzelnen, langsamer Monatsrhythmus fürs Schiff. Ein Monat wäre für Ligen zu lang, um Spannung zu erzeugen.
+
+**Verhältnis zum bestehenden Ranglisten-Reiter:** Die Liga **ersetzt die Rangliste nicht als eigener Reiter**, sondern wird zur Hauptansicht des vorhandenen Reiters "Rangliste" (Abschnitt 16). Zwei getrennte Reiter wären redundant, da die Liga im Kern selbst eine Rangliste ist – nur auf ca. 30 Personen zugeschnitten.
+- **Standardansicht:** die eigene aktuelle Liga mit farblich markierten Auf-/Abstiegszonen und Countdown bis zum Wochenende.
+- **Nebenansicht über einen kleinen Umschalter:** die globale Bestenliste des Schiffs – das Einzige, was die Liga nicht leisten kann, nämlich zu zeigen, wer insgesamt ganz vorne steht (motivierend für Spitzenspieler, Orientierung für alle anderen).
+- Reiteranzahl bleibt damit bei 5, keine zusätzliche Navigationsebene.
+
+**Stärkeres Antwort-Feedback:**
+- Sofortiges, üppiges Feedback bei jeder Antwort: Konfetti-/Partikeleffekte bei richtigen Antworten, hochzählende Punktzahlen, deutliche Animationen, passende Sounds.
+- Bei falschen Antworten klares, aber nicht entmutigendes Feedback (der Wackel-Effekt ist ein guter Anfang), plus sofortige Anzeige der richtigen Lösung im Lernmodus.
+
+**Bewusst nicht übernommen:** Mechaniken, die auf Verlustangst und künstliche Dringlichkeit setzen (ablaufende Timer mit Druckaufbau, "dein Streak stirbt in 2 Stunden!", Lootboxen). Die App hat echten beruflichen Nutzen – Motivation über sichtbaren Fortschritt und Wettbewerb mit Kollegen trägt hier weiter als künstlicher Druck, und es besteht sonst das Risiko, dass die App als nervig empfunden und deinstalliert wird.
+
+## 18d. Verteilung: Web-Version + APK-Download über Firebase Hosting
+
+**Entscheidung:** Erster Verteilweg ist **nicht** der App Store, sondern eine eigene Adresse über **Firebase Hosting** (bereits Teil des Projekts, kostenlos im bestehenden Tarif, keine zusätzliche Plattform nötig – Vercel o. Ä. wäre redundant).
+
+**Umfang:**
+- Die **Web-Version der App** wird unter einer festen Adresse gehostet und ist direkt im Browser nutzbar – ohne Installation, auf Android, iPhone und Desktop gleichermaßen.
+- Auf derselben Seite steht zusätzlich die **APK zum Download** für Android-Nutzer, die die installierte Variante bevorzugen (bessere Offline-Nutzung, Icon auf dem Startbildschirm).
+- **Die App ist kostenfrei.**
+
+**Warum nicht (zunächst) App Store:** Google Play wäre machbar (einmalig 25 $), Apple dagegen deutlich aufwendiger: 99 $ pro Jahr und iOS-Builds erfordern zwingend einen Mac mit Xcode – auf der aktuellen Windows-Umgebung nicht möglich. Über die Web-Version erreicht man iPhone-Nutzer ohne diese Hürde vollständig.
+
+**Zum Geschäftsmodell (offen, später zu entscheiden):** Angedacht ist, dass Crew-Mitglieder zahlen und die Kosten über Crew Welfare erstattet bekommen (wiederkehrende Einnahmen statt einer einmaligen Zahlung der Reederei). Marktanhaltspunkte: etablierte Sprachlern-Anbieter im Firmengeschäft liegen bei ca. 8-10 € pro Nutzer/Monat; für ein Modell mit Vorleistung durch die Crew wären realistisch eher 2-5 € pro Monat bzw. 20-40 € im Jahr. Eine Direktzahlung der Reederei läge grob bei 2.000-10.000 € pro Schiff und Jahr, bedeutet aber Ausschreibungen, Datenschutzprüfungen und lange Verkaufszyklen. Stärkste Verhandlungsposition entsteht ohnehin erst mit belegbaren Nutzungszahlen – deshalb zunächst kostenfrei verteilen.
+
 ## 19. Englische Bedienoberfläche (Reiter "Optionen")
 
 In den Optionen soll es eine Sprachumschaltung Deutsch/Englisch geben – aber **nur für die Bedienoberfläche** (Menüs, Reiter-Beschriftungen, Buttons, Anleitungstexte, Systemmeldungen usw.). Die eigentlichen Deutsch-Lerninhalte/Fragen bleiben immer auf Deutsch, unabhängig von der gewählten Oberflächensprache – macht didaktisch Sinn, da das Ziel ja das Deutschlernen ist, nur die Bedienung soll für alle verständlich sein, unabhängig vom Englisch-Niveau.
 
-**Status: bereits umgesetzt** (`SegmentedButton` im Profil-Reiter, `lib/l10n/`) – deckt Reiter, Menüs, Profil, Rangliste, Flottentreffen, 1-vs-1-Warteschlange/Draft/Match-Ergebnis, Start-/Ergebnisbildschirm ab.
+## Status Abschnitt 18e Teil 1 – Antwort-Feedback + Lernmodus-Fortschritt (Stand 2026-09-05)
 
-## 21. Status Abschnitt 18c – alle drei Features umgesetzt (Stand 2026-09-03)
+Wie angewiesen **nur** die beiden unten stehenden Punkte umgesetzt – Ligen-System und Aktivitäts-EP bewusst ausgelassen, da das Ranking-Konzept laut Statuszeile oben noch nicht final ist. In zwei Teilschritten committet/gepusht:
 
-**Hinweis:** Abschnitt 18c (oben) verweist noch darauf, dass die Rangliste "bereits nach Deutsch-Level segmentiert" sei - das ist durch Abschnitt 18b überholt (genau umgekehrt: ein einziger gemeinsamer Pool, keine Level-Segmentierung). Ändert aber nichts an der eigentlichen Regel ("kein Department-Matching") - die gilt mit einem einzigen Pool sogar noch klarer.
+**1. Stärkeres Antwort-Feedback in allen Formaten:** Bisher hatten nur "Allgemeinwissen-Quiz" und "Hörverständnis" Konfetti/Wackel-Effekt/Haptik. Neuer `AnswerFeedbackMixin` (`lib/widgets/answer_feedback.dart`) bündelt Konfetti, grünes Aufblitzen, Wackeln und Haptik und wurde in allen 14 verbleibenden Formaten ergänzt (Wahr/Falsch, Lückentext, Richtige Reihenfolge, Gameshow-Quiz, Bild-Quiz, Open the Box, Random Wheel, Duell, Rank Order, Word Magnets, Find the Match, Flip Tiles, Match Up, Group Sort). Punktzahlen zählen jetzt hoch (`CountUpNumber`) statt zu springen, und wo bisher nicht vorhanden, wird die richtige Lösung bei falscher Antwort jetzt explizit als Text angezeigt (Multiple-Choice-Formate zeigten sie vorher nur indirekt über die grüne Einfärbung der richtigen Option). Karteikarten bewusst ausgenommen (Selbsteinschätzung, kein Richtig/Falsch). Für die Sounds gab es kein Audio-Package im Projekt und keine unbedenkliche Quelle für fertige Sound-Dateien - stattdessen werden kurze Töne zur Laufzeit per Sinus-Synthese erzeugt (`lib/audio/tone_generator.dart`, `lib/audio/sound_effects.dart`, neues Package `audioplayers`), kein Lizenzrisiko.
 
-**1. Hörverständnis (Text-to-Speech):** 17. Spielformat, `flutter_tts`, liest einen deutschen Satz aus den bestehenden sentences.json-Daten vor, vier englische Bedeutungs-Optionen zur Auswahl (bewusst keine Dopplung zu "Konversation üben", das dieselben Daten für die passende deutsche Erwiderung nutzt). Wie alle 16 bisherigen Formate im Katalog registriert, dadurch automatisch auch im 1-vs-1-Draft-Pool.
+**2. Fortschrittsanzeige im Lernmodus:** `Question`-Modell um `level` (1-6) und `topic` (grammatisches Schlagwort, z. B. "Kasus", "Höflichkeitsformen") ergänzt, analog zum bisherigen Scoping der Department-Tags nur für dieses eine Datenmodell. Der bestehende Fragenkatalog (`assets/questions.json`, 37 Fragen) wurde mit plausiblen Level-/Themen-Werten befüllt. Neuer `QuestionMasteryService` (`lib/services/question_mastery_service.dart`) speichert rein lokal über `shared_preferences` pro Frage Versuche und aktuellen Richtig-Serien-Zähler (2 in Folge richtig = "sicher") - bewusst kein Firestore, da der Lernmodus offline-first bleiben und keine EP vergeben soll. Neuer `ProgressScreen`, erreichbar über eine neue Kachel oben im Lernmodus-Reiter, zeigt Fortschritt pro Level, die (mindestens einmal versuchten) drei schwächsten Themen und die Liste noch nicht sicher sitzender Fragen. Mastery wird bei jeder Antwort in Allgemeinwissen-Quiz, Gameshow-Quiz, Open the Box, Random Wheel und Duell mitgeschrieben (nicht bei "Konversation üben", das keine echten Katalogfragen, sondern aus Sentence-Daten synthetisierte nutzt).
 
-**2. Department-Tags:** wie abgestimmt nur beim `Question`-Modell (Allgemeinwissen-Quiz, Gameshow-Quiz, Open the Box, Random Wheel) - die übrigen sechs Datenmodelle bleiben ungetaggt, **müssen das Feld aber bekommen, bevor echte Inhalte eingepflegt werden** (siehe Warnhinweis oben). Lernmodus zeigt eigenes Department + allgemeine Inhalte, 1 vs 1 bewusst nur allgemeine Inhalte (`lib/models/department.dart`, beide Filterfunktionen fallen auf die ungefilterte Liste zurück statt einen Nutzer ganz ohne Fragen dastehen zu lassen). Das Profil-Department-Feld wurde dafür von Freitext auf eine feste Auswahl umgestellt, damit die Filterung zuverlässig matcht. Ein Dutzend Platzhalter-Fragen mit Department-Tags ergänzt, damit überhaupt etwas zu filtern ist.
+Bewusst nicht umgesetzt: Ligen-System, Aktivitäts-EP, Timer mit Drohkulisse, Lootboxen.
 
-**3. Tages-Challenge mit Streak:** die erste abgeschlossene Runde eines Tages (egal welches Format) zählt, verlängert einen Streak-Zähler und gibt einen Punkte-Bonus (10 Punkte, eigene Wahl da die Roadmap keinen Betrag vorgab) auf den Flottentreffen-Punktestand der laufenden Season - kein neues Punktesystem, nutzt die bestehende scoreSubmissions-Infrastruktur. "Noch kein Schiff" wird sinnvoll abgefangen: der Streak zählt trotzdem, nur der Punkte-Bonus entfällt (nutzt dafür `FleetWarService.submitScore()`, das genau das schon eingebaut hatte). Streak-Anzeige (🔥-Icon) im Kopfbereich der Reiter-Navigation, Datumsvergleich auf Basis der Gerätezeit (kein serverseitiger Zeitzonen-Abgleich - Schiffe reisen durch Zeitzonen, "heute" ist bewusst das, was der Nutzer gerade auf seinem Gerät sieht).
-
-**Getestet:** neue automatisierte Tests für die Department-Filterung (`test/department_test.dart`) und die Streak-Logik inkl. Tag-Sprung/Lücken-Verhalten (`test/daily_challenge_service_test.dart`, mit injizierbarer Uhrzeit für reproduzierbare Tests ohne echten Tageswechsel). `flutter analyze`, `flutter test` (27 Tests) und `flutter build web` laufen nach allen drei Teilschritten sauber. Sprachausgabe (TTS) konnte nicht tatsächlich gehört werden (kein Audio-Testwerkzeug in dieser Umgebung).
+**Getestet:** `flutter analyze`, `flutter test` (32 Tests, davon 5 neu für den Mastery-Service inkl. Schwachstellen-Sortierung) und `flutter build web` laufen sauber. Echter visueller/akustischer Eindruck konnte von mir nicht geprüft werden (kein Browser-/Audio-Werkzeug in dieser Umgebung).
 
 **Noch nicht deployt** - wie angewiesen, wird gesammelt am Ende deployt.
-
-## 22. Status Abschnitt 13b Schritt 1 – rein Flutter-basierte Optik-Verbesserungen umgesetzt (Stand 2026-09-03)
-
-Alle sechs angeforderten Punkte umgesetzt, in vier Teilschritten committet/gepusht:
-
-- **Display-Schrift:** Baloo 2 (fünf Schnitte), lokal als Font-Asset gebündelt statt über Google Fonts zur Laufzeit geladen - läuft damit auch beim allerersten App-Start ganz ohne Internet (Offline-first-Prinzip). Nur für Überschriften/Buttons/Zahlen, Fließtext bleibt auf der Systemschrift.
-- **Tiefe:** zwei wiederverwendbare Widgets (`GameButton`, `GamePanel` in `lib/widgets/`) mit Verlauf, Schlagschatten und Glanzlicht-Fase, angewendet auf die wichtigsten Buttons/Karten/Panels app-weit (Start-, 1-vs-1-, Lernmodus-, Profil-, Rangliste-, Flottentreffen- und Ergebnisbildschirme).
-- **Maritime Farbpalette:** Tiefseeblau/Messing-Gold/Segeltuch-Beige/Signalrot ersetzt das bisherige einfarbige Blau-auf-Dunkelblau, zentral in `lib/theme/app_theme.dart` - wirkt automatisch auf die ganze App über das globale Theme.
-- **Animationen:** federnde Antipp-Effekte auf `GameButton`/Lernmodus-Kacheln, ein neuer Wackel-Effekt (`lib/widgets/shake.dart`) bei falschen Antworten im meistgenutzten Frage-Bildschirm, animierte Fortschrittsbalken/Zahlen waren teils schon vorhanden und wurden nicht angetastet.
-- **Dichteres Layout:** die von der Analyse in Abschnitt 13a explizit kritisierte 1-vs-1-Leere (ein einzelnes Icon in großer Fläche) zeigt jetzt Wertung, Tages-Streak, Saison-Platzierung (per Firestore-Aggregations-Query) und die letzten drei gewerteten Matches.
-- **Programmatische Ornamente:** `WaveDivider` (Wellenband) und `RopeDivider` (gedrehtes Tau) über `CustomPainter`, ganz ohne Bild-Assets - eingesetzt am Startbildschirm, unter dem Kopfbereich der Reiter-Navigation und als Abschnitts-Trenner im Lernmodus.
-
-**Kleine Verhaltensänderung dabei:** die 1-vs-1-Ansicht zeigt jetzt konsequent wie Profil/Flottentreffen eine "keine Verbindung zum Konto"-Meldung statt eines Buttons ohne Login (der sowieso fehlschlagen würde) - der bestehende Smoke-Test wurde entsprechend angepasst.
-
-**Getestet:** `flutter analyze`, `flutter test` (27 Tests) und `flutter build web` laufen nach jedem der vier Teilschritte sauber; die beiden neuen Firestore-Abfragen für die 1-vs-1-Landing (letzte Matches, Saison-Rang) wurden im Emulator mit echtem Nutzer-Token gegen echte Sicherheitsregeln verifiziert, inkl. eines neuen Composite-Index in `firestore.indexes.json`. Echter visueller Eindruck im Browser konnte von mir nicht geprüft werden (kein Browser-Werkzeug in dieser Umgebung) - der lokale Server läuft unter `http://localhost:8768/` zur eigenen Ansicht.
-
-**Nicht angefasst (bewusst, wie mit 16 der Format-Bildschirme):** die Bedienelemente innerhalb der 17 einzelnen Spielformate selbst - das wäre ein deutlich größerer, separater Schritt, analog zur Entscheidung bei der Sprachumschaltung (Abschnitt 19).
-
-**Noch nicht deployt** - reine Flutter/Client-Änderung, kein Firebase-Deploy nötig.
-
-## 23. Status Optik-Runde 2 – umgesetzt in vier Teilschritten (Stand 2026-09-03)
-
-Aufbauend auf Abschnitt 22 (Design-Fundament), diesmal auf konkrete Kritikpunkte am zu generischen Standard-Flutter-Look:
-
-**1. Maritimes Icon-Set:** neues `MaritimeIcon`-Widget - selbstgezeichnet per `CustomPainter` (Leuchtturm, Steuerrad, Rettungsring, Möwe, Bullauge, Kapitänsmütze, gekreuzte Ruder), keine externen Icon-Pakete. "1 vs 1" zeigt jetzt gekreuzte Ruder statt der Karate-Figur, alle 10 Profil-Avatare sind komplett maritim statt zufällig.
-
-**2. Verlaufs-Hintergrund + Textur:** `MaritimeBackground` (Verlauf hell→dunkel plus sehr dezente Wellenlinien-Textur per `CustomPainter`) ersetzt die flache Fläche - über einen einzigen Wrap-Punkt auf allen fünf Reitern sowie den vier eigenständigen Bildschirmen (Warteschlange, Draft, Match-Ergebnis, Ergebnis) angewendet.
-
-**3. Handy-Proportionen:** `PhoneFrame`, einmalig über `MaterialApp.builder` gelegt statt pro Bildschirm - begrenzt die komplette App (inkl. AppBar/Reiter-Leiste) auf 480px Breite, mittig zentriert mit dunkler Blende drumherum. Im breiten Browser sieht die App dadurch wie auf einem Handy aus.
-
-**4. Gestaltete Leerzustände:** neues `EmptyState`-Widget (Icon + motivierende Zeile) ersetzt nackte Textzeilen bei "Letzte Matches", Rangliste und Flottentreffen-Leaderboard, auch für deren Fehlerzustände.
-
-**5. Mehr Tiefe:** `GamePanel`/`GameButton` simulieren jetzt eine Innenschattierung (Glanzlicht-Streifen oben, Schatten-Streifen unten) statt der vorherigen einfachen Fase - Flutter hat keine echten CSS-artigen Inset-Schatten, das ist die Annäherung.
-
-**6. Animation/Juice:** `CountUpNumber` (zählt vom zuletzt gezeigten zum neuen Wert hoch, nicht immer ab 0) für Wertung/Streak/Ranglisten-/Flottentreffen-Zahlen; `PopIn` (Panels poppen beim Erscheinen sanft auf) auf der 1-vs-1-Landing; `GameButton` hat einen optionalen `pulse`-Modus für die jeweils wichtigste Aktion (Start-/Kampf-Button) und federt beim Antippen jetzt spürbarer.
-
-**7. Abstände/Rhythmus:** nicht als eigener systematischer Durchgang gemacht, sondern dort vereinheitlicht, wo ohnehin Code angefasst wurde (z. B. 1-vs-1-Landing auf durchgängig 16px zwischen Abschnitten) - kein flächendeckendes Spacing-System eingeführt. Bei Bedarf als eigener, gezielter Schritt nachholbar.
-
-**Getestet:** `flutter analyze`, `flutter test` (27 Tests) und `flutter build web` laufen nach jedem der vier Teilschritte sauber. Echter visueller Eindruck im Browser konnte von mir weiterhin nicht geprüft werden (kein Browser-Werkzeug in dieser Umgebung).
-
-**Nicht angefasst (bewusst, wie schon in Runde 1):** die Bedienelemente innerhalb der 17 einzelnen Spielformate selbst.
-
-**Zurückgestellt (wie angewiesen):** Abschnitt 18d (Download-Seite). **Noch nicht deployt** - reine Flutter/Client-Änderung.
