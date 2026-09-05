@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../audio/sound_effects.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
+import '../utils/tts_voice_rank.dart';
 import '../widgets/firework_particle.dart';
 import '../widgets/shake.dart';
 import 'result_screen.dart';
@@ -43,6 +44,7 @@ class _ListeningScreenState extends State<ListeningScreen> {
   int _score = 0;
   int _shakeTrigger = 0;
   late final ConfettiController _confettiController;
+  Map<String, String>? _selectedVoice;
 
   @override
   void initState() {
@@ -69,6 +71,39 @@ class _ListeningScreenState extends State<ListeningScreen> {
       debugPrint('Hörverständnis: deutsche Stimme laut Browser verfügbar = $available');
     } catch (e) {
       debugPrint('Hörverständnis: Prüfung auf deutsche Stimme fehlgeschlagen - $e');
+    }
+  }
+
+  /// Sucht einmalig (Ergebnis wird gecacht) die beste verfügbare deutsche
+  /// Stimme und wählt sie explizit aus, statt sich auf `setLanguage`s
+  /// naive "erste passende Stimme"-Auswahl zu verlassen. Schlägt beim
+  /// ersten Versuch evtl. fehl, weil die Stimmenliste des Browsers noch
+  /// nicht geladen ist (siehe `_checkGermanVoice`) - wird dann bei der
+  /// nächsten Frage automatisch erneut versucht.
+  Future<void> _selectBestGermanVoice() async {
+    if (_selectedVoice != null) return;
+    try {
+      final raw = await _tts.getVoices;
+      final voices = (raw as List)
+          .whereType<Object>()
+          .map((v) => Map<String, String>.from(v as Map))
+          .toList();
+      final german = voices.where((v) => (v['locale'] ?? '').toLowerCase().startsWith('de')).toList();
+      if (german.isEmpty) {
+        debugPrint('Hörverständnis: noch keine deutsche Stimme in der Browser-/System-Liste gefunden');
+        return;
+      }
+      german.sort((a, b) => rankTtsVoiceName(a['name'] ?? '').compareTo(rankTtsVoiceName(b['name'] ?? '')));
+      final best = german.first;
+      await _tts.setVoice(best);
+      _selectedVoice = best;
+      debugPrint(
+        'Hörverständnis: gewählte Stimme = "${best['name']}" (${best['locale']}, '
+        'Rang ${rankTtsVoiceName(best['name'] ?? '')} von 0-2, 0 = am besten) - '
+        '${german.length} deutsche Stimme(n) insgesamt verfügbar',
+      );
+    } catch (e) {
+      debugPrint('Hörverständnis: Stimmenauswahl fehlgeschlagen - $e');
     }
   }
 
@@ -106,6 +141,10 @@ class _ListeningScreenState extends State<ListeningScreen> {
       // (z. B. bei der nächsten Frage) treffen auf eine bereits geladene
       // Liste.
       await _tts.setLanguage('de-DE');
+      // Überschreibt die naive "erste passende Stimme" von setLanguage mit
+      // der besten verfügbaren, sobald die Browser-/System-Stimmenliste
+      // geladen ist (siehe ROADMAP_QuizApp.md Abschnitt 18g).
+      await _selectBestGermanVoice();
       await _tts.speak(_rounds[_currentIndex].sentence.question);
     } catch (e) {
       debugPrint('Hörverständnis: Sprachausgabe fehlgeschlagen - $e');
