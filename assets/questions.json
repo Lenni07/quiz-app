@@ -1,103 +1,188 @@
 [
   {
+    "id": "q01",
     "question": "Wie viele Fälle (Kasus) hat die deutsche Sprache?",
-    "options": ["3", "4", "5", "6"],
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
     "correctIndex": 1,
     "level": 2,
     "topic": "Kasus"
   },
   {
+    "id": "q02",
     "question": "Welcher Buchstabe kommt im deutschen Alphabet vor, aber nicht im englischen?",
-    "options": ["ß", "Q", "X", "Y"],
+    "options": [
+      "ß",
+      "Q",
+      "X",
+      "Y"
+    ],
     "correctIndex": 0,
     "level": 1,
     "topic": "Rechtschreibung"
   },
   {
+    "id": "q03",
     "question": "Wer schrieb das Drama \"Faust\"?",
-    "options": ["Johann Wolfgang von Goethe", "Friedrich Schiller", "Franz Kafka", "Bertolt Brecht"],
+    "options": [
+      "Johann Wolfgang von Goethe",
+      "Friedrich Schiller",
+      "Franz Kafka",
+      "Bertolt Brecht"
+    ],
     "correctIndex": 0,
     "level": 4,
     "topic": "Kultur"
   },
   {
+    "id": "q04",
     "question": "Wie lautet der bestimmte Artikel für ein weibliches Substantiv im Nominativ?",
-    "options": ["der", "die", "das", "dem"],
+    "options": [
+      "der",
+      "die",
+      "das",
+      "dem"
+    ],
     "correctIndex": 1,
     "level": 1,
     "topic": "Artikel"
   },
   {
+    "id": "q05",
     "question": "Welches Wort ist ein umgangssprachliches Synonym für \"Fahrrad\"?",
-    "options": ["Drahtesel", "Blechesel", "Stahlross", "Rennschnecke"],
+    "options": [
+      "Drahtesel",
+      "Blechesel",
+      "Stahlross",
+      "Rennschnecke"
+    ],
     "correctIndex": 0,
     "level": 3,
     "topic": "Wortschatz"
   },
   {
+    "id": "q06",
     "question": "Wie viele grammatische Geschlechter (Genera) gibt es im Deutschen?",
-    "options": ["2", "3", "4", "5"],
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
     "correctIndex": 1,
     "level": 1,
     "topic": "Artikel"
   },
   {
+    "id": "q07",
     "question": "Was bedeutet das deutsche Wort \"Fernweh\"?",
-    "options": ["Sehnsucht nach der Ferne", "Angst vor großer Höhe", "Starkes Heimweh", "Müdigkeit nach Reisen"],
+    "options": [
+      "Sehnsucht nach der Ferne",
+      "Angst vor großer Höhe",
+      "Starkes Heimweh",
+      "Müdigkeit nach Reisen"
+    ],
     "correctIndex": 0,
     "level": 3,
     "topic": "Wortschatz"
   },
   {
+    "id": "q08",
     "question": "In welchem Jahr trat die deutsche Rechtschreibreform in Kraft?",
-    "options": ["1996", "1980", "2005", "1945"],
+    "options": [
+      "1996",
+      "1980",
+      "2005",
+      "1945"
+    ],
     "correctIndex": 0,
     "level": 5,
     "topic": "Kultur"
   },
   {
+    "id": "q09",
     "question": "Was ist ein \"Kompositum\" in der deutschen Sprache?",
-    "options": ["Ein zusammengesetztes Wort", "Ein Fremdwort", "Eine Verbform", "Ein Fall (Kasus)"],
+    "options": [
+      "Ein zusammengesetztes Wort",
+      "Ein Fremdwort",
+      "Eine Verbform",
+      "Ein Fall (Kasus)"
+    ],
     "correctIndex": 0,
     "level": 3,
     "topic": "Wortbildung"
   },
   {
+    "id": "q10",
     "question": "Wie lautet der Plural von \"das Kind\"?",
-    "options": ["die Kinder", "die Kindern", "die Kinds", "die Kinde"],
+    "options": [
+      "die Kinder",
+      "die Kindern",
+      "die Kinds",
+      "die Kinde"
+    ],
     "correctIndex": 0,
     "level": 2,
     "topic": "Plural"
   },
   {
+    "id": "q11",
     "question": "Welcher Fall (Kasus) beantwortet die Frage \"Wessen?\"",
-    "options": ["Nominativ", "Genitiv", "Dativ", "Akkusativ"],
+    "options": [
+      "Nominativ",
+      "Genitiv",
+      "Dativ",
+      "Akkusativ"
+    ],
     "correctIndex": 1,
     "level": 3,
     "topic": "Kasus"
   },
   {
+    "id": "q12",
     "question": "Wer gilt durch seine Bibelübersetzung als Wegbereiter der modernen deutschen Schriftsprache?",
-    "options": ["Martin Luther", "Johannes Gutenberg", "Friedrich Schiller", "Thomas Mann"],
+    "options": [
+      "Martin Luther",
+      "Johannes Gutenberg",
+      "Friedrich Schiller",
+      "Thomas Mann"
+    ],
     "correctIndex": 0,
     "level": 4,
     "topic": "Kultur"
   },
   {
+    "id": "q13",
     "question": "Was bedeutet das Wort \"Zeitgeist\"?",
-    "options": ["Die vorherrschende Stimmung einer Epoche", "Ein spukendes Uhrwerk", "Ein historisches Datum", "Ein Zeitungsartikel"],
+    "options": [
+      "Die vorherrschende Stimmung einer Epoche",
+      "Ein spukendes Uhrwerk",
+      "Ein historisches Datum",
+      "Ein Zeitungsartikel"
+    ],
     "correctIndex": 0,
     "level": 4,
     "topic": "Wortschatz"
   },
   {
+    "id": "q14",
     "question": "Wie viele Wortarten werden im Deutschen traditionell unterschieden?",
-    "options": ["5", "8", "10", "12"],
+    "options": [
+      "5",
+      "8",
+      "10",
+      "12"
+    ],
     "correctIndex": 2,
     "level": 3,
     "topic": "Wortarten"
   },
   {
+    "id": "q15",
     "question": "Welches Gesetz galt lange als Beispiel für besonders lange deutsche Komposita, bevor es 2013 abgeschafft wurde?",
     "options": [
       "Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz",
@@ -110,6 +195,7 @@
     "topic": "Kultur"
   },
   {
+    "id": "q16",
     "question": "Was ist der Unterschied zwischen \"das\" und \"dass\"?",
     "options": [
       "\"das\" ist Artikel/Pronomen, \"dass\" leitet einen Nebensatz ein",
@@ -122,20 +208,33 @@
     "topic": "Rechtschreibung"
   },
   {
+    "id": "q17",
     "question": "Welche Sprache hat die deutsche Sprache historisch am stärksten mit Lehnwörtern geprägt?",
-    "options": ["Latein", "Chinesisch", "Japanisch", "Finnisch"],
+    "options": [
+      "Latein",
+      "Chinesisch",
+      "Japanisch",
+      "Finnisch"
+    ],
     "correctIndex": 0,
     "level": 5,
     "topic": "Kultur"
   },
   {
+    "id": "q18",
     "question": "Wie heißt der Dialekt, der typischerweise in Bayern gesprochen wird?",
-    "options": ["Bairisch", "Sächsisch", "Plattdeutsch", "Schwäbisch"],
+    "options": [
+      "Bairisch",
+      "Sächsisch",
+      "Plattdeutsch",
+      "Schwäbisch"
+    ],
     "correctIndex": 0,
     "level": 3,
     "topic": "Kultur"
   },
   {
+    "id": "q19",
     "question": "Was versteht man unter \"Denglisch\"?",
     "options": [
       "Eine Mischung aus Deutsch und Englisch",
@@ -148,138 +247,246 @@
     "topic": "Wortschatz"
   },
   {
+    "id": "q20",
     "question": "Wie nennt man umgangssprachlich einen besonders langen, verschachtelten Satz?",
-    "options": ["Bandwurmsatz", "Kurzsatz", "Hauptsatz", "Fragesatz"],
+    "options": [
+      "Bandwurmsatz",
+      "Kurzsatz",
+      "Hauptsatz",
+      "Fragesatz"
+    ],
     "correctIndex": 0,
     "level": 4,
     "topic": "Wortschatz"
   },
   {
+    "id": "q21",
     "question": "Wer schrieb die Erzählung \"Die Verwandlung\"?",
-    "options": ["Franz Kafka", "Thomas Mann", "Bertolt Brecht", "Hermann Hesse"],
+    "options": [
+      "Franz Kafka",
+      "Thomas Mann",
+      "Bertolt Brecht",
+      "Hermann Hesse"
+    ],
     "correctIndex": 0,
     "level": 5,
     "topic": "Kultur"
   },
   {
+    "id": "q22",
     "question": "Was bedeutet die Vorsilbe \"un-\" in den meisten deutschen Wörtern?",
-    "options": ["Verneinung / Gegenteil", "Verstärkung", "Wiederholung", "Verkleinerung"],
+    "options": [
+      "Verneinung / Gegenteil",
+      "Verstärkung",
+      "Wiederholung",
+      "Verkleinerung"
+    ],
     "correctIndex": 0,
     "level": 2,
     "topic": "Wortbildung"
   },
   {
+    "id": "q23",
     "question": "Welches Modalverb drückt im Deutschen eine Erlaubnis aus?",
-    "options": ["dürfen", "müssen", "sollen", "wollen"],
+    "options": [
+      "dürfen",
+      "müssen",
+      "sollen",
+      "wollen"
+    ],
     "correctIndex": 0,
     "level": 2,
     "topic": "Modalverben"
   },
   {
+    "id": "q24",
     "question": "Wie viele Buchstaben hat das deutsche Alphabet, wenn man Umlaute (ä, ö, ü) und ß mitzählt?",
-    "options": ["26", "29", "30", "33"],
+    "options": [
+      "26",
+      "29",
+      "30",
+      "33"
+    ],
     "correctIndex": 2,
     "level": 1,
     "topic": "Rechtschreibung"
   },
   {
+    "id": "q25",
     "question": "Welches deutsche Wort wurde unverändert ins Englische übernommen?",
-    "options": ["Kindergarten", "Nur englische Wörter werden übernommen", "Fahrrad", "Rechtschreibung"],
+    "options": [
+      "Kindergarten",
+      "Nur englische Wörter werden übernommen",
+      "Fahrrad",
+      "Rechtschreibung"
+    ],
     "correctIndex": 0,
     "level": 3,
     "topic": "Kultur"
   },
   {
+    "id": "q26",
     "question": "Ein Gast fragt: \"Ist der Tisch für heute Abend reserviert?\" Was bedeutet \"reserviert\"?",
-    "options": ["vorbestellt", "kaputt", "kostenlos", "besetzt gewesen"],
+    "options": [
+      "vorbestellt",
+      "kaputt",
+      "kostenlos",
+      "besetzt gewesen"
+    ],
     "correctIndex": 0,
     "department": "restaurant",
     "level": 2,
     "topic": "Berufsvokabular"
   },
   {
+    "id": "q27",
     "question": "Wie fragt man höflich, ob ein Gast schon bestellt hat?",
-    "options": ["Haben Sie schon bestellt?", "Bestellen Sie schon?", "Haben Sie bestellt schon?", "Sie bestellt haben?"],
+    "options": [
+      "Haben Sie schon bestellt?",
+      "Bestellen Sie schon?",
+      "Haben Sie bestellt schon?",
+      "Sie bestellt haben?"
+    ],
     "correctIndex": 0,
     "department": "restaurant",
     "level": 2,
     "topic": "Höflichkeitsformen"
   },
   {
+    "id": "q28",
     "question": "Was bedeutet \"Die Rechnung, bitte\"?",
-    "options": ["Der Gast möchte zahlen", "Der Gast möchte bestellen", "Der Gast beschwert sich", "Der Gast möchte reservieren"],
+    "options": [
+      "Der Gast möchte zahlen",
+      "Der Gast möchte bestellen",
+      "Der Gast beschwert sich",
+      "Der Gast möchte reservieren"
+    ],
     "correctIndex": 0,
     "department": "restaurant",
     "level": 1,
     "topic": "Berufsvokabular"
   },
   {
+    "id": "q29",
     "question": "Ein Gast sagt: \"Können Sie bitte die Handtücher wechseln?\" Was möchte er?",
-    "options": ["Frische Handtücher", "Das Zimmer reinigen", "Die Minibar auffüllen", "Ein neues Bett"],
+    "options": [
+      "Frische Handtücher",
+      "Das Zimmer reinigen",
+      "Die Minibar auffüllen",
+      "Ein neues Bett"
+    ],
     "correctIndex": 0,
     "department": "housekeeping",
     "level": 2,
     "topic": "Berufsvokabular"
   },
   {
+    "id": "q30",
     "question": "Was bedeutet \"Bitte nicht stören\" an einer Kabinentür?",
-    "options": ["Nicht klopfen/eintreten", "Bitte sauber machen", "Gast ist unterwegs", "Zimmer ist leer"],
+    "options": [
+      "Nicht klopfen/eintreten",
+      "Bitte sauber machen",
+      "Gast ist unterwegs",
+      "Zimmer ist leer"
+    ],
     "correctIndex": 0,
     "department": "housekeeping",
     "level": 1,
     "topic": "Berufsvokabular"
   },
   {
+    "id": "q31",
     "question": "Wie fragt man freundlich, wann man das Zimmer reinigen darf?",
-    "options": ["Wann passt es Ihnen, dass wir sauber machen?", "Wann Sie raus gehen?", "Machen wir jetzt sauber!", "Zimmer frei?"],
+    "options": [
+      "Wann passt es Ihnen, dass wir sauber machen?",
+      "Wann Sie raus gehen?",
+      "Machen wir jetzt sauber!",
+      "Zimmer frei?"
+    ],
     "correctIndex": 0,
     "department": "housekeeping",
     "level": 3,
     "topic": "Höflichkeitsformen"
   },
   {
+    "id": "q32",
     "question": "Ein Gast fragt an der Rezeption: \"Wann ist der Check-out?\" Was möchte er wissen?",
-    "options": ["Bis wann er das Zimmer verlassen muss", "Wann das Restaurant öffnet", "Wo das Schwimmbad ist", "Wie das WLAN heißt"],
+    "options": [
+      "Bis wann er das Zimmer verlassen muss",
+      "Wann das Restaurant öffnet",
+      "Wo das Schwimmbad ist",
+      "Wie das WLAN heißt"
+    ],
     "correctIndex": 0,
     "department": "rezeption",
     "level": 2,
     "topic": "Berufsvokabular"
   },
   {
+    "id": "q33",
     "question": "Wie begrüßt man einen neu ankommenden Gast höflich?",
-    "options": ["Herzlich willkommen an Bord!", "Was wollen Sie?", "Ja bitte?", "Sie hier neu?"],
+    "options": [
+      "Herzlich willkommen an Bord!",
+      "Was wollen Sie?",
+      "Ja bitte?",
+      "Sie hier neu?"
+    ],
     "correctIndex": 0,
     "department": "rezeption",
     "level": 1,
     "topic": "Höflichkeitsformen"
   },
   {
+    "id": "q34",
     "question": "Ein Gast fragt nach einer Massage-Behandlung. Welches Wort passt?",
-    "options": ["Termin", "Rechnung", "Ausflug", "Rettungsboot"],
+    "options": [
+      "Termin",
+      "Rechnung",
+      "Ausflug",
+      "Rettungsboot"
+    ],
     "correctIndex": 0,
     "department": "spa",
     "level": 2,
     "topic": "Berufsvokabular"
   },
   {
+    "id": "q35",
     "question": "Wie fragt man, ob ein Gast Allergien hat, bevor eine Behandlung beginnt?",
-    "options": ["Haben Sie Allergien, die ich wissen sollte?", "Sie Allergie haben?", "Allergien verboten!", "Mögen Sie Allergien?"],
+    "options": [
+      "Haben Sie Allergien, die ich wissen sollte?",
+      "Sie Allergie haben?",
+      "Allergien verboten!",
+      "Mögen Sie Allergien?"
+    ],
     "correctIndex": 0,
     "department": "spa",
     "level": 3,
     "topic": "Höflichkeitsformen"
   },
   {
+    "id": "q36",
     "question": "Was sagt man bei einer Sicherheitsübung (Muster-Drill) auf Deutsch zuerst?",
-    "options": ["Bitte begeben Sie sich zur Sammelstelle", "Das Schiff sinkt gleich", "Bleiben Sie im Zimmer", "Es ist nur ein Spiel"],
+    "options": [
+      "Bitte begeben Sie sich zur Sammelstelle",
+      "Das Schiff sinkt gleich",
+      "Bleiben Sie im Zimmer",
+      "Es ist nur ein Spiel"
+    ],
     "correctIndex": 0,
     "department": "security",
     "level": 2,
     "topic": "Berufsvokabular"
   },
   {
+    "id": "q37",
     "question": "Wie erklärt man einem Gast höflich, dass ein Bereich gesperrt ist?",
-    "options": ["Dieser Bereich ist momentan leider gesperrt", "Hier nicht!", "Verboten für Sie", "Gehen Sie weg"],
+    "options": [
+      "Dieser Bereich ist momentan leider gesperrt",
+      "Hier nicht!",
+      "Verboten für Sie",
+      "Gehen Sie weg"
+    ],
     "correctIndex": 0,
     "department": "security",
     "level": 2,

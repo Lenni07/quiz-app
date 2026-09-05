@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../services/question_mastery_service.dart';
+import '../utils/current_uid.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/answer_feedback.dart';
 import 'result_screen.dart';
@@ -32,7 +33,7 @@ class _OpenBoxScreenState extends State<OpenBoxScreen> with AnswerFeedbackMixin 
     if (_selectedOption != null) return;
     final question = widget.questions[_activeBox!];
     final isCorrect = optionIndex == question.correctIndex;
-    QuestionMasteryService().recordAnswer(question, wasCorrect: isCorrect);
+    QuestionMasteryService().recordAnswer(question, wasCorrect: isCorrect, uid: currentUid());
     setState(() {
       _selectedOption = optionIndex;
       if (isCorrect) _score++;

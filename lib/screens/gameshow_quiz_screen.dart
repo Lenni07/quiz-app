@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../services/question_mastery_service.dart';
+import '../utils/current_uid.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/answer_feedback.dart';
 import '../widgets/count_up_number.dart';
@@ -30,7 +31,7 @@ class _GameshowQuizScreenState extends State<GameshowQuizScreen> with AnswerFeed
       if (!mounted) return;
       final question = widget.questions[_currentIndex];
       final isCorrect = index == question.correctIndex;
-      QuestionMasteryService().recordAnswer(question, wasCorrect: isCorrect);
+      QuestionMasteryService().recordAnswer(question, wasCorrect: isCorrect, uid: currentUid());
       setState(() {
         _revealed = true;
         if (isCorrect) _score++;

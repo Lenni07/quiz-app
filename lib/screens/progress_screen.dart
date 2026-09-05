@@ -4,6 +4,7 @@ import '../l10n/strings.dart';
 import '../models/question.dart';
 import '../services/question_mastery_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/current_uid.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/game_panel.dart';
 import '../widgets/maritime_background.dart';
@@ -27,6 +28,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   Future<LearningProgress> _load() async {
     final questions = await loadQuestions();
+    final uid = currentUid();
+    if (uid != null) {
+      // Bestmögliche Sicherung/Wiederherstellung vor der Anzeige (siehe
+      // ROADMAP_QuizApp.md Abschnitt 18e) - lokal bleibt auch bei Fehlern
+      // (z. B. offline) die maßgebliche Quelle, computeProgress() läuft
+      // unabhängig davon immer.
+      await QuestionMasteryService().syncWithCloud(uid, questions);
+    }
     return QuestionMasteryService().computeProgress(questions);
   }
 

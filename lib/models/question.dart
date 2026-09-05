@@ -6,6 +6,13 @@ class Question {
   final List<String> options;
   final int correctIndex;
 
+  /// Stabile Kennung für die Fortschritts-/Mastery-Verfolgung im Lernmodus
+  /// (siehe ROADMAP_QuizApp.md Abschnitt 18e). Bewusst NICHT `question`s
+  /// `hashCode` verwendet - Dart-Strings hashen auf Web (dart2js) und
+  /// nativen Plattformen (VM/AOT) unterschiedlich, das hätte den
+  /// Cloud-Abgleich zwischen Geräten/Plattformen unbemerkt zerstört.
+  final String id;
+
   /// Department-Tag (siehe ROADMAP_QuizApp.md Abschnitt 18c), z. B.
   /// "restaurant", "housekeeping" - oder "general" für abteilungsüber-
   /// greifende Inhalte. Fehlt das Feld in den Rohdaten, gilt die Frage als
@@ -26,6 +33,7 @@ class Question {
     required this.question,
     required this.options,
     required this.correctIndex,
+    this.id = '',
     this.department = 'general',
     this.level = 1,
     this.topic = 'Allgemein',
@@ -36,6 +44,7 @@ class Question {
       question: json['question'] as String,
       options: List<String>.from(json['options'] as List),
       correctIndex: json['correctIndex'] as int,
+      id: json['id'] as String? ?? '',
       department: json['department'] as String? ?? 'general',
       level: json['level'] as int? ?? 1,
       topic: json['topic'] as String? ?? 'Allgemein',
@@ -47,6 +56,7 @@ class Question {
       'question': question,
       'options': options,
       'correctIndex': correctIndex,
+      'id': id,
       'department': department,
       'level': level,
       'topic': topic,

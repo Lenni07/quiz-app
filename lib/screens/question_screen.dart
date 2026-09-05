@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../audio/sound_effects.dart';
 import '../models/question.dart';
 import '../services/question_mastery_service.dart';
+import '../utils/current_uid.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/firework_particle.dart';
 import '../widgets/shake.dart';
@@ -49,7 +50,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     // Nur echte Katalogfragen fließen in die Fortschrittsanzeige ein, nicht
     // die aus Sentence-Daten synthetisierten Fragen von "Konversation üben".
     if (widget.formatId == 'allgemeinwissen-quiz') {
-      QuestionMasteryService().recordAnswer(question, wasCorrect: isCorrect);
+      QuestionMasteryService().recordAnswer(question, wasCorrect: isCorrect, uid: currentUid());
     }
     setState(() {
       _selectedIndex = index;
