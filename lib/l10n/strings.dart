@@ -1,5 +1,13 @@
 import 'app_language.dart';
 
+/// Singular-/Pluralform einer Übersetzungs-Vorlage - siehe [S.plural].
+class _PluralForms {
+  final String one;
+  final String other;
+
+  const _PluralForms({required this.one, required this.other});
+}
+
 /// Übersetzungen für die Bedienoberfläche (siehe ROADMAP_QuizApp.md
 /// Abschnitt 19) - deckt bewusst nur die App-Hülle ab (Reiter, Menüs,
 /// Profil, Rangliste, Start-/Warteschlangen-/Draft-/Ergebnisbildschirme).
@@ -19,6 +27,47 @@ class S {
     }
     return result;
   }
+
+  /// Wie [f], wählt aber je nach [count] die Singular- oder Pluralform aus
+  /// [_pluralValues] - wichtig in einer Deutsch-Lern-App, wo "1 Tage" ein
+  /// besonders schädlicher Grammatikfehler wäre. Deutsch und Englisch
+  /// kennen hier beide nur die einfache Unterscheidung "genau 1" vs. "alles
+  /// andere" (auch 0), keine komplexeren Plural-Kategorien.
+  static String plural(String key, int count, [List<Object>? args]) {
+    final entry = _pluralValues[key];
+    if (entry == null) return key;
+    final forms = entry[appLanguage.value] ?? entry[AppLanguage.de]!;
+    var result = count == 1 ? forms.one : forms.other;
+    final substitutionArgs = args ?? [count];
+    for (var i = 0; i < substitutionArgs.length; i++) {
+      result = result.replaceAll('{$i}', '${substitutionArgs[i]}');
+    }
+    return result;
+  }
+
+  static const Map<String, Map<AppLanguage, _PluralForms>> _pluralValues = {
+    'streak_label': {
+      AppLanguage.de: _PluralForms(one: '{0} Tag', other: '{0} Tage'),
+      AppLanguage.en: _PluralForms(one: '{0} day', other: '{0} days'),
+    },
+    'daily_challenge_streak': {
+      AppLanguage.de: _PluralForms(
+        one: 'Tages-Challenge geschafft! 🔥 {0} Tag in Folge',
+        other: 'Tages-Challenge geschafft! 🔥 {0} Tage in Folge',
+      ),
+      AppLanguage.en: _PluralForms(
+        one: 'Daily challenge complete! 🔥 {0}-day streak',
+        other: 'Daily challenge complete! 🔥 {0}-day streak',
+      ),
+    },
+    // Die Pluralform hängt hier vom zweiten Platzhalter ({1}, der
+    // Gesamtzahl) ab, nicht vom ersten - deshalb übergibt der Aufrufer
+    // count: totalCount und beide Werte explizit als args.
+    'progress_level_detail': {
+      AppLanguage.de: _PluralForms(one: '{0} von {1} Frage sicher', other: '{0} von {1} Fragen sicher'),
+      AppLanguage.en: _PluralForms(one: '{0} of {1} question mastered', other: '{0} of {1} questions mastered'),
+    },
+  };
 
   static const Map<String, Map<AppLanguage, String>> _values = {
     // Startbildschirm
@@ -185,10 +234,6 @@ class S {
     'progress_title': {AppLanguage.de: 'Mein Fortschritt', AppLanguage.en: 'My Progress'},
     'progress_levels_heading': {AppLanguage.de: 'Fortschritt pro Level', AppLanguage.en: 'Progress by Level'},
     'progress_level_label': {AppLanguage.de: 'Level {0}', AppLanguage.en: 'Level {0}'},
-    'progress_level_detail': {
-      AppLanguage.de: '{0} von {1} Fragen sicher',
-      AppLanguage.en: '{0} of {1} questions mastered',
-    },
     'progress_weak_spots_heading': {AppLanguage.de: 'Deine Schwachstellen', AppLanguage.en: 'Your Weak Spots'},
     'progress_weak_spots_empty': {
       AppLanguage.de: 'Noch keine Daten - spiel ein paar Runden im Lernmodus!',
@@ -311,11 +356,6 @@ class S {
     'profile_sound_off': {AppLanguage.de: 'Aus', AppLanguage.en: 'Off'},
 
     // Tages-Challenge / Streak
-    'daily_challenge_streak': {
-      AppLanguage.de: 'Tages-Challenge geschafft! 🔥 {0} Tage in Folge',
-      AppLanguage.en: 'Daily challenge complete! 🔥 {0}-day streak',
-    },
-    'streak_label': {AppLanguage.de: '{0} Tage', AppLanguage.en: '{0} days'},
     'streak_tile_label': {AppLanguage.de: 'Streak', AppLanguage.en: 'Streak'},
     'season_rank_label': {AppLanguage.de: 'Platz {0} diese Season', AppLanguage.en: 'Rank {0} this season'},
     'recent_matches_title': {AppLanguage.de: 'Letzte Matches', AppLanguage.en: 'Recent Matches'},

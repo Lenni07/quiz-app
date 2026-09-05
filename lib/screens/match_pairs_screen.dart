@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/sentence.dart';
 import '../utils/page_transitions.dart';
+import '../utils/german_plural.dart';
 import '../widgets/answer_feedback.dart';
 import 'result_screen.dart';
 
@@ -109,7 +110,7 @@ class _MatchPairsScreenState extends State<MatchPairsScreen> with AnswerFeedback
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Find the Match (${_matchedPairIds.length} von $_totalPairs, $_attempts Versuche)'),
+        title: Text('Find the Match (${_matchedPairIds.length} von $_totalPairs, ${germanCount(_attempts, 'Versuch', 'Versuche')})'),
       ),
       body: Stack(
         children: [

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/sentence.dart';
+import '../utils/german_plural.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/answer_feedback.dart';
 import 'result_screen.dart';
@@ -108,7 +109,7 @@ class _MatchUpScreenState extends State<MatchUpScreen> with AnswerFeedbackMixin 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Match Up (Runde ${_roundIndex + 1} von ${_rounds.length}, $_attempts Versuche)'),
+        title: Text('Match Up (Runde ${_roundIndex + 1} von ${_rounds.length}, ${germanCount(_attempts, 'Versuch', 'Versuche')})'),
       ),
       body: Stack(
         children: [

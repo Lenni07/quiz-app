@@ -84,7 +84,7 @@ class _ResultScreenState extends State<ResultScreen> {
     final streak = await DailyChallengeService().recordCompletion(user.uid);
     if (streak == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(S.f('daily_challenge_streak', [streak]))),
+      SnackBar(content: Text(S.plural('daily_challenge_streak', streak))),
     );
   }
 

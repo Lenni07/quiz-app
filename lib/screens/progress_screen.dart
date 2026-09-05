@@ -151,7 +151,7 @@ class _LevelRow extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            S.f('progress_level_detail', [progress.masteredCount, progress.totalCount]),
+            S.plural('progress_level_detail', progress.totalCount, [progress.masteredCount, progress.totalCount]),
             style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.7)),
           ),
         ],

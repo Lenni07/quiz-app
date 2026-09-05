@@ -104,7 +104,7 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                             BoxShadow(color: Colors.black54, offset: Offset(0, 3), blurRadius: 6),
                           ],
                         ),
-                        child: const MaritimeIcon(MaritimeIconShape.crossedOars, color: AppColors.deepSeaDark),
+                        child: const MaritimeIcon(MaritimeIconShape.shipWheel, color: AppColors.deepSeaDark),
                       )
                     : Icon(_tabIcons[i]),
                 label: S.t(_tabLabelKeys[i]),
@@ -171,7 +171,7 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
                         children: [
                           const Text('🔥', style: TextStyle(fontSize: 16)),
                           const SizedBox(width: 2),
-                          Text(S.f('streak_label', [streak]), style: const TextStyle(fontSize: 12)),
+                          Text(S.plural('streak_label', streak), style: const TextStyle(fontSize: 12)),
                         ],
                       ),
                     ],
@@ -220,7 +220,7 @@ class _OneVsOneLanding extends StatelessWidget {
             child: GamePanel(
               child: Column(
                 children: [
-                  const MaritimeIcon(MaritimeIconShape.crossedOars, size: 56, color: AppColors.brassLight),
+                  const MaritimeIcon(MaritimeIconShape.shipWheel, size: 56, color: AppColors.brassLight),
                   const SizedBox(height: 8),
                   Text(S.t('tab_1v1'), style: displayStyle(fontSize: 26, color: AppColors.canvas)),
                   const SizedBox(height: 6),
@@ -366,7 +366,7 @@ class _RecentMatchesList extends StatelessWidget {
         final finished = snapshot.data!.docs.where((doc) => doc.data()['status'] == 'finished').toList();
         if (finished.isEmpty) {
           return EmptyState(
-            iconWidget: MaritimeIcon(MaritimeIconShape.crossedOars, size: 44, color: AppColors.brass.withValues(alpha: 0.55)),
+            iconWidget: MaritimeIcon(MaritimeIconShape.shipWheel, size: 44, color: AppColors.brass.withValues(alpha: 0.55)),
             message: S.t('recent_matches_empty'),
           );
         }

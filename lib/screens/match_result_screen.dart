@@ -62,7 +62,7 @@ class MatchResultScreen extends StatelessWidget {
                 children: [
                   winnerUid == myUid
                       ? Icon(Icons.emoji_events, size: 90, color: headlineColor)
-                      : MaritimeIcon(MaritimeIconShape.crossedOars, size: 90, color: headlineColor),
+                      : MaritimeIcon(MaritimeIconShape.shipWheel, size: 90, color: headlineColor),
                   const SizedBox(height: 24),
                   Text(
                     headline,

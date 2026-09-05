@@ -18,7 +18,6 @@ enum MaritimeIconShape {
   seagull,
   porthole,
   captainHat,
-  crossedOars,
 }
 
 class MaritimeIcon extends StatelessWidget {
@@ -74,8 +73,6 @@ class _MaritimeIconPainter extends CustomPainter {
         _paintPorthole(canvas);
       case MaritimeIconShape.captainHat:
         _paintCaptainHat(canvas);
-      case MaritimeIconShape.crossedOars:
-        _paintCrossedOars(canvas);
       case MaritimeIconShape.anchor:
       case MaritimeIconShape.sailboat:
       case MaritimeIconShape.waves:
@@ -86,37 +83,34 @@ class _MaritimeIconPainter extends CustomPainter {
     canvas.restore();
   }
 
+  /// Bewusst breiter und kontrastreicher als eine "echte" schlanke
+  /// Leuchtturm-Silhouette (siehe ROADMAP_QuizApp.md Abschnitt 18e) - dünne
+  /// Linien/Strahlen verschwinden bei kleiner Darstellung (z. B. in einer
+  /// Statistik-Kachel), deshalb ein kräftiges Band statt zweier dünner
+  /// Streifen und ein solider Lichtpunkt statt dünner Strahlen-Linien.
   void _paintLighthouse(Canvas canvas) {
     final fill = Paint()..color = color;
     final tower = Path()
-      ..moveTo(8, 22)
-      ..lineTo(16, 22)
-      ..lineTo(14.5, 9)
-      ..lineTo(9.5, 9)
+      ..moveTo(6.5, 22.5)
+      ..lineTo(17.5, 22.5)
+      ..lineTo(15.5, 8)
+      ..lineTo(8.5, 8)
       ..close();
     canvas.drawPath(tower, fill);
 
-    final stripe = Paint()
-      ..color = const Color(0xFF071B29)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    canvas.drawLine(const Offset(9, 15), const Offset(15, 15), stripe);
-    canvas.drawLine(const Offset(9.6, 19), const Offset(14.4, 19), stripe);
+    final stripe = Paint()..color = const Color(0xFF071B29);
+    canvas.drawRect(const Rect.fromLTRB(7.6, 12.5, 16.4, 16), stripe);
 
-    canvas.drawRect(const Rect.fromLTRB(9.5, 5, 14.5, 9), fill);
+    canvas.drawRect(const Rect.fromLTRB(8, 3.5, 16, 8), fill);
     final cap = Path()
-      ..moveTo(9, 5)
-      ..lineTo(15, 5)
-      ..lineTo(12, 2.5)
+      ..moveTo(7, 3.5)
+      ..lineTo(17, 3.5)
+      ..lineTo(12, 1)
       ..close();
     canvas.drawPath(cap, fill);
 
-    final ray = Paint()
-      ..color = color.withValues(alpha: 0.6)
-      ..strokeWidth = 1.2
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(const Offset(9, 6.5), const Offset(4, 4.5), ray);
-    canvas.drawLine(const Offset(15, 6.5), const Offset(20, 4.5), ray);
+    final glow = Paint()..color = const Color(0xFFFFE8A3);
+    canvas.drawCircle(const Offset(12, 5.5), 2.3, glow);
   }
 
   void _paintShipWheel(Canvas canvas) {
@@ -210,47 +204,6 @@ class _MaritimeIconPainter extends CustomPainter {
 
     final emblem = Paint()..color = const Color(0xFF071B29);
     canvas.drawCircle(const Offset(12, 11), 1.6, emblem);
-  }
-
-  /// Ein Ruder von [handle] (Griff) bis [tip] (Blattspitze) - mit einem
-  /// deutlich ausgearbeiteten, länglichen Ruderblatt (statt der vorherigen
-  /// kleinen runden Nubben), damit die Form auch bei kleiner Darstellung
-  /// noch als Ruder statt als schlichtes X erkennbar bleibt.
-  void _paintOar(Canvas canvas, Offset handle, Offset tip, Paint shaft, Paint blade, Paint bladeOutline) {
-    final direction = tip - handle;
-    final length = direction.distance;
-    final unit = Offset(direction.dx / length, direction.dy / length);
-    final bladeLength = length * 0.4;
-    final bladeBase = tip - unit * bladeLength;
-
-    canvas.drawLine(handle, bladeBase, shaft);
-    canvas.drawCircle(handle, 1.3, Paint()..color = shaft.color);
-
-    canvas.save();
-    canvas.translate((bladeBase.dx + tip.dx) / 2, (bladeBase.dy + tip.dy) / 2);
-    canvas.rotate(math.atan2(direction.dy, direction.dx));
-    final bladeRect = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset.zero, width: bladeLength, height: 5.2),
-      const Radius.circular(2.4),
-    );
-    canvas.drawRRect(bladeRect, blade);
-    canvas.drawRRect(bladeRect, bladeOutline);
-    canvas.restore();
-  }
-
-  void _paintCrossedOars(Canvas canvas) {
-    final shaft = Paint()
-      ..color = color
-      ..strokeWidth = 2.4
-      ..strokeCap = StrokeCap.round;
-    final blade = Paint()..color = color;
-    final bladeOutline = Paint()
-      ..color = const Color(0xFF071B29)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1;
-
-    _paintOar(canvas, const Offset(5, 21), const Offset(19, 4), shaft, blade, bladeOutline);
-    _paintOar(canvas, const Offset(19, 21), const Offset(5, 4), shaft, blade, bladeOutline);
   }
 
   @override
