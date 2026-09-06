@@ -1,8 +1,15 @@
+const { setGlobalOptions } = require("firebase-functions/v2");
 const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+
+// Gleiche Region wie die Firestore-Datenbank (Berlin) - vermeidet
+// Cross-Region-Latenz und verarbeitet die personenbezogenen Crew-Daten
+// (Name, Geburtsdatum, Position) innerhalb Deutschlands statt im
+// standardmaessigen us-central1.
+setGlobalOptions({ region: "europe-west10" });
 
 initializeApp();
 const db = getFirestore();
