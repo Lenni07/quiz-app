@@ -98,6 +98,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/questions.json
+    - assets/personalized_questions.json
     - assets/sentences.json
     - assets/true_false.json
     - assets/image_quiz.json

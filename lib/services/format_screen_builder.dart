@@ -1,12 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/department.dart';
 import '../models/flip_tile_word.dart';
 import '../models/group_sort.dart';
 import '../models/image_quiz.dart';
 import '../models/number_word.dart';
+import '../models/personalized_question.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
+import 'user_profile_service.dart';
 import '../screens/fill_blank_screen.dart';
 import '../screens/flashcard_screen.dart';
 import '../screens/flip_tiles_screen.dart';
@@ -76,7 +79,31 @@ Future<Widget> buildFormatScreen(String formatId) async {
       return RankOrderScreen(words: await loadNumberWords());
     case 'hoerverstehen':
       return ListeningScreen(sentences: await loadSentences());
+    case 'persoenliche-fragen':
+      return QuestionScreen(questions: await _buildPersonalizedQuestionsForCurrentUser(), formatId: formatId);
     default:
       throw ArgumentError('Unbekanntes Format: $formatId');
   }
+}
+
+/// Baut die personalisierten Fragen für den 1-vs-1-Modus (siehe
+/// ROADMAP_QuizApp.md Abschnitt 18f) - jede Seite lädt dabei nur ihr
+/// eigenes Profil und sieht dementsprechend nur ihre eigene personalisierte
+/// Fassung; der Gegner sieht nur den am Ende übermittelten Punktestand,
+/// nie die tatsächlichen Fragen/Antworten (gleiches Prinzip wie bei allen
+/// anderen Formaten). Fällt auf die unausgefüllten Vorlagen zurück, falls
+/// (noch) keine einzige Vorlage nutzbar ist - besser eine Runde mit ein
+/// paar leeren Platzhaltern als ein Absturz durch null Fragen.
+Future<List<Question>> _buildPersonalizedQuestionsForCurrentUser() async {
+  String? uid;
+  try {
+    uid = FirebaseAuth.instance.currentUser?.uid;
+  } catch (_) {
+    uid = null;
+  }
+  final data = uid == null ? null : await UserProfileService().loadProfile(uid);
+  final profile = personalizationProfileFromUserData(data);
+  final templates = await loadPersonalizedQuestionTemplates();
+  final usable = usableTemplates(templates, profile);
+  return buildPersonalizedQuestions(usable.isEmpty ? templates : usable, profile);
 }

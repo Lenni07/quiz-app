@@ -6,6 +6,7 @@ import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/avatar_option.dart';
 import '../models/department.dart';
+import '../models/personalized_question.dart';
 import '../services/career_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/user_profile_service.dart';
@@ -38,6 +39,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _department;
   int? _germanLevel;
   DateTime? _certificateIssuedAt;
+  DateTime? _birthDate;
+  String? _gender;
+  String? _diverseGrammaticalForm;
   bool _loaded = false;
   bool _saving = false;
 
@@ -63,6 +67,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _avatarId = (data?['avatarId'] as String?) ?? allAvatarOptions.first.id;
       _germanLevel = (data?['germanLevel'] as num?)?.toInt();
       _certificateIssuedAt = (data?['certificateIssuedAt'] as Timestamp?)?.toDate();
+      _birthDate = (data?['birthDate'] as Timestamp?)?.toDate();
+      _gender = data?['gender'] as String?;
+      _diverseGrammaticalForm = data?['diverseGrammaticalForm'] as String?;
       _loaded = true;
     });
   }
@@ -90,6 +97,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _birthDate ?? DateTime(now.year - 25),
+      firstDate: DateTime(now.year - 100),
+      lastDate: DateTime(now.year - 16, now.month, now.day),
+    );
+    if (picked != null) {
+      setState(() => _birthDate = picked);
+    }
+  }
+
   Future<void> _save(String uid) async {
     setState(() => _saving = true);
     try {
@@ -103,6 +123,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crewId: _crewIdController.text.trim(),
         germanLevel: _germanLevel,
         certificateIssuedAt: _certificateIssuedAt,
+        birthDate: _birthDate,
+        gender: _gender,
+        diverseGrammaticalForm: _gender == 'diverse' ? _diverseGrammaticalForm : null,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('profile_save_success'))));
@@ -261,6 +284,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       issuedAt: _certificateIssuedAt,
                       onPick: _pickCertificateDate,
                     ),
+                    const SizedBox(height: 16),
+                    Text(S.t('profile_birthdate_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
+                    const SizedBox(height: 8),
+                    _BirthDateStatus(
+                      birthDate: _birthDate,
+                      onPick: _pickBirthDate,
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String?>(
+                      initialValue: _gender,
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_gender_label'),
+                        helperText: S.t('profile_private_helper'),
+                      ),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(S.t('profile_gender_unspecified'))),
+                        DropdownMenuItem(value: 'male', child: Text(S.t('profile_gender_male'))),
+                        DropdownMenuItem(value: 'female', child: Text(S.t('profile_gender_female'))),
+                        DropdownMenuItem(value: 'diverse', child: Text(S.t('profile_gender_diverse'))),
+                      ],
+                      onChanged: (value) => setState(() => _gender = value),
+                    ),
+                    if (_gender == 'diverse') ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        S.t('profile_grammatical_form_hint'),
+                        style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.7)),
+                      ),
+                      const SizedBox(height: 8),
+                      SegmentedButton<String>(
+                        segments: [
+                          ButtonSegment(value: 'male', label: Text(S.t('profile_grammatical_form_male'))),
+                          ButtonSegment(value: 'female', label: Text(S.t('profile_grammatical_form_female'))),
+                        ],
+                        selected: {_diverseGrammaticalForm ?? 'male'},
+                        onSelectionChanged: (selection) => setState(() => _diverseGrammaticalForm = selection.first),
+                      ),
+                    ],
                     const SizedBox(height: 20),
                     Center(
                       child: _saving
@@ -339,6 +400,38 @@ class _AvatarChoice extends StatelessWidget {
           backgroundColor: option.color,
           child: MaritimeIcon(option.shape, color: Colors.white),
         ),
+      ),
+    );
+  }
+}
+
+/// Zeigt das Geburtsdatum und das daraus berechnete Alter (siehe
+/// ROADMAP_QuizApp.md Abschnitt 18f) - gespeichert wird bewusst das Datum,
+/// nicht eine feste Alterszahl, die sonst nie mehr aktuell wäre.
+class _BirthDateStatus extends StatelessWidget {
+  final DateTime? birthDate;
+  final VoidCallback onPick;
+
+  const _BirthDateStatus({required this.birthDate, required this.onPick});
+
+  @override
+  Widget build(BuildContext context) {
+    final date = birthDate;
+    String formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+    return GamePanel(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      borderRadius: 14,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              date == null ? S.t('profile_birthdate_none') : S.f('profile_birthdate_set', [formatDate(date), calculateAge(date)]),
+              style: const TextStyle(color: AppColors.canvas),
+            ),
+          ),
+          TextButton(onPressed: onPick, child: Text(S.t('profile_birthdate_pick'))),
+        ],
       ),
     );
   }

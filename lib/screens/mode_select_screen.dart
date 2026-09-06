@@ -8,6 +8,7 @@ import '../models/game_format.dart';
 import '../models/group_sort.dart';
 import '../models/image_quiz.dart';
 import '../models/number_word.dart';
+import '../models/personalized_question.dart';
 import '../models/question.dart';
 import '../models/sentence.dart';
 import '../models/true_false.dart';
@@ -189,6 +190,39 @@ class ModeSelectScreen extends StatelessWidget {
     }
   }
 
+  /// Baut die personalisierten Fragen aus dem eigenen Profil (siehe
+  /// ROADMAP_QuizApp.md Abschnitt 18f) - nur Vorlagen, für die alle
+  /// nötigen Angaben vorhanden sind; ist das Profil noch leer, gibt es
+  /// einen Hinweis statt einer leeren Fragenrunde.
+  Future<void> _startPersonalizedQuestions(BuildContext context) async {
+    String? uid;
+    try {
+      uid = FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      uid = null;
+    }
+    if (uid == null) return;
+
+    final data = await UserProfileService().loadProfile(uid);
+    final profile = personalizationProfileFromUserData(data);
+    final templates = await loadPersonalizedQuestionTemplates();
+    final usable = usableTemplates(templates, profile);
+    if (!context.mounted) return;
+
+    if (usable.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.t('personal_questions_profile_incomplete'))),
+      );
+      return;
+    }
+
+    final questions = buildPersonalizedQuestions(usable, profile);
+    Navigator.push(
+      context,
+      buildFadeSlideRoute(QuestionScreen(questions: questions, formatId: 'persoenliche-fragen')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Reagiert auf Sprachwechsel (siehe ROADMAP_QuizApp.md Abschnitt 19) -
@@ -326,6 +360,13 @@ class ModeSelectScreen extends StatelessWidget {
               subtitle: S.t('format_rank-order_subtitle'),
               icon: Icons.sort,
               onTap: () => _startRankOrder(context),
+            ),
+            _SectionHeader(S.t('section_personalized')),
+            _ModeCard(
+              title: gameFormatById('persoenliche-fragen').displayName,
+              subtitle: S.t('format_persoenliche-fragen_subtitle'),
+              icon: Icons.badge_outlined,
+              onTap: () => _startPersonalizedQuestions(context),
             ),
             _SectionHeader(S.t('section_multiplayer')),
             _ModeCard(

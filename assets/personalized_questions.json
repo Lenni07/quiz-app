@@ -1,0 +1,50 @@
+[
+  {
+    "id": "p01",
+    "question": "Wie heißt du mit Vornamen?",
+    "correctAnswer": "{vorname}",
+    "decoyPool": ["Max", "Julia", "Ben", "Lea", "Tom", "Anna"],
+    "level": 1,
+    "topic": "Persönliche Angaben"
+  },
+  {
+    "id": "p02",
+    "question": "Wie alt bist du?",
+    "correctAnswer": "{alter}",
+    "decoyPool": ["19", "23", "27", "31", "38", "45"],
+    "level": 1,
+    "topic": "Persönliche Angaben"
+  },
+  {
+    "id": "p03",
+    "question": "Welche Position hast du an Bord?",
+    "correctAnswer": "{position}",
+    "decoyPool": ["Kapitän", "Steward", "Koch", "Techniker", "Rezeptionist", "Animateur"],
+    "level": 2,
+    "topic": "Berufsvokabular"
+  },
+  {
+    "id": "p04",
+    "question": "Du arbeitest im Restaurant. Wie nennt man deinen Beruf?",
+    "correctAnswer": "{Kellner/Kellnerin}",
+    "decoyPool": ["{Koch/Köchin}", "{Barkeeper/Barkeeperin}", "{Rezeptionist/Rezeptionistin}", "{Steward/Stewardess}"],
+    "level": 2,
+    "topic": "Berufsvokabular"
+  },
+  {
+    "id": "p05",
+    "question": "Du kommst aus Deutschland. Welches Wort beschreibt deine Nationalität?",
+    "correctAnswer": "{Deutscher/Deutsche}",
+    "decoyPool": ["{Franzose/Französin}", "{Italiener/Italienerin}", "{Spanier/Spanierin}", "{Brite/Britin}"],
+    "level": 3,
+    "topic": "Nationalitäten"
+  },
+  {
+    "id": "p06",
+    "question": "Stell dich kurz vor: Hallo, ich bin {vorname} und ich arbeite als was?",
+    "correctAnswer": "{position}",
+    "decoyPool": ["Kapitän", "Steward", "Koch", "Techniker", "Rezeptionist", "Animateur"],
+    "level": 2,
+    "topic": "Vorstellung"
+  }
+]

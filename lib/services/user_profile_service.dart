@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/avatar_option.dart';
+import '../models/personalized_question.dart';
 
 class UserProfileService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -23,6 +24,9 @@ class UserProfileService {
         'crewId': null,
         'germanLevel': null,
         'certificateIssuedAt': null,
+        'birthDate': null,
+        'gender': null,
+        'diverseGrammaticalForm': null,
       });
     }
   }
@@ -48,6 +52,9 @@ class UserProfileService {
     required String crewId,
     required int? germanLevel,
     required DateTime? certificateIssuedAt,
+    required DateTime? birthDate,
+    required String? gender,
+    required String? diverseGrammaticalForm,
   }) {
     return _firestore.collection('users').doc(uid).set({
       'nickname': nickname,
@@ -58,6 +65,30 @@ class UserProfileService {
       'crewId': crewId,
       'germanLevel': germanLevel,
       'certificateIssuedAt': certificateIssuedAt == null ? null : Timestamp.fromDate(certificateIssuedAt),
+      'birthDate': birthDate == null ? null : Timestamp.fromDate(birthDate),
+      'gender': gender,
+      'diverseGrammaticalForm': diverseGrammaticalForm,
     }, SetOptions(merge: true));
   }
+}
+
+/// Wandelt die in Firestore gespeicherten Profil-Rohdaten in die
+/// Firebase-unabhängigen [PersonalizationProfile]-Werte um (siehe
+/// ROADMAP_QuizApp.md Abschnitt 18f) - der Vorname wird bewusst aus dem
+/// vorhandenen "echter Name"-Feld abgeleitet (erstes Wort), statt ein
+/// weiteres Profilfeld nur dafür einzuführen.
+PersonalizationProfile personalizationProfileFromUserData(Map<String, dynamic>? data) {
+  final realName = (data?['realName'] as String?)?.trim() ?? '';
+  final firstName = realName.isEmpty ? '' : realName.split(RegExp(r'\s+')).first;
+  final birthDate = (data?['birthDate'] as Timestamp?)?.toDate();
+  final gender = data?['gender'] as String?;
+  final diverseGrammaticalForm = data?['diverseGrammaticalForm'] as String?;
+
+  return PersonalizationProfile(
+    firstName: firstName,
+    age: birthDate == null ? null : calculateAge(birthDate),
+    position: (data?['position'] as String?)?.trim() ?? '',
+    crewId: (data?['crewId'] as String?)?.trim() ?? '',
+    grammaticalForm: effectiveGrammaticalForm(gender: gender, diverseGrammaticalForm: diverseGrammaticalForm),
+  );
 }
