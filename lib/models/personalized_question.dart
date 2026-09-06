@@ -15,16 +15,6 @@ int calculateAge(DateTime birthDate, {DateTime? now}) {
   return age;
 }
 
-/// Welche grammatische Form (männlich/weiblich) für Platzhalter wie
-/// "{Kellner/Kellnerin}" verwendet werden soll. Bei "divers" gibt es im
-/// Deutschen keine gebräuchliche neutrale Berufsform - der Nutzer wählt
-/// deshalb selbst, welche der beiden Formen er lernen möchte.
-String? effectiveGrammaticalForm({required String? gender, required String? diverseGrammaticalForm}) {
-  if (gender == 'male' || gender == 'female') return gender;
-  if (gender == 'diverse') return diverseGrammaticalForm;
-  return null;
-}
-
 /// Die für die Platzhalter-Auflösung nötigen Profildaten - bewusst von
 /// Firestore entkoppelt (siehe user_profile_service.dart für die
 /// Umwandlung), damit diese Datei ohne Firebase testbar bleibt.

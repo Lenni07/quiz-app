@@ -190,8 +190,8 @@ class S {
       AppLanguage.en: 'Questions using your own name, age and position',
     },
     'personal_questions_profile_incomplete': {
-      AppLanguage.de: 'Fülle zuerst dein Profil aus (Name, Geburtsdatum, Position, Geschlecht), um personalisierte Fragen zu erhalten.',
-      AppLanguage.en: 'Fill in your profile first (name, birth date, position, gender) to get personalized questions.',
+      AppLanguage.de: 'Fülle zuerst dein Profil aus (Name, Geburtsdatum, Position, Sprachform), um personalisierte Fragen zu erhalten.',
+      AppLanguage.en: 'Fill in your profile first (name, birth date, position, language form) to get personalized questions.',
     },
     'duel_title': {AppLanguage.de: 'Lokales Duell', AppLanguage.en: 'Local Duel'},
     'duel_subtitle': {
@@ -346,9 +346,11 @@ class S {
     'profile_certificate_expired': {AppLanguage.de: 'Abgelaufen seit {0}', AppLanguage.en: 'Expired since {0}'},
     'profile_certificate_pick': {AppLanguage.de: 'Datum wählen', AppLanguage.en: 'Pick Date'},
 
-    // Geburtsdatum/Geschlecht (siehe ROADMAP_QuizApp.md Abschnitt 18f, für
+    // Geburtsdatum/Sprachform (siehe ROADMAP_QuizApp.md Abschnitt 18f, für
     // personalisierte Fragen) - beide bleiben wie realName/department nur
-    // im eigenen Profil sichtbar.
+    // im eigenen Profil sichtbar. Die Sprachform dient ausschließlich der
+    // Wahl der grammatischen Form (Kellner/Kellnerin), nicht einer
+    // Identitätsangabe - deshalb keine "Geschlecht"-Frage.
     'profile_birthdate_title': {AppLanguage.de: 'Geburtsdatum', AppLanguage.en: 'Date of Birth'},
     'profile_birthdate_none': {
       AppLanguage.de: 'Noch kein Geburtsdatum hinterlegt',
@@ -356,17 +358,12 @@ class S {
     },
     'profile_birthdate_set': {AppLanguage.de: '{0} ({1} Jahre)', AppLanguage.en: '{0} ({1} years)'},
     'profile_birthdate_pick': {AppLanguage.de: 'Datum wählen', AppLanguage.en: 'Pick Date'},
-    'profile_gender_label': {AppLanguage.de: 'Geschlecht', AppLanguage.en: 'Gender'},
-    'profile_gender_unspecified': {AppLanguage.de: 'Nicht angegeben', AppLanguage.en: 'Not specified'},
-    'profile_gender_male': {AppLanguage.de: 'Männlich', AppLanguage.en: 'Male'},
-    'profile_gender_female': {AppLanguage.de: 'Weiblich', AppLanguage.en: 'Female'},
-    'profile_gender_diverse': {AppLanguage.de: 'Divers', AppLanguage.en: 'Diverse'},
-    'profile_grammatical_form_hint': {
-      AppLanguage.de: 'Das Deutsche hat keine neutrale Berufsform - welche Form möchtest du lernen?',
-      AppLanguage.en: 'German has no neutral professional form - which form would you like to learn?',
+    'profile_grammatical_form_title': {
+      AppLanguage.de: 'Welche Sprachform möchtest du lernen?',
+      AppLanguage.en: 'Which language form would you like to learn?',
     },
-    'profile_grammatical_form_male': {AppLanguage.de: 'Männliche Form', AppLanguage.en: 'Male Form'},
-    'profile_grammatical_form_female': {AppLanguage.de: 'Weibliche Form', AppLanguage.en: 'Female Form'},
+    'profile_grammatical_form_male': {AppLanguage.de: 'Männlich', AppLanguage.en: 'Male'},
+    'profile_grammatical_form_female': {AppLanguage.de: 'Weiblich', AppLanguage.en: 'Female'},
 
     'profile_save': {AppLanguage.de: 'Speichern', AppLanguage.en: 'Save'},
     'profile_save_success': {AppLanguage.de: 'Profil gespeichert.', AppLanguage.en: 'Profile saved.'},

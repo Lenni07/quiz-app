@@ -25,8 +25,7 @@ class UserProfileService {
         'germanLevel': null,
         'certificateIssuedAt': null,
         'birthDate': null,
-        'gender': null,
-        'diverseGrammaticalForm': null,
+        'grammaticalForm': null,
       });
     }
   }
@@ -53,8 +52,7 @@ class UserProfileService {
     required int? germanLevel,
     required DateTime? certificateIssuedAt,
     required DateTime? birthDate,
-    required String? gender,
-    required String? diverseGrammaticalForm,
+    required String? grammaticalForm,
   }) {
     return _firestore.collection('users').doc(uid).set({
       'nickname': nickname,
@@ -66,8 +64,7 @@ class UserProfileService {
       'germanLevel': germanLevel,
       'certificateIssuedAt': certificateIssuedAt == null ? null : Timestamp.fromDate(certificateIssuedAt),
       'birthDate': birthDate == null ? null : Timestamp.fromDate(birthDate),
-      'gender': gender,
-      'diverseGrammaticalForm': diverseGrammaticalForm,
+      'grammaticalForm': grammaticalForm,
     }, SetOptions(merge: true));
   }
 }
@@ -81,14 +78,12 @@ PersonalizationProfile personalizationProfileFromUserData(Map<String, dynamic>? 
   final realName = (data?['realName'] as String?)?.trim() ?? '';
   final firstName = realName.isEmpty ? '' : realName.split(RegExp(r'\s+')).first;
   final birthDate = (data?['birthDate'] as Timestamp?)?.toDate();
-  final gender = data?['gender'] as String?;
-  final diverseGrammaticalForm = data?['diverseGrammaticalForm'] as String?;
 
   return PersonalizationProfile(
     firstName: firstName,
     age: birthDate == null ? null : calculateAge(birthDate),
     position: (data?['position'] as String?)?.trim() ?? '',
     crewId: (data?['crewId'] as String?)?.trim() ?? '',
-    grammaticalForm: effectiveGrammaticalForm(gender: gender, diverseGrammaticalForm: diverseGrammaticalForm),
+    grammaticalForm: data?['grammaticalForm'] as String?,
   );
 }

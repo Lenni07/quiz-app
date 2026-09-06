@@ -40,8 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int? _germanLevel;
   DateTime? _certificateIssuedAt;
   DateTime? _birthDate;
-  String? _gender;
-  String? _diverseGrammaticalForm;
+  String? _grammaticalForm;
   bool _loaded = false;
   bool _saving = false;
 
@@ -68,8 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _germanLevel = (data?['germanLevel'] as num?)?.toInt();
       _certificateIssuedAt = (data?['certificateIssuedAt'] as Timestamp?)?.toDate();
       _birthDate = (data?['birthDate'] as Timestamp?)?.toDate();
-      _gender = data?['gender'] as String?;
-      _diverseGrammaticalForm = data?['diverseGrammaticalForm'] as String?;
+      _grammaticalForm = data?['grammaticalForm'] as String?;
       _loaded = true;
     });
   }
@@ -124,8 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         germanLevel: _germanLevel,
         certificateIssuedAt: _certificateIssuedAt,
         birthDate: _birthDate,
-        gender: _gender,
-        diverseGrammaticalForm: _gender == 'diverse' ? _diverseGrammaticalForm : null,
+        grammaticalForm: _grammaticalForm,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('profile_save_success'))));
@@ -291,37 +288,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       birthDate: _birthDate,
                       onPick: _pickBirthDate,
                     ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String?>(
-                      initialValue: _gender,
-                      decoration: InputDecoration(
-                        labelText: S.t('profile_gender_label'),
-                        helperText: S.t('profile_private_helper'),
-                      ),
-                      items: [
-                        DropdownMenuItem(value: null, child: Text(S.t('profile_gender_unspecified'))),
-                        DropdownMenuItem(value: 'male', child: Text(S.t('profile_gender_male'))),
-                        DropdownMenuItem(value: 'female', child: Text(S.t('profile_gender_female'))),
-                        DropdownMenuItem(value: 'diverse', child: Text(S.t('profile_gender_diverse'))),
+                    const SizedBox(height: 16),
+                    Text(S.t('profile_grammatical_form_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
+                    const SizedBox(height: 8),
+                    SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(value: 'male', label: Text(S.t('profile_grammatical_form_male'))),
+                        ButtonSegment(value: 'female', label: Text(S.t('profile_grammatical_form_female'))),
                       ],
-                      onChanged: (value) => setState(() => _gender = value),
+                      selected: _grammaticalForm == null ? {} : {_grammaticalForm!},
+                      emptySelectionAllowed: true,
+                      onSelectionChanged: (selection) =>
+                          setState(() => _grammaticalForm = selection.isEmpty ? null : selection.first),
                     ),
-                    if (_gender == 'diverse') ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        S.t('profile_grammatical_form_hint'),
-                        style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.7)),
-                      ),
-                      const SizedBox(height: 8),
-                      SegmentedButton<String>(
-                        segments: [
-                          ButtonSegment(value: 'male', label: Text(S.t('profile_grammatical_form_male'))),
-                          ButtonSegment(value: 'female', label: Text(S.t('profile_grammatical_form_female'))),
-                        ],
-                        selected: {_diverseGrammaticalForm ?? 'male'},
-                        onSelectionChanged: (selection) => setState(() => _diverseGrammaticalForm = selection.first),
-                      ),
-                    ],
                     const SizedBox(height: 20),
                     Center(
                       child: _saving
