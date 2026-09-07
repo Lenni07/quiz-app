@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'audio/sound_effects.dart';
@@ -28,6 +29,7 @@ void main() async {
     debugPrint('Firebase: signed in as ${user.uid}');
     await UserProfileService().ensureProfileExists(user.uid);
     debugPrint('Firebase: profile ensured');
+    await _maybeRunEmulatorDevLink(user);
   } catch (e, stack) {
     // Kein Internet oder Firebase nicht erreichbar: App bleibt trotzdem
     // voll nutzbar (offline-first), nur der Cloud-Abgleich fehlt dann.
@@ -39,6 +41,22 @@ void main() async {
   // SoundEffects.preload()).
   SoundEffects.instance.preload();
   runApp(const MyApp());
+}
+
+/// Nur im Emulator-Modus (siehe firebase_emulator.dart): Wird die App mit
+/// `?devlink=name@example.com` aufgerufen, wird das anonyme Konto ohne
+/// echtes Google-Popup mit diesem Fake-Konto verknüpft - so lässt sich die
+/// Umwandlung anonym → vollwertig aus Abschnitt 18h automatisiert testen.
+Future<void> _maybeRunEmulatorDevLink(User user) async {
+  if (!useFirebaseEmulator || !user.isAnonymous) return;
+  final email = Uri.base.queryParameters['devlink'];
+  if (email == null || email.isEmpty) return;
+  try {
+    await AuthService().debugLinkGoogleForEmulator(email);
+    debugPrint('Firebase: emulator dev-link to $email done, uid still ${user.uid}');
+  } catch (e) {
+    debugPrint('Firebase: emulator dev-link failed: $e');
+  }
 }
 
 /// Nur im Emulator-Modus: `?devqueue=1` startet direkt in der

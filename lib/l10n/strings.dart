@@ -365,6 +365,41 @@ class S {
     'profile_grammatical_form_male': {AppLanguage.de: 'Männlich', AppLanguage.en: 'Male'},
     'profile_grammatical_form_female': {AppLanguage.de: 'Weiblich', AppLanguage.en: 'Female'},
 
+    // Konto / Google-Anmeldung (siehe ROADMAP_QuizApp.md Abschnitt 18h)
+    'account_section_title': {AppLanguage.de: 'Konto', AppLanguage.en: 'Account'},
+    'account_anonymous_info': {
+      AppLanguage.de: 'Dein Fortschritt ist zurzeit nur auf diesem Gerät gespeichert. '
+          'Melde dich mit Google an, damit er einen Gerätewechsel übersteht – '
+          'und um 1 vs 1, Flottentreffen und Rangliste freizuschalten.',
+      AppLanguage.en: 'Your progress is currently stored only on this device. '
+          'Sign in with Google so it survives a device change – '
+          'and to unlock 1 vs 1, Fleet Meetup and Ranking.',
+    },
+    'account_link_google_button': {
+      AppLanguage.de: 'Mit Google anmelden',
+      AppLanguage.en: 'Sign in with Google',
+    },
+    'account_linked_as': {
+      AppLanguage.de: 'Angemeldet mit Google als {0}',
+      AppLanguage.en: 'Signed in with Google as {0}',
+    },
+    'account_link_success': {
+      AppLanguage.de: 'Google-Konto verknüpft – dein Fortschritt ist jetzt gesichert.',
+      AppLanguage.en: 'Google account linked – your progress is now backed up.',
+    },
+    'account_link_error_in_use': {
+      AppLanguage.de: 'Dieses Google-Konto ist bereits mit einem anderen Spielstand verknüpft.',
+      AppLanguage.en: 'This Google account is already linked to another progress record.',
+    },
+    'account_link_error_generic': {
+      AppLanguage.de: 'Anmeldung nicht abgeschlossen. Bitte erneut versuchen.',
+      AppLanguage.en: 'Sign-in was not completed. Please try again.',
+    },
+    'account_link_web_only': {
+      AppLanguage.de: 'Die Google-Anmeldung ist zurzeit nur in der Web-Version möglich.',
+      AppLanguage.en: 'Google sign-in is currently only available in the web version.',
+    },
+
     'profile_save': {AppLanguage.de: 'Speichern', AppLanguage.en: 'Save'},
     'profile_save_success': {AppLanguage.de: 'Profil gespeichert.', AppLanguage.en: 'Profile saved.'},
     'profile_save_error': {

@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../audio/sound_settings.dart';
+import '../services/auth_service.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/avatar_option.dart';
@@ -11,6 +13,7 @@ import '../services/career_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/account_status.dart';
 import '../widgets/game_button.dart';
 import '../widgets/maritime_icon.dart';
 import '../widgets/game_panel.dart';
@@ -43,6 +46,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _grammaticalForm;
   bool _loaded = false;
   bool _saving = false;
+  bool _linking = false;
+
+  final _authService = AuthService();
 
   @override
   void dispose() {
@@ -136,6 +142,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// Verknüpft das anonyme Konto mit Google (siehe ROADMAP_QuizApp.md
+  /// Abschnitt 18h). Bei Erfolg bleibt die UID gleich, der Fortschritt also
+  /// erhalten - danach nur die Anzeige aktualisieren.
+  Future<void> _linkGoogle() async {
+    setState(() => _linking = true);
+    try {
+      await _authService.linkGoogleAccount();
+      if (!mounted) return;
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.t('account_link_success'))),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      final inUse = e.code == 'credential-already-in-use' || e.code == 'email-already-in-use';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.t(inUse ? 'account_link_error_in_use' : 'account_link_error_generic')),
+      ));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.t('account_link_error_generic'))),
+      );
+    } finally {
+      if (mounted) setState(() => _linking = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -155,6 +189,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Text(S.t('account_section_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
+                    const SizedBox(height: 8),
+                    AccountStatus(
+                      isFullAccount: _authService.isFullAccount,
+                      email: _authService.linkedEmail,
+                      linking: _linking,
+                      canLink: kIsWeb,
+                      onLink: _linkGoogle,
+                    ),
+                    const SizedBox(height: 24),
                     Text(S.t('profile_language_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
                     const SizedBox(height: 8),
                     SegmentedButton<AppLanguage>(
