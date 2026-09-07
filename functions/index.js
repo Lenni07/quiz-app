@@ -469,9 +469,15 @@ function hashCrewId(normalized) {
  * Ordnet dem aufrufenden Konto eine Crew-ID zu. Serverseitig durchgesetzt
  * (Client kann es nicht umgehen, siehe firestore.rules): In der Datenbank
  * landet NUR der Hash - als users/{uid}.crewIdHash und als Sperr-Eintrag
- * crewIds/{hash}. Ist der Hash bereits einem anderen Konto zugeordnet, wird
- * die Anfrage mit "already-exists" abgelehnt. Eine frühere Crew-ID desselben
- * Kontos wird dabei freigegeben (Tippfehler-Korrektur bleibt möglich).
+ * crewIds/{hash} mit { uid, originalUid, claimedAt/releasedAt }.
+ *
+ * - Aktiver Inhaber (uid gesetzt) und != Aufrufer  -> Ablehnung.
+ * - Wechselt der Inhaber weg, wird der Eintrag NICHT gelöscht, sondern nur
+ *   freigegeben (uid = null); originalUid (der Erst-Inhaber) bleibt dauerhaft
+ *   stehen. Eine freigegebene ID kann danach NUR der ursprüngliche Inhaber
+ *   erneut beanspruchen - so lässt sich eine verifizierte Crew-ID nicht per
+ *   "kurz wegwechseln" an ein zweites Google-Konto weiterreichen (18h).
+ *   Tippfehler-Korrektur durch dieselbe Person bleibt möglich.
  */
 exports.claimCrewId = onCall({ secrets: [CREW_ID_PEPPER] }, async (request) => {
   const uid = request.auth?.uid;
@@ -492,19 +498,48 @@ exports.claimCrewId = onCall({ secrets: [CREW_ID_PEPPER] }, async (request) => {
   const userRef = db.collection("users").doc(uid);
 
   await db.runTransaction(async (tx) => {
-    const [crewIdDoc, userDoc] = await Promise.all([tx.get(crewIdRef), tx.get(userRef)]);
-
-    if (crewIdDoc.exists && crewIdDoc.data().uid !== uid) {
-      throw new HttpsError("already-exists", "Diese Crew-ID ist bereits einem anderen Konto zugeordnet.");
-    }
-
+    // --- alle Lesezugriffe zuerst ---
+    const userDoc = await tx.get(userRef);
     const currentHash = userDoc.data()?.crewIdHash ?? null;
     if (currentHash === hash) return; // schon von diesem Konto beansprucht
 
-    if (currentHash) {
-      tx.delete(db.collection("crewIds").doc(currentHash));
+    const oldRef = currentHash ? db.collection("crewIds").doc(currentHash) : null;
+    const [crewIdDoc, oldDoc] = await Promise.all([
+      tx.get(crewIdRef),
+      oldRef ? tx.get(oldRef) : Promise.resolve(null),
+    ]);
+
+    // --- prüfen ---
+    if (crewIdDoc.exists) {
+      const data = crewIdDoc.data();
+      const holder = data.uid ?? null;
+      const firstOwner = data.originalUid ?? data.uid ?? null;
+      if (holder && holder !== uid) {
+        throw new HttpsError("already-exists", "Diese Crew-ID ist bereits einem anderen Konto zugeordnet.");
+      }
+      if (!holder && firstOwner && firstOwner !== uid) {
+        throw new HttpsError("already-exists", "Diese Crew-ID ist dauerhaft einem anderen Konto zugeordnet.");
+      }
     }
-    tx.set(crewIdRef, { uid, claimedAt: FieldValue.serverTimestamp() });
+
+    // --- schreiben ---
+    if (oldRef) {
+      const firstOwner = oldDoc?.data()?.originalUid ?? oldDoc?.data()?.uid ?? uid;
+      tx.set(
+        oldRef,
+        { uid: null, originalUid: firstOwner, releasedAt: FieldValue.serverTimestamp() },
+        { merge: true }
+      );
+    }
+
+    const firstOwner = crewIdDoc.exists
+      ? (crewIdDoc.data().originalUid ?? crewIdDoc.data().uid ?? uid)
+      : uid;
+    tx.set(
+      crewIdRef,
+      { uid, originalUid: firstOwner, claimedAt: FieldValue.serverTimestamp() },
+      { merge: true }
+    );
     tx.set(userRef, { crewIdHash: hash, crewId: FieldValue.delete() }, { merge: true });
   });
 
