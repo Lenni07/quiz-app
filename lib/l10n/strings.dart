@@ -425,6 +425,26 @@ class S {
       AppLanguage.en: 'Google sign-in is currently only available in the web version.',
     },
 
+    // Gestufter Zugang / Konto-Sperre (siehe ROADMAP_QuizApp.md Abschnitt 18h)
+    'gate_title': {AppLanguage.de: 'Vollwertiges Konto nötig', AppLanguage.en: 'Full account required'},
+    'gate_needs_google': {
+      AppLanguage.de: '1 vs 1, Flottentreffen und Rangliste brauchen ein vollwertiges Konto. '
+          'Melde dich im Profil mit Google an und hinterlege deine Crew-ID.',
+      AppLanguage.en: '1 vs 1, Fleet Meetup and Ranking need a full account. '
+          'Sign in with Google in your profile and add your crew ID.',
+    },
+    'gate_needs_crewid': {
+      AppLanguage.de: 'Fast geschafft: Hinterlege noch deine Crew-ID im Profil, '
+          'dann sind 1 vs 1, Flottentreffen und Rangliste frei.',
+      AppLanguage.en: 'Almost there: add your crew ID in your profile, '
+          'then 1 vs 1, Fleet Meetup and Ranking are unlocked.',
+    },
+    'gate_no_connection': {
+      AppLanguage.de: 'Konto gerade nicht prüfbar – bitte Internetverbindung prüfen.',
+      AppLanguage.en: 'Cannot verify your account right now – please check your internet connection.',
+    },
+    'gate_go_to_profile': {AppLanguage.de: 'Zum Profil', AppLanguage.en: 'Go to profile'},
+
     'profile_save': {AppLanguage.de: 'Speichern', AppLanguage.en: 'Save'},
     'profile_save_success': {AppLanguage.de: 'Profil gespeichert.', AppLanguage.en: 'Profile saved.'},
     'profile_save_error': {

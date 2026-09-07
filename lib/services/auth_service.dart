@@ -9,7 +9,9 @@ import 'firebase_emulator.dart';
 /// Konto umgewandelt werden - die Kennung (UID) und damit der gesamte
 /// Fortschritt bleiben dabei erhalten.
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Erst bei Bedarf auflösen - so lässt sich AuthService in Widget-Tests
+  // ohne initialisiertes Firebase konstruieren (siehe FullAccountGate).
+  FirebaseAuth get _auth => FirebaseAuth.instance;
 
   User? get currentUser => _auth.currentUser;
 
@@ -24,10 +26,16 @@ class AuthService {
   }
 
   /// Noch kein vollwertiges Konto: Nutzer ist gar nicht angemeldet oder nur
-  /// anonym (kein Google-Anbieter verknüpft).
-  bool get isFullAccount =>
-      _auth.currentUser != null &&
-      _auth.currentUser!.providerData.any((info) => info.providerId == 'google.com');
+  /// anonym (kein Google-Anbieter verknüpft). Robust gegen "Firebase nicht
+  /// erreichbar" (offline / im Test) - liefert dann `false`.
+  bool get isFullAccount {
+    try {
+      final user = _auth.currentUser;
+      return user != null && user.providerData.any((info) => info.providerId == 'google.com');
+    } catch (_) {
+      return false;
+    }
+  }
 
   /// E-Mail des verknüpften Google-Kontos (für die Anzeige im Profil).
   String? get linkedEmail => _auth.currentUser?.email;

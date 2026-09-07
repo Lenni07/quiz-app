@@ -12,6 +12,7 @@ import '../widgets/game_button.dart';
 import '../widgets/game_panel.dart';
 import '../widgets/maritime_background.dart';
 import '../widgets/maritime_icon.dart';
+import '../widgets/full_account_gate.dart';
 import '../widgets/maritime_painters.dart';
 import '../widgets/pop_in.dart';
 import 'career_ranking_screen.dart';
@@ -54,14 +55,24 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
       case 0:
         return const ModeSelectScreen(embedded: true);
       case 1:
-        return const FleetWarScreen(embedded: true);
+        return _gated(const FleetWarScreen(embedded: true));
       case 2:
-        return _buildOneVsOneLanding(context);
+        return _gated(_buildOneVsOneLanding(context));
       case 3:
-        return const CareerRankingScreen(embedded: true);
+        return _gated(const CareerRankingScreen(embedded: true));
       default:
         return const ProfileScreen(embedded: true);
     }
+  }
+
+  /// Umschließt die wettbewerbsrelevanten Bereiche mit der Konto-Sperre
+  /// (siehe ROADMAP_QuizApp.md Abschnitt 18h). Der Lernmodus (case 0) bleibt
+  /// bewusst frei.
+  Widget _gated(Widget child) {
+    return FullAccountGate(
+      onGoToProfile: () => setState(() => _index = 4),
+      child: child,
+    );
   }
 
   @override

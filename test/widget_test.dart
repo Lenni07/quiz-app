@@ -23,12 +23,13 @@ void main() {
     expect(find.text('Rangliste'), findsOneWidget);
     expect(find.text('Profil'), findsOneWidget);
 
-    // Standardmäßig ist der 1-vs-1-Reiter aktiv (Hauptmodus). Ohne
-    // initialisiertes Firebase (wie in diesem Test) zeigt er konsequent
-    // dieselbe "keine Verbindung zum Konto"-Meldung wie Profil/Flottentreffen,
-    // statt einen Button anzuzeigen, der sowieso fehlschlagen würde.
+    // Standardmäßig ist der 1-vs-1-Reiter aktiv (Hauptmodus). Er ist über
+    // FullAccountGate gesperrt (siehe ROADMAP_QuizApp.md Abschnitt 18h);
+    // ohne initialisiertes Firebase (wie in diesem Test) kann das Konto nicht
+    // geprüft werden, also erscheint der "Konto nicht prüfbar"-Sperrhinweis
+    // statt des Spiel-Buttons.
     expect(find.text('Quiz-Duell starten'), findsNothing);
-    expect(find.textContaining('Keine Verbindung zum Konto'), findsOneWidget);
+    expect(find.textContaining('Konto gerade nicht prüfbar'), findsOneWidget);
 
     await tester.tap(find.text('Lernmodus'));
     await tester.pumpAndSettle();
