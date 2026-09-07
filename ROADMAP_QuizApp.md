@@ -9,7 +9,12 @@
 
 5. **Personalisierte Fragen aus Profildaten** (Abschnitt 18f) – Profilfelder Geburtsdatum und Geschlecht ergänzen, Platzhalter-System für Fragen einbauen.
 
-**Zurückgestellt:** Abschnitt 18d (Download-Seite/Hosting), Abschnitt 18e (Ligen- und EP-System – Ranking-Konzept noch nicht final), Live-Deployment aller bisher nur lokal getesteten Server-Logik.
+**Zurückgestellt:** Abschnitt 18d (Download-Seite/Hosting), Abschnitt 18e (Ligen- und EP-System – Ranking-Konzept noch nicht final), Sound-Dateien in besserer Qualität (Kenney klingt zu billig – bessere Quellen: Pixabay, Mixkit, WOW Sound, BOOM Library), vorproduzierte Audiodateien für das Hörverständnis (Abschnitt 18g, langfristiger Teil).
+
+### ⚠ Technische Wartung mit Frist
+
+- **Node.js 20 → 22 umstellen (Frist: 30.10.2026).** Die aktuelle Cloud-Functions-Laufzeit Node.js 20 ist bereits als veraltet markiert und wird zu diesem Datum endgültig abgeschaltet. Danach lassen sich die Functions nicht mehr deployen bzw. laufen nicht mehr. Muss also vor Ende Oktober 2026 erledigt sein – nicht dringend heute, aber auch nicht bis zum letzten Moment aufschieben.
+- **`firebase-functions`-Paket:** neueres Major-Release verfügbar, enthält Breaking Changes. Kein Zeitdruck, sinnvollerweise zusammen mit dem Node-22-Umstieg erledigen.
 
 Dieses Dokument ergänzt die bestehende `CLAUDE.md`. Die dortige Phase 1 (MVP) bleibt technisch das Fundament und wird **nicht** rückgebaut – die folgenden Phasen bauen schrittweise darauf auf. Am Ende steht eine Zusammenfassung, welche Punkte der ursprünglichen "Kein X"-Liste aus der MVP-Phase jetzt bewusst aufgehoben werden.
 
@@ -370,6 +375,10 @@ Damit sind die beiden Bereiche auch inhaltlich sauber getrennt: **Lernmodus = Pr
 - **Die App ist kostenfrei.**
 
 **Warum nicht (zunächst) App Store:** Google Play wäre machbar (einmalig 25 $), Apple dagegen deutlich aufwendiger: 99 $ pro Jahr und iOS-Builds erfordern zwingend einen Mac mit Xcode – auf der aktuellen Windows-Umgebung nicht möglich. Über die Web-Version erreicht man iPhone-Nutzer ohne diese Hürde vollständig.
+
+**Offener Punkt: Zugangsbeschränkung.** Die gehostete Adresse ist öffentlich – jeder mit dem Link kann die App öffnen, sich anonym anmelden und einem Schiff beitreten. Für die Testphase ist das gewollt (Link einfach weitergeben). Mittelfristig braucht es aber eine Begrenzung, sonst können Fremde in Ranglisten und Flottentreffen auftauchen und die Wertungen verfälschen. Denkbare Wege: Prüfung der Crew-ID, Einladungscode pro Schiff, oder Freischaltung durch eine verantwortliche Person an Bord. Noch nicht entschieden.
+
+**Offener Punkt: Ladegröße.** Die Web-Version lädt beim ersten Aufruf ca. 44 MB, davon allein ~30 MB für Flutters Grafik-Motor (CanvasKit). Danach liegt alles im Browser-Zwischenspeicher. Über eine Satelliten-Anbindung an Bord kann die Erstladung aber spürbar dauern. Falls sich das in der Praxis als Hürde zeigt, gibt es Stellschrauben (schlankerer Renderer statt CanvasKit). Vorerst kein Hindernis, aber im Blick behalten.
 
 **Zum Geschäftsmodell (offen, später zu entscheiden):** Angedacht ist, dass Crew-Mitglieder zahlen und die Kosten über Crew Welfare erstattet bekommen (wiederkehrende Einnahmen statt einer einmaligen Zahlung der Reederei). Marktanhaltspunkte: etablierte Sprachlern-Anbieter im Firmengeschäft liegen bei ca. 8-10 € pro Nutzer/Monat; für ein Modell mit Vorleistung durch die Crew wären realistisch eher 2-5 € pro Monat bzw. 20-40 € im Jahr. Eine Direktzahlung der Reederei läge grob bei 2.000-10.000 € pro Schiff und Jahr, bedeutet aber Ausschreibungen, Datenschutzprüfungen und lange Verkaufszyklen. Stärkste Verhandlungsposition entsteht ohnehin erst mit belegbaren Nutzungszahlen – deshalb zunächst kostenfrei verteilen.
 
