@@ -47,6 +47,20 @@ function kFactorFor(matchesPlayed) {
   return matchesPlayed < PLACEMENT_MATCHES ? PLACEMENT_K_FACTOR : STANDARD_K_FACTOR;
 }
 
+/** Wirft, wenn der Aufrufer nicht angemeldet oder nur anonym angemeldet ist.
+ *  Für wettbewerbsrelevante Callables (siehe ROADMAP_QuizApp.md Abschnitt 18h,
+ *  "Gestufter Zugang"). Die Crew-ID-Prüfung passiert schon beim Betreten der
+ *  Warteschlange (firestore.rules isFullAccount) - wer in einem Match ist, hat
+ *  sie also bereits; hier reicht der billige, lesezugriffsfreie Anonym-Check. */
+function requireNonAnonymous(request) {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Login erforderlich.");
+  if (request.auth.token?.firebase?.sign_in_provider === "anonymous") {
+    throw new HttpsError("failed-precondition", "Vollwertiges Konto erforderlich.");
+  }
+  return uid;
+}
+
 /** "YYYY-MM", z. B. "2026-08" — identifiziert eine Season eindeutig. */
 function seasonKeyForDate(date) {
   const year = date.getUTCFullYear();
@@ -278,8 +292,7 @@ exports.matchmakeCareerQueue = onDocumentWritten("careerQueue/{uid}", async (eve
  * sie ausgelöst hat.
  */
 exports.submitDraftAction = onCall(async (request) => {
-  const uid = request.auth?.uid;
-  if (!uid) throw new HttpsError("unauthenticated", "Login erforderlich.");
+  const uid = requireNonAnonymous(request);
   const { matchId, formatId } = request.data || {};
   if (!matchId || !formatId) {
     throw new HttpsError("invalid-argument", "matchId und formatId erforderlich.");
@@ -347,8 +360,7 @@ exports.submitDraftAction = onCall(async (request) => {
  * Spieler serverseitig aktualisiert (nie client-vorgegeben).
  */
 exports.submitRoundResult = onCall(async (request) => {
-  const uid = request.auth?.uid;
-  if (!uid) throw new HttpsError("unauthenticated", "Login erforderlich.");
+  const uid = requireNonAnonymous(request);
   const { matchId, roundIndex, score, total } = request.data || {};
   if (
     !matchId || typeof roundIndex !== "number" ||

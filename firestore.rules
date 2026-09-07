@@ -3,6 +3,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Vollwertiges Konto (siehe ROADMAP_QuizApp.md Abschnitt 18h, "Gestufter
+    // Zugang"): nicht anonym angemeldet UND eine Crew-ID hinterlegt. Wird für
+    // alles Wettbewerbsrelevante verlangt (1 vs 1, Flottenkrieg-Einreichungen).
+    // Der get() kostet einen Lesezugriff - nur auf den wenigen Schreibpfaden
+    // eingesetzt, nicht flächendeckend.
+    function isFullAccount() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('crewIdHash', null) != null;
+    }
+
     // Jeder Nutzer darf nur sein eigenes Profil lesen/schreiben - aber die
     // ELO-Wertung darf nur die Cloud Function ändern, nicht der Client selbst
     // (sonst könnte man sich einfach eine Top-Wertung eintragen). Gleiches
@@ -37,11 +48,14 @@ service cloud.firestore {
       }
     }
 
-    // Ergebnis-Einreichungen: jeder angemeldete Nutzer darf für sich selbst
-    // einreichen (einmalig, nicht änderbar), aber nur eigene einsehen.
+    // Ergebnis-Einreichungen für den Flottenkrieg: nur vollwertige Konten
+    // dürfen einreichen (siehe ROADMAP_QuizApp.md Abschnitt 18h - der
+    // Flottenkrieg ist wettbewerbsrelevant). Einmalig, nicht änderbar, nur
+    // eigene einsehbar.
     match /scoreSubmissions/{submissionId} {
       allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid;
+        && request.resource.data.uid == request.auth.uid
+        && isFullAccount();
       allow read: if request.auth != null
         && resource.data.uid == request.auth.uid;
       allow update, delete: if false;
@@ -54,11 +68,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // 1-vs-1-Warteschlange: jeder darf nur seinen eigenen Eintrag
-    // lesen/schreiben (Wertung wird serverseitig aus users/{uid} gelesen,
-    // hier also nichts Sicherheitsrelevantes zu schützen).
+    // 1-vs-1-Warteschlange: nur das eigene Dokument, und Schreiben (= ins
+    // Matchmaking gehen) nur mit vollwertigem Konto (siehe ROADMAP_QuizApp.md
+    // Abschnitt 18h). Lesen bleibt ohne die teure Prüfung - der eigene
+    // Warteschlangen-Status ist nicht schützenswert.
     match /careerQueue/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid && isFullAccount();
     }
 
     // 1-vs-1-Matches: nur die beiden Teilnehmer dürfen lesen (für die
