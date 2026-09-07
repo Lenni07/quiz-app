@@ -9,7 +9,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 class CareerMatchService {
   CareerMatchService({FirebaseFirestore? firestore, FirebaseFunctions? functions})
       : _firestore = firestore ?? FirebaseFirestore.instance,
-        _functions = functions ?? FirebaseFunctions.instanceFor(region: 'europe-west10');
+        _functions = functions ?? FirebaseFunctions.instanceFor(region: 'europe-west3');
 
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;

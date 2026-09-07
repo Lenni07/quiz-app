@@ -5,11 +5,15 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
-// Gleiche Region wie die Firestore-Datenbank (Berlin) - vermeidet
-// Cross-Region-Latenz und verarbeitet die personenbezogenen Crew-Daten
-// (Name, Geburtsdatum, Position) innerhalb Deutschlands statt im
-// standardmaessigen us-central1.
-setGlobalOptions({ region: "europe-west10" });
+// europe-west10 (Berlin, gleiche Region wie Firestore) unterstuetzt
+// Cloud Scheduler nicht, was die zeitgesteuerten Functions
+// (resetMonthlySeasons, resetCareerSeason) unmoeglich macht - deshalb
+// stattdessen europe-west3 (Frankfurt) fuer ALLE Functions einheitlich,
+// statt einzelne Functions in unterschiedlichen Regionen zu verteilen.
+// Verarbeitet die personenbezogenen Crew-Daten (Name, Geburtsdatum,
+// Position) weiterhin innerhalb Deutschlands/EU statt im
+// standardmaessigen us-central1 (USA).
+setGlobalOptions({ region: "europe-west3" });
 
 initializeApp();
 const db = getFirestore();
