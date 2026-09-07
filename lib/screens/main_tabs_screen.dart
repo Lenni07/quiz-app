@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_language.dart';
 import '../l10n/strings.dart';
 import '../models/game_format.dart';
+import '../services/career_match_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/count_up_number.dart';
@@ -17,6 +18,7 @@ import '../widgets/maritime_painters.dart';
 import '../widgets/pop_in.dart';
 import 'career_ranking_screen.dart';
 import 'fleet_war_screen.dart';
+import 'match_resume_screen.dart';
 import 'mode_select_screen.dart';
 import 'one_vs_one_queue_screen.dart';
 import 'profile_screen.dart';
@@ -227,6 +229,7 @@ class _OneVsOneLanding extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          _ResumeMatchCard(uid: myUid),
           PopIn(
             child: GamePanel(
               child: Column(
@@ -279,6 +282,50 @@ class _OneVsOneLanding extends StatelessWidget {
           PopIn(delay: const Duration(milliseconds: 220), child: _RecentMatchesList(uid: myUid)),
         ],
       ),
+    );
+  }
+}
+
+/// Zeigt oben im 1-vs-1-Startbild einen "Zurück ins laufende Match"-Knopf,
+/// falls der Nutzer ein noch offenes Match hat (Draft oder Spielphase) -
+/// wichtig nach einem Verbindungsabriss (siehe ROADMAP_QuizApp.md
+/// Abschnitt 17).
+class _ResumeMatchCard extends StatelessWidget {
+  final String uid;
+
+  const _ResumeMatchCard({required this.uid});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>?>(
+      stream: CareerMatchService().watchActiveMatch(uid),
+      builder: (context, snapshot) {
+        final doc = snapshot.data;
+        if (doc == null) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: PopIn(
+            child: GamePanel(
+              gradient: const LinearGradient(colors: [AppColors.deepSeaLight, AppColors.brassDark]),
+              child: Column(
+                children: [
+                  Text(S.t('resume_match_title'), style: displayStyle(fontSize: 18, color: AppColors.canvas)),
+                  const SizedBox(height: 12),
+                  GameButton(
+                    label: S.t('resume_match_button'),
+                    icon: Icons.play_arrow_rounded,
+                    pulse: true,
+                    onPressed: () => Navigator.push(
+                      context,
+                      buildFadeSlideRoute(MatchResumeScreen(matchId: doc.id)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -225,6 +225,14 @@ const DRAFT_GRACE_MS = 3000; // Kulanz, bevor eine abgelaufene Frist serverseiti
 // abwesend, das Match wird ohne Wertungsänderung abgebrochen.
 const DRAFT_ABANDON_THRESHOLD = 2;
 
+// Spielphase (siehe ROADMAP_QuizApp.md Abschnitt 17): großzügige Frist pro
+// Runde, damit ein kurzer Verbindungsabriss (Satellit an Bord) und ein
+// Wiedereinstieg drin sind. Läuft sie ab und nur ein Spieler hat sein
+// Ergebnis eingereicht, gewinnt dieser das Match (der Gegner ist nicht mehr
+// erschienen - anders als beim Draft wurde hier tatsächlich gespielt).
+const ROUND_MS = 4 * 60 * 1000;
+const ROUND_GRACE_MS = 15 * 1000;
+
 /**
  * Wendet einen Draft-Zug (Ban oder Pick) von [actorUid] an. Gemeinsame Logik
  * für den manuellen submitDraftAction und die serverseitige Auto-Aktion
@@ -287,6 +295,7 @@ function applyDraftAction(tx, matchRef, match, actorUid, formatId, { auto }) {
       turnUid: null,
       turnDeadline: null,
       draftAutoStreak: streak,
+      roundDeadline: Date.now() + ROUND_MS,
     });
   } else {
     tx.update(matchRef, {
@@ -432,32 +441,42 @@ exports.advanceDraftIfExpired = onCall(async (request) => {
 });
 
 /**
- * Sicherheitsnetz: bricht Draft-Matches ab, deren Zug-Frist deutlich (>10 min)
- * abgelaufen ist - also Fälle, in denen BEIDE Spieler weg sind und niemand
- * advanceDraftIfExpired auslöst. Keine Wertungsänderung.
+ * Sicherheitsnetz für Matches, die niemand mehr voranbringt (beide Clients
+ * weg, niemand ruft advanceDraftIfExpired / claimRoundTimeout):
+ * - Draft, Zug-Frist >10 min her  -> Abbruch ohne Wertung.
+ * - Spielphase, Runden-Frist >8 min her -> falls genau ein Spieler
+ *   eingereicht hat, gewinnt dieser (auch wenn er die Warte-Ansicht
+ *   verlassen hat); sonst Abbruch.
  */
-exports.abandonStaleDraftMatches = onSchedule(
+exports.abandonStaleMatches = onSchedule(
   { schedule: "every 10 minutes", timeZone: "Etc/UTC" },
   async () => {
-    const cutoff = Date.now() - 10 * 60 * 1000;
-    const snap = await db.collection("matches").where("status", "==", "drafting").get();
-    const batch = db.batch();
-    let count = 0;
+    const draftCutoff = Date.now() - 10 * 60 * 1000;
+    const roundCutoff = Date.now() - 8 * 60 * 1000;
+    const snap = await db.collection("matches").where("status", "in", ["drafting", "playing"]).get();
+
     for (const doc of snap.docs) {
       const match = doc.data();
-      if (!match.turnDeadline || match.turnDeadline > cutoff) continue;
-      batch.update(doc.ref, {
-        status: "aborted",
-        abortReason: "stale",
-        turnUid: null,
-        turnDeadline: null,
-      });
-      for (const p of match.players || []) {
-        batch.set(db.collection("careerQueue").doc(p), { status: "idle" }, { merge: true });
+      if (match.status === "drafting") {
+        if (!match.turnDeadline || match.turnDeadline > draftCutoff) continue;
+        await db.runTransaction(async (tx) => {
+          const fresh = await tx.get(doc.ref);
+          if (fresh.data()?.status !== "drafting") return;
+          tx.update(doc.ref, { status: "aborted", abortReason: "stale", turnUid: null, turnDeadline: null });
+          for (const p of match.players || []) {
+            tx.set(db.collection("careerQueue").doc(p), { status: "idle" }, { merge: true });
+          }
+        });
+      } else {
+        if (!match.roundDeadline || match.roundDeadline > roundCutoff) continue;
+        await db.runTransaction(async (tx) => {
+          const fresh = await tx.get(doc.ref);
+          const m = fresh.data();
+          if (m?.status !== "playing") return;
+          await resolveRoundTimeout(tx, doc.ref, m);
+        });
       }
-      count++;
     }
-    if (count > 0) await batch.commit();
   }
 );
 
@@ -512,7 +531,12 @@ exports.submitRoundResult = onCall(async (request) => {
     roundWinners[roundIndex] = roundWinner;
 
     if (roundIndex < 2) {
-      tx.update(matchRef, { roundScores, roundWinners, currentRound: roundIndex + 1 });
+      tx.update(matchRef, {
+        roundScores,
+        roundWinners,
+        currentRound: roundIndex + 1,
+        roundDeadline: Date.now() + ROUND_MS,
+      });
       return;
     }
 
@@ -522,54 +546,130 @@ exports.submitRoundResult = onCall(async (request) => {
     if (p1Wins > p2Wins) winnerUid = p1;
     else if (p2Wins > p1Wins) winnerUid = p2;
 
-    const p1UserRef = db.collection("users").doc(p1);
-    const p2UserRef = db.collection("users").doc(p2);
-    const p1UserDoc = await tx.get(p1UserRef);
-    const p2UserDoc = await tx.get(p2UserRef);
-    const p1Rating = p1UserDoc.data()?.eloRating ?? DEFAULT_ELO;
-    const p2Rating = p2UserDoc.data()?.eloRating ?? DEFAULT_ELO;
-    const p1MatchesPlayed = p1UserDoc.data()?.rankedMatchesPlayed ?? 0;
-    const p2MatchesPlayed = p2UserDoc.data()?.rankedMatchesPlayed ?? 0;
-
-    let p1Actual = 0.5;
-    let p2Actual = 0.5;
-    if (winnerUid === p1) {
-      p1Actual = 1;
-      p2Actual = 0;
-    } else if (winnerUid === p2) {
-      p1Actual = 0;
-      p2Actual = 1;
-    }
-
-    const p1Expected = expectedScore(p1Rating, p2Rating);
-    const p1NewRating = updatedElo(p1Rating, p1Expected, p1Actual, kFactorFor(p1MatchesPlayed));
-    const p2NewRating = updatedElo(p2Rating, 1 - p1Expected, p2Actual, kFactorFor(p2MatchesPlayed));
-
-    tx.update(matchRef, {
-      roundScores,
-      roundWinners,
-      status: "finished",
-      winnerUid,
-      eloChange: { [p1]: p1NewRating, [p2]: p2NewRating },
-    });
-    tx.update(p1UserRef, { eloRating: p1NewRating, rankedMatchesPlayed: p1MatchesPlayed + 1 });
-    tx.update(p2UserRef, { eloRating: p2NewRating, rankedMatchesPlayed: p2MatchesPlayed + 1 });
-    tx.set(
-      db.collection("careerRankings").doc(p1),
-      { eloRating: p1NewRating, updatedAt: FieldValue.serverTimestamp(), currentSeasonKey: seasonKeyForDate(new Date()) },
-      { merge: true }
-    );
-    tx.set(
-      db.collection("careerRankings").doc(p2),
-      { eloRating: p2NewRating, updatedAt: FieldValue.serverTimestamp(), currentSeasonKey: seasonKeyForDate(new Date()) },
-      { merge: true }
-    );
-    tx.update(db.collection("careerQueue").doc(p1), { status: "idle" });
-    tx.update(db.collection("careerQueue").doc(p2), { status: "idle" });
+    await finalizeMatchElo(tx, matchRef, match, { roundScores, roundWinners }, winnerUid);
   });
 
   return { ok: true };
 });
+
+/**
+ * Schließt ein Match ab: bestimmt die neuen ELO-Werte (nie client-vorgegeben),
+ * schreibt sie in users/ und careerRankings/ und setzt beide
+ * Warteschlangen-Einträge zurück. [patch] sind zusätzliche Match-Felder
+ * (z. B. roundScores/roundWinners), [winnerUid] der Gesamtsieger (oder null
+ * bei Unentschieden). Alle Lesezugriffe müssen VOR dem ersten Aufruf in der
+ * Transaktion passiert sein.
+ */
+async function finalizeMatchElo(tx, matchRef, match, patch, winnerUid) {
+  const [p1, p2] = match.players;
+  const p1UserRef = db.collection("users").doc(p1);
+  const p2UserRef = db.collection("users").doc(p2);
+  const p1UserDoc = await tx.get(p1UserRef);
+  const p2UserDoc = await tx.get(p2UserRef);
+  const p1Rating = p1UserDoc.data()?.eloRating ?? DEFAULT_ELO;
+  const p2Rating = p2UserDoc.data()?.eloRating ?? DEFAULT_ELO;
+  const p1MatchesPlayed = p1UserDoc.data()?.rankedMatchesPlayed ?? 0;
+  const p2MatchesPlayed = p2UserDoc.data()?.rankedMatchesPlayed ?? 0;
+
+  let p1Actual = 0.5;
+  let p2Actual = 0.5;
+  if (winnerUid === p1) {
+    p1Actual = 1;
+    p2Actual = 0;
+  } else if (winnerUid === p2) {
+    p1Actual = 0;
+    p2Actual = 1;
+  }
+
+  const p1Expected = expectedScore(p1Rating, p2Rating);
+  const p1NewRating = updatedElo(p1Rating, p1Expected, p1Actual, kFactorFor(p1MatchesPlayed));
+  const p2NewRating = updatedElo(p2Rating, 1 - p1Expected, p2Actual, kFactorFor(p2MatchesPlayed));
+  const season = seasonKeyForDate(new Date());
+
+  tx.update(matchRef, {
+    ...patch,
+    status: "finished",
+    winnerUid,
+    eloChange: { [p1]: p1NewRating, [p2]: p2NewRating },
+    turnUid: null,
+    turnDeadline: null,
+    roundDeadline: null,
+  });
+  tx.update(p1UserRef, { eloRating: p1NewRating, rankedMatchesPlayed: p1MatchesPlayed + 1 });
+  tx.update(p2UserRef, { eloRating: p2NewRating, rankedMatchesPlayed: p2MatchesPlayed + 1 });
+  tx.set(
+    db.collection("careerRankings").doc(p1),
+    { eloRating: p1NewRating, updatedAt: FieldValue.serverTimestamp(), currentSeasonKey: season },
+    { merge: true }
+  );
+  tx.set(
+    db.collection("careerRankings").doc(p2),
+    { eloRating: p2NewRating, updatedAt: FieldValue.serverTimestamp(), currentSeasonKey: season },
+    { merge: true }
+  );
+  tx.set(db.collection("careerQueue").doc(p1), { status: "idle" }, { merge: true });
+  tx.set(db.collection("careerQueue").doc(p2), { status: "idle" }, { merge: true });
+}
+
+/**
+ * Wertet eine abgelaufene Runden-Frist aus (siehe ROADMAP_QuizApp.md
+ * Abschnitt 17). Aufgerufen vom anwesenden Spieler, sobald dessen Uhr
+ * roundDeadline überschritten sieht - geprüft wird serverseitig gegen
+ * roundDeadline.
+ * - genau ein Spieler hat die aktuelle Runde eingereicht -> er gewinnt das
+ *   Match (Gegner nicht mehr erschienen), volle ELO-Wertung.
+ * - niemand hat eingereicht -> beide weg, Match wird ohne Wertung verworfen.
+ * Idempotent (Match schon beendet / Frist noch nicht abgelaufen -> No-Op).
+ */
+exports.claimRoundTimeout = onCall(async (request) => {
+  const uid = requireNonAnonymous(request);
+  const { matchId } = request.data || {};
+  if (!matchId) throw new HttpsError("invalid-argument", "matchId erforderlich.");
+
+  const matchRef = db.collection("matches").doc(matchId);
+
+  await db.runTransaction(async (tx) => {
+    const matchDoc = await tx.get(matchRef);
+    if (!matchDoc.exists) throw new HttpsError("not-found", "Match nicht gefunden.");
+    const match = matchDoc.data();
+    if (!match.players.includes(uid)) throw new HttpsError("permission-denied", "Kein Teilnehmer dieses Matches.");
+
+    if (match.status !== "playing") return;
+    if (!match.roundDeadline || Date.now() < match.roundDeadline + ROUND_GRACE_MS) return;
+
+    await resolveRoundTimeout(tx, matchRef, match);
+  });
+
+  return { ok: true };
+});
+
+/** Gemeinsame Auswertung einer abgelaufenen Runden-Frist (Callable + Sweep). */
+async function resolveRoundTimeout(tx, matchRef, match) {
+  const roundKey = String(match.currentRound);
+  const thisRound = (match.roundScores || {})[roundKey] || {};
+  const submitters = match.players.filter((p) => thisRound[p]);
+
+  if (submitters.length >= 2) return; // sollte submitRoundResult schon gelöst haben
+
+  if (submitters.length === 0) {
+    tx.update(matchRef, {
+      status: "aborted",
+      abortReason: "both_left",
+      roundDeadline: null,
+    });
+    for (const p of match.players) {
+      tx.set(db.collection("careerQueue").doc(p), { status: "idle" }, { merge: true });
+    }
+    return;
+  }
+
+  const winnerUid = submitters[0];
+  const roundWinners = [...match.roundWinners];
+  for (let i = match.currentRound; i < roundWinners.length; i++) {
+    if (roundWinners[i] == null) roundWinners[i] = winnerUid;
+  }
+  await finalizeMatchElo(tx, matchRef, match, { roundWinners, timeoutWinnerUid: winnerUid }, winnerUid);
+}
 
 // --- Crew-ID: Eindeutigkeit + Datenschutz (ROADMAP_QuizApp.md 18h Punkt 3 / 18i) ---
 

@@ -305,6 +305,19 @@ class S {
       AppLanguage.de: 'Warte auf Ergebnis des Gegners ...',
       AppLanguage.en: 'Waiting for opponent\'s result ...',
     },
+    'round_waiting_timeout_hint': {
+      AppLanguage.de: 'Kommt der Gegner nicht zurück, wird das Match nach einigen Minuten zu deinen Gunsten gewertet.',
+      AppLanguage.en: 'If the opponent does not return, the match is decided in your favour after a few minutes.',
+    },
+    'match_aborted_body': {
+      AppLanguage.de: 'Beide Spieler sind aus dem Match ausgestiegen. Es wurde ohne Wertung verworfen.',
+      AppLanguage.en: 'Both players left the match. It was discarded without a rating change.',
+    },
+    'resume_match_title': {
+      AppLanguage.de: 'Du hast ein laufendes Match',
+      AppLanguage.en: 'You have a match in progress',
+    },
+    'resume_match_button': {AppLanguage.de: 'Zurück ins Match', AppLanguage.en: 'Back to match'},
     'round_draw': {AppLanguage.de: 'Runde unentschieden.', AppLanguage.en: 'Round drawn.'},
     'round_win': {AppLanguage.de: 'Runde gewonnen!', AppLanguage.en: 'Round won!'},
     'round_loss': {AppLanguage.de: 'Runde verloren.', AppLanguage.en: 'Round lost.'},

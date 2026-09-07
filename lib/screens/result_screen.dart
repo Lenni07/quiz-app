@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -43,6 +45,11 @@ class _ResultScreenState extends State<ResultScreen> {
   int? _roundIndex;
   bool get _inMatch => _matchId != null;
 
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _matchSub;
+  Map<String, dynamic>? _latestMatch;
+  Timer? _timeoutTicker;
+  DateTime? _lastTimeoutCall;
+
   bool get _isGoodResult => widget.score > widget.total / 2;
 
   @override
@@ -69,7 +76,32 @@ class _ResultScreenState extends State<ResultScreen> {
       _matchId = matchContext.matchId;
       _roundIndex = matchContext.roundIndex;
       _submitMatchRound();
+      _matchSub = CareerMatchService().watchMatch(_matchId!).listen((snapshot) {
+        _latestMatch = snapshot.data();
+        if (mounted) setState(() {});
+      });
+      // Läuft die großzügige Runden-Frist ab und der Gegner ist nicht mehr
+      // erschienen, wertet der Server das Match zu meinen Gunsten (siehe
+      // ROADMAP_QuizApp.md Abschnitt 17). Nur der anwesende Spieler stößt das
+      // an; der Server prüft die Frist selbst.
+      _timeoutTicker = Timer.periodic(const Duration(seconds: 5), (_) => _checkRoundTimeout());
     }
+  }
+
+  void _checkRoundTimeout() {
+    final match = _latestMatch;
+    if (match == null || match['status'] != 'playing') return;
+    final currentRound = match['currentRound'] as int? ?? _roundIndex;
+    if (currentRound != _roundIndex) return; // Runde schon aufgelöst
+    final deadline = (match['roundDeadline'] as num?)?.toInt();
+    if (deadline == null) return;
+    if (DateTime.now().millisecondsSinceEpoch < deadline + 15000) return;
+    final now = DateTime.now();
+    if (_lastTimeoutCall != null && now.difference(_lastTimeoutCall!) < const Duration(seconds: 10)) {
+      return;
+    }
+    _lastTimeoutCall = now;
+    CareerMatchService().claimRoundTimeout(_matchId!).catchError((_) {});
   }
 
   void _submitToFleetWar() {
@@ -112,6 +144,8 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   void dispose() {
+    _matchSub?.cancel();
+    _timeoutTicker?.cancel();
     for (final controller in _fireworkControllers) {
       controller.dispose();
     }
@@ -144,18 +178,30 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Widget _buildMatchRoundView(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final data = _latestMatch;
     return Scaffold(
-      body: MaritimeBackground(child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: CareerMatchService().watchMatch(_matchId!),
-            builder: (context, snapshot) {
-              final data = snapshot.data?.data();
-              if (data == null) {
-                return const CircularProgressIndicator();
-              }
+      body: MaritimeBackground(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Builder(builder: (context) {
+              if (data == null) return const CircularProgressIndicator();
+
               final status = data['status'] as String;
+              if (status == 'aborted') {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(S.t('match_aborted_body'), textAlign: TextAlign.center),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+                      child: Text(S.t('match_back_to_start')),
+                    ),
+                  ],
+                );
+              }
+
               final currentRound = data['currentRound'] as int? ?? _roundIndex!;
               final roundResolved = status == 'finished' || currentRound > _roundIndex!;
 
@@ -173,7 +219,14 @@ class _ResultScreenState extends State<ResultScreen> {
                     const SizedBox(height: 16),
                     Text(
                       S.t('round_waiting'),
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7)),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      S.t('round_waiting_timeout_hint'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.5)),
                     ),
                   ] else ...[
                     _buildRoundOutcomeText(data),
@@ -185,10 +238,10 @@ class _ResultScreenState extends State<ResultScreen> {
                   ],
                 ],
               );
-            },
+            }),
           ),
         ),
-      )),
+      ),
     );
   }
 

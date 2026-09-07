@@ -52,6 +52,33 @@ class CareerMatchService {
     return _functions.httpsCallable('advanceDraftIfExpired').call({'matchId': matchId});
   }
 
+  /// Bittet den Server, eine abgelaufene Runden-Frist auszuwerten (siehe
+  /// ROADMAP_QuizApp.md Abschnitt 17): hat nur der anwesende Spieler
+  /// eingereicht, gewinnt er das Match. Server prüft die Frist selbst.
+  Future<void> claimRoundTimeout(String matchId) {
+    return _functions.httpsCallable('claimRoundTimeout').call({'matchId': matchId});
+  }
+
+  /// Ein laufendes Match dieses Nutzers (Draft oder Spielphase), falls
+  /// vorhanden - für den Wiedereinstieg nach einem Verbindungsabriss. Nutzt
+  /// denselben Index wie die "letzte Matches"-Liste (players + createdAt);
+  /// der Status wird clientseitig gefiltert.
+  Stream<DocumentSnapshot<Map<String, dynamic>>?> watchActiveMatch(String uid) {
+    return _firestore
+        .collection('matches')
+        .where('players', arrayContains: uid)
+        .orderBy('createdAt', descending: true)
+        .limit(3)
+        .snapshots()
+        .map((snap) {
+      for (final doc in snap.docs) {
+        final status = doc.data()['status'];
+        if (status == 'drafting' || status == 'playing') return doc;
+      }
+      return null;
+    });
+  }
+
   Future<void> submitRoundResult({
     required String matchId,
     required int roundIndex,
