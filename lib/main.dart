@@ -6,7 +6,9 @@ import 'firebase_options.dart';
 import 'l10n/app_language.dart';
 import 'l10n/strings.dart';
 import 'screens/main_tabs_screen.dart';
+import 'screens/one_vs_one_queue_screen.dart';
 import 'services/auth_service.dart';
+import 'services/firebase_emulator.dart';
 import 'services/user_profile_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/page_transitions.dart';
@@ -21,6 +23,7 @@ void main() async {
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     debugPrint('Firebase: initialized');
+    await connectToFirebaseEmulatorsIfEnabled();
     final user = await AuthService().ensureSignedIn();
     debugPrint('Firebase: signed in as ${user.uid}');
     await UserProfileService().ensureProfileExists(user.uid);
@@ -38,6 +41,16 @@ void main() async {
   runApp(const MyApp());
 }
 
+/// Nur im Emulator-Modus: `?devqueue=1` startet direkt in der
+/// 1-vs-1-Warteschlange, damit sich zwei Browser-Fenster automatisiert
+/// gegeneinander ins Matchmaking schicken lassen (Regressionsprüfung des
+/// Draft-Freeze). In echten Builds ist [useFirebaseEmulator] fest `false`.
+Widget? _emulatorDevRoute() {
+  if (!useFirebaseEmulator) return null;
+  if (Uri.base.queryParameters['devqueue'] == '1') return const OneVsOneQueueScreen();
+  return null;
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -52,7 +65,7 @@ class MyApp extends StatelessWidget {
       builder: (context, language, _) => MaterialApp(
         title: S.t('app_title'),
         theme: buildAppTheme(),
-        home: const StartScreen(),
+        home: _emulatorDevRoute() ?? const StartScreen(),
         builder: (context, child) => PhoneFrame(child: child ?? const SizedBox.shrink()),
       ),
     );
