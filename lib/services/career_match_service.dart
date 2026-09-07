@@ -9,10 +9,15 @@ import 'package:cloud_functions/cloud_functions.dart';
 class CareerMatchService {
   CareerMatchService({FirebaseFirestore? firestore, FirebaseFunctions? functions})
       : _firestore = firestore ?? FirebaseFirestore.instance,
-        _functions = functions ?? FirebaseFunctions.instanceFor(region: 'europe-west3');
+        _functionsOverride = functions;
 
   final FirebaseFirestore _firestore;
-  final FirebaseFunctions _functions;
+  final FirebaseFunctions? _functionsOverride;
+
+  // Erst bei Bedarf auflösen - so lässt sich der Dienst in Tests ohne
+  // initialisiertes Firebase erzeugen (nur mit einer simulierten Firestore).
+  FirebaseFunctions get _functions =>
+      _functionsOverride ?? FirebaseFunctions.instanceFor(region: 'europe-west3');
 
   Future<void> joinQueue(String uid) async {
     await _firestore.collection('careerQueue').doc(uid).set({
