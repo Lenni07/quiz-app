@@ -1,9 +1,17 @@
+const crypto = require("crypto");
 const { setGlobalOptions } = require("firebase-functions/v2");
+const { defineSecret } = require("firebase-functions/params");
 const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+
+// Geheimer Server-Schlüssel ("Pepper") für das Hashen der Crew-IDs (siehe
+// ROADMAP_QuizApp.md Abschnitt 18i). Liegt NUR in der Function-Umgebung,
+// nie in der Datenbank. Emulator: aus functions/.env.local. Produktiv:
+// `firebase functions:secrets:set CREW_ID_PEPPER`.
+const CREW_ID_PEPPER = defineSecret("CREW_ID_PEPPER");
 
 // europe-west10 (Berlin, gleiche Region wie Firestore) unterstuetzt
 // Cloud Scheduler nicht, was die zeitgesteuerten Functions
@@ -134,8 +142,15 @@ exports.onUserProfileWritten = onDocumentWritten("users/{uid}", async (event) =>
   if (!after) return;
   const uid = event.params.uid;
 
+  const nickname = (after.nickname ?? "").trim();
+  // Ohne Nickname keinen (leeren) Ranglisten-Eintrag anlegen - sonst
+  // erscheinen namenlose Platzhalter-Zeilen in der Rangliste (siehe
+  // ROADMAP_QuizApp.md Abschnitt 18h). Ein bereits vorhandener
+  // eloRating-Eintrag (aus einem gewerteten Match) bleibt unangetastet.
+  if (!nickname) return;
+
   await db.collection("careerRankings").doc(uid).set(
-    { nickname: after.nickname ?? null, position: after.position ?? null },
+    { nickname, position: after.position ?? null },
     { merge: true }
   );
 });
@@ -431,6 +446,66 @@ exports.submitRoundResult = onCall(async (request) => {
     );
     tx.update(db.collection("careerQueue").doc(p1), { status: "idle" });
     tx.update(db.collection("careerQueue").doc(p2), { status: "idle" });
+  });
+
+  return { ok: true };
+});
+
+// --- Crew-ID: Eindeutigkeit + Datenschutz (ROADMAP_QuizApp.md 18h Punkt 3 / 18i) ---
+
+/** Vereinheitlicht eine Crew-ID vor dem Hashen, damit "CR-42", "cr 42" und
+ *  "CR42" als dieselbe ID gelten. */
+function normalizeCrewId(raw) {
+  return String(raw ?? "").trim().toUpperCase().replace(/[\s-]/g, "");
+}
+
+/** HMAC-SHA256 der normalisierten Crew-ID mit dem Server-Pepper. Deterministisch
+ *  (gleiche ID → gleicher Hash), aber ohne den Pepper nicht rückrechenbar. */
+function hashCrewId(normalized) {
+  return crypto.createHmac("sha256", CREW_ID_PEPPER.value()).update(normalized).digest("hex");
+}
+
+/**
+ * Ordnet dem aufrufenden Konto eine Crew-ID zu. Serverseitig durchgesetzt
+ * (Client kann es nicht umgehen, siehe firestore.rules): In der Datenbank
+ * landet NUR der Hash - als users/{uid}.crewIdHash und als Sperr-Eintrag
+ * crewIds/{hash}. Ist der Hash bereits einem anderen Konto zugeordnet, wird
+ * die Anfrage mit "already-exists" abgelehnt. Eine frühere Crew-ID desselben
+ * Kontos wird dabei freigegeben (Tippfehler-Korrektur bleibt möglich).
+ */
+exports.claimCrewId = onCall({ secrets: [CREW_ID_PEPPER] }, async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Anmeldung erforderlich.");
+
+  const provider = request.auth.token?.firebase?.sign_in_provider;
+  if (provider === "anonymous") {
+    throw new HttpsError("failed-precondition", "Bitte zuerst mit Google anmelden.");
+  }
+
+  const normalized = normalizeCrewId(request.data?.crewId);
+  if (normalized.length < 3 || normalized.length > 32) {
+    throw new HttpsError("invalid-argument", "Ungültige Crew-ID.");
+  }
+
+  const hash = hashCrewId(normalized);
+  const crewIdRef = db.collection("crewIds").doc(hash);
+  const userRef = db.collection("users").doc(uid);
+
+  await db.runTransaction(async (tx) => {
+    const [crewIdDoc, userDoc] = await Promise.all([tx.get(crewIdRef), tx.get(userRef)]);
+
+    if (crewIdDoc.exists && crewIdDoc.data().uid !== uid) {
+      throw new HttpsError("already-exists", "Diese Crew-ID ist bereits einem anderen Konto zugeordnet.");
+    }
+
+    const currentHash = userDoc.data()?.crewIdHash ?? null;
+    if (currentHash === hash) return; // schon von diesem Konto beansprucht
+
+    if (currentHash) {
+      tx.delete(db.collection("crewIds").doc(currentHash));
+    }
+    tx.set(crewIdRef, { uid, claimedAt: FieldValue.serverTimestamp() });
+    tx.set(userRef, { crewIdHash: hash, crewId: FieldValue.delete() }, { merge: true });
   });
 
   return { ok: true };

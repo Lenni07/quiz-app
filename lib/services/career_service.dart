@@ -21,7 +21,13 @@ class CareerService {
         .orderBy('eloRating', descending: true)
         .limit(50)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => CareerRankingEntry.fromFirestore(doc.id, doc.data())).toList());
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CareerRankingEntry.fromFirestore(doc.id, doc.data()))
+            // Einträge ohne Nickname nicht anzeigen (siehe ROADMAP_QuizApp.md
+            // Abschnitt 18h) - der Server legt sie zwar nicht mehr an, aber ein
+            // Alt-Eintrag aus einem gewerteten Match ohne gesetzten Nickname
+            // soll keine namenlose Zeile erzeugen.
+            .where((entry) => (entry.nickname ?? '').trim().isNotEmpty)
+            .toList());
   }
 }

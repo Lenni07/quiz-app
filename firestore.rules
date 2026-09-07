@@ -13,7 +13,16 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow create: if request.auth != null && request.auth.uid == uid;
       allow update: if request.auth != null && request.auth.uid == uid
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['eloRating', 'rankedMatchesPlayed']);
+        && !request.resource.data.diff(resource.data).affectedKeys()
+             .hasAny(['eloRating', 'rankedMatchesPlayed', 'crewId', 'crewIdHash']);
+    }
+
+    // Crew-ID-Sperre (siehe ROADMAP_QuizApp.md Abschnitt 18h/18i): pro Crew-ID
+    // (als HMAC-Hash) genau ein Eintrag, ausschließlich von der Cloud Function
+    // claimCrewId geschrieben (Admin SDK, umgeht Regeln). Kein Client-Zugriff -
+    // die Eindeutigkeitsprüfung läuft komplett serverseitig.
+    match /crewIds/{hash} {
+      allow read, write: if false;
     }
 
     // Flottenrangliste: für alle lesbar, aber nur die Cloud Function (Admin

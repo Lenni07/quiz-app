@@ -22,14 +22,12 @@ class PersonalizationProfile {
   final String firstName;
   final int? age;
   final String position;
-  final String crewId;
   final String? grammaticalForm;
 
   const PersonalizationProfile({
     required this.firstName,
     required this.age,
     required this.position,
-    required this.crewId,
     required this.grammaticalForm,
   });
 
@@ -37,7 +35,6 @@ class PersonalizationProfile {
     firstName: '',
     age: null,
     position: '',
-    crewId: '',
     grammaticalForm: null,
   );
 }
@@ -45,7 +42,7 @@ class PersonalizationProfile {
 final _placeholderPattern = RegExp(r'\{([^{}]+)\}');
 
 /// Ersetzt Platzhalter in [template]: einfache Werte wie "{vorname}",
-/// "{alter}", "{position}", "{crewid}" aus dem Profil, sowie
+/// "{alter}", "{position}" aus dem Profil, sowie
 /// geschlechtsabhängige Formen wie "{Kellner/Kellnerin}" oder
 /// "{Deutscher/Deutsche}" (männliche Form vor dem Schrägstrich, weibliche
 /// danach) - passend zu `profile.grammaticalForm` aufgelöst. Ein
@@ -69,8 +66,6 @@ String fillTemplate(String template, PersonalizationProfile profile) {
         return profile.age == null ? match.group(0)! : profile.age.toString();
       case 'position':
         return profile.position.isEmpty ? match.group(0)! : profile.position;
-      case 'crewid':
-        return profile.crewId.isEmpty ? match.group(0)! : profile.crewId;
       default:
         return match.group(0)!;
     }
@@ -120,9 +115,9 @@ Future<List<PersonalizedQuestionTemplate>> loadPersonalizedQuestionTemplates() a
 }
 
 /// Nur die Vorlagen, für die [profile] alle nötigen Angaben hat (Vorname,
-/// Alter, Position, Crew-ID, bzw. eine gewählte grammatische Form) - eine
-/// Vorlage mit fehlenden Daten würde sonst mit einer sichtbaren
-/// "{platzhalter}"-Lücke angezeigt.
+/// Alter, Position bzw. eine gewählte grammatische Form) - eine Vorlage mit
+/// fehlenden Daten würde sonst mit einer sichtbaren "{platzhalter}"-Lücke
+/// angezeigt.
 List<PersonalizedQuestionTemplate> usableTemplates(
   List<PersonalizedQuestionTemplate> templates,
   PersonalizationProfile profile,

@@ -330,6 +330,31 @@ class S {
     'department_spa': {AppLanguage.de: 'Spa', AppLanguage.en: 'Spa'},
     'department_security': {AppLanguage.de: 'Security', AppLanguage.en: 'Security'},
     'profile_crewid_label': {AppLanguage.de: 'Crew-ID', AppLanguage.en: 'Crew ID'},
+    // Crew-ID einreichen (siehe ROADMAP_QuizApp.md Abschnitt 18h/18i)
+    'crewid_helper': {
+      AppLanguage.de: 'Wird nur verschlüsselt geprüft und gespeichert. Jede Crew-ID gehört zu genau einem Konto.',
+      AppLanguage.en: 'Checked and stored only in encrypted form. Each crew ID belongs to exactly one account.',
+    },
+    'crewid_save': {AppLanguage.de: 'Crew-ID speichern', AppLanguage.en: 'Save crew ID'},
+    'crewid_set_label': {AppLanguage.de: 'Crew-ID ist hinterlegt', AppLanguage.en: 'Crew ID is on file'},
+    'crewid_change': {AppLanguage.de: 'Ändern', AppLanguage.en: 'Change'},
+    'crewid_claim_success': {AppLanguage.de: 'Crew-ID gespeichert.', AppLanguage.en: 'Crew ID saved.'},
+    'crewid_error_taken': {
+      AppLanguage.de: 'Diese Crew-ID ist bereits einem anderen Konto zugeordnet.',
+      AppLanguage.en: 'This crew ID is already linked to another account.',
+    },
+    'crewid_error_needs_google': {
+      AppLanguage.de: 'Bitte zuerst mit Google anmelden, dann die Crew-ID hinterlegen.',
+      AppLanguage.en: 'Please sign in with Google first, then add your crew ID.',
+    },
+    'crewid_error_invalid': {
+      AppLanguage.de: 'Diese Crew-ID hat kein gültiges Format.',
+      AppLanguage.en: 'That crew ID is not a valid format.',
+    },
+    'crewid_error_generic': {
+      AppLanguage.de: 'Speichern fehlgeschlagen - bitte Internetverbindung prüfen.',
+      AppLanguage.en: 'Save failed - please check your internet connection.',
+    },
     'profile_level_label': {AppLanguage.de: 'Deutsch-Level', AppLanguage.en: 'German Level'},
     'profile_level_helper': {
       AppLanguage.de: 'Selbsteinschätzung, ohne Einfluss auf deine Wertung im 1-vs-1-Modus',

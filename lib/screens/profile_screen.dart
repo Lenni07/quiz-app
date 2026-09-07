@@ -10,6 +10,7 @@ import '../models/avatar_option.dart';
 import '../models/department.dart';
 import '../models/personalized_question.dart';
 import '../services/career_service.dart';
+import '../services/crew_id_service.dart';
 import '../services/fleet_war_service.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
@@ -44,11 +45,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   DateTime? _certificateIssuedAt;
   DateTime? _birthDate;
   String? _grammaticalForm;
+  bool _crewIdSet = false;
+  bool _editingCrewId = false;
+  bool _claimingCrewId = false;
   bool _loaded = false;
   bool _saving = false;
   bool _linking = false;
 
   final _authService = AuthService();
+  final _crewIdService = CrewIdService();
 
   @override
   void dispose() {
@@ -68,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _realNameController.text = (data?['realName'] as String?) ?? '';
       _positionController.text = (data?['position'] as String?) ?? '';
       _department = data?['department'] as String?;
-      _crewIdController.text = (data?['crewId'] as String?) ?? '';
+      _crewIdSet = data?['crewIdHash'] != null;
       _avatarId = (data?['avatarId'] as String?) ?? allAvatarOptions.first.id;
       _germanLevel = (data?['germanLevel'] as num?)?.toInt();
       _certificateIssuedAt = (data?['certificateIssuedAt'] as Timestamp?)?.toDate();
@@ -124,7 +129,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         position: _positionController.text.trim(),
         department: _department ?? '',
         avatarId: _avatarId,
-        crewId: _crewIdController.text.trim(),
         germanLevel: _germanLevel,
         certificateIssuedAt: _certificateIssuedAt,
         birthDate: _birthDate,
@@ -168,6 +172,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } finally {
       if (mounted) setState(() => _linking = false);
     }
+  }
+
+  /// Reicht die eingegebene Crew-ID serverseitig ein (siehe
+  /// ROADMAP_QuizApp.md Abschnitt 18h/18i). Gespeichert wird nur ein Hash;
+  /// ist die ID schon vergeben, lehnt der Server ab.
+  Future<void> _claimCrewId() async {
+    final value = _crewIdController.text.trim();
+    if (value.isEmpty) return;
+    setState(() => _claimingCrewId = true);
+    try {
+      await _crewIdService.claim(value);
+      if (!mounted) return;
+      setState(() {
+        _crewIdSet = true;
+        _editingCrewId = false;
+        _crewIdController.clear();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('crewid_claim_success'))));
+    } on CrewIdTakenException {
+      _showCrewIdError('crewid_error_taken');
+    } on CrewIdNeedsGoogleException {
+      _showCrewIdError('crewid_error_needs_google');
+    } on CrewIdInvalidException {
+      _showCrewIdError('crewid_error_invalid');
+    } catch (_) {
+      _showCrewIdError('crewid_error_generic');
+    } finally {
+      if (mounted) setState(() => _claimingCrewId = false);
+    }
+  }
+
+  void _showCrewIdError(String key) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t(key))));
   }
 
   @override
@@ -298,12 +336,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onChanged: (value) => setState(() => _department = value),
                     ),
                     const SizedBox(height: 12),
-                    TextField(
+                    _CrewIdField(
                       controller: _crewIdController,
-                      decoration: InputDecoration(
-                        labelText: S.t('profile_crewid_label'),
-                        helperText: S.t('profile_private_helper'),
-                      ),
+                      alreadySet: _crewIdSet,
+                      editing: _editingCrewId,
+                      claiming: _claimingCrewId,
+                      onStartEdit: () => setState(() => _editingCrewId = true),
+                      onSubmit: _claimCrewId,
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<int>(
@@ -392,6 +431,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(S.t('tab_profile'))),
       body: body,
+    );
+  }
+}
+
+/// Crew-ID-Feld (siehe ROADMAP_QuizApp.md Abschnitt 18h/18i): Ist die
+/// Crew-ID hinterlegt, wird nur "hinterlegt ✓" angezeigt - die ID selbst
+/// liegt nur als Hash auf dem Server, ist also nicht rückholbar. Über
+/// "Ändern" lässt sich eine neue eingeben (z. B. bei Tippfehler).
+class _CrewIdField extends StatelessWidget {
+  final TextEditingController controller;
+  final bool alreadySet;
+  final bool editing;
+  final bool claiming;
+  final VoidCallback onStartEdit;
+  final VoidCallback onSubmit;
+
+  const _CrewIdField({
+    required this.controller,
+    required this.alreadySet,
+    required this.editing,
+    required this.claiming,
+    required this.onStartEdit,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (alreadySet && !editing) {
+      return GamePanel(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        borderRadius: 14,
+        child: Row(
+          children: [
+            Icon(Icons.badge_outlined, color: Colors.greenAccent.shade400),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(S.t('crewid_set_label'), style: const TextStyle(color: AppColors.canvas)),
+            ),
+            TextButton(onPressed: onStartEdit, child: Text(S.t('crewid_change'))),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: S.t('profile_crewid_label'),
+            helperText: S.t('crewid_helper'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerRight,
+          child: claiming
+              ? const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                )
+              : TextButton.icon(
+                  onPressed: onSubmit,
+                  icon: const Icon(Icons.check, size: 18),
+                  label: Text(S.t('crewid_save')),
+                ),
+        ),
+      ],
     );
   }
 }

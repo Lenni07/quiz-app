@@ -35,13 +35,12 @@ void main() {
       firstName: 'Maria',
       age: 29,
       position: 'Kellnerin',
-      crewId: 'CR-42',
       grammaticalForm: 'female',
     );
 
     test('einfache Platzhalter werden aus dem Profil ersetzt', () {
       expect(fillTemplate('Hallo {vorname}, du bist {alter} Jahre alt.', profile), 'Hallo Maria, du bist 29 Jahre alt.');
-      expect(fillTemplate('Position: {position}, ID: {crewid}', profile), 'Position: Kellnerin, ID: CR-42');
+      expect(fillTemplate('Deine Position: {position}.', profile), 'Deine Position: Kellnerin.');
     });
 
     test('geschlechtsabhängige Form: weiblich wählt den Teil nach dem Schrägstrich', () {
@@ -49,12 +48,12 @@ void main() {
     });
 
     test('geschlechtsabhängige Form: männlich wählt den Teil vor dem Schrägstrich', () {
-      const maleProfile = PersonalizationProfile(firstName: 'Tom', age: 30, position: 'Kellner', crewId: 'CR-1', grammaticalForm: 'male');
+      const maleProfile = PersonalizationProfile(firstName: 'Tom', age: 30, position: 'Kellner', grammaticalForm: 'male');
       expect(fillTemplate('Du bist {Kellner/Kellnerin}.', maleProfile), 'Du bist Kellner.');
     });
 
     test('fehlende Angabe lässt den Platzhalter unverändert stehen', () {
-      const incomplete = PersonalizationProfile(firstName: '', age: null, position: '', crewId: '', grammaticalForm: null);
+      const incomplete = PersonalizationProfile(firstName: '', age: null, position: '', grammaticalForm: null);
       expect(fillTemplate('Hallo {vorname}!', incomplete), 'Hallo {vorname}!');
       expect(fillTemplate('Du bist {Kellner/Kellnerin}.', incomplete), 'Du bist {Kellner/Kellnerin}.');
     });
@@ -65,9 +64,9 @@ void main() {
   });
 
   group('usableTemplates', () {
-    const complete = PersonalizationProfile(firstName: 'Maria', age: 29, position: 'Kellnerin', crewId: 'CR-42', grammaticalForm: 'female');
-    const noAge = PersonalizationProfile(firstName: 'Maria', age: null, position: 'Kellnerin', crewId: 'CR-42', grammaticalForm: 'female');
-    const noForm = PersonalizationProfile(firstName: 'Maria', age: 29, position: 'Kellnerin', crewId: 'CR-42', grammaticalForm: null);
+    const complete = PersonalizationProfile(firstName: 'Maria', age: 29, position: 'Kellnerin', grammaticalForm: 'female');
+    const noAge = PersonalizationProfile(firstName: 'Maria', age: null, position: 'Kellnerin', grammaticalForm: 'female');
+    const noForm = PersonalizationProfile(firstName: 'Maria', age: 29, position: 'Kellnerin', grammaticalForm: null);
 
     test('vollständiges Profil: alle Vorlagen nutzbar', () {
       final templates = [
@@ -100,7 +99,7 @@ void main() {
   });
 
   group('buildPersonalizedQuestion', () {
-    const profile = PersonalizationProfile(firstName: 'Maria', age: 29, position: 'Kellnerin', crewId: 'CR-42', grammaticalForm: 'female');
+    const profile = PersonalizationProfile(firstName: 'Maria', age: 29, position: 'Kellnerin', grammaticalForm: 'female');
 
     test('die richtige Antwort steht unter den Optionen und correctIndex zeigt darauf', () {
       final template = _template(question: 'Wie heißt du?', correctAnswer: '{vorname}', decoyPool: ['Julia', 'Anna', 'Lea', 'Tom']);

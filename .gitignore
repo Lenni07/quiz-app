@@ -55,5 +55,10 @@ firestore-debug.log
 pubsub-debug.log
 ui-debug.log
 
+# Cloud Functions secrets / local env (never commit - contains the crew-ID pepper)
+/functions/.env
+/functions/.env.*
+/functions/.secret.local
+
 # Firebase Hosting deploy cache
 .firebase/

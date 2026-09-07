@@ -21,7 +21,7 @@ class UserProfileService {
         'position': null,
         'department': null,
         'avatarId': allAvatarOptions.first.id,
-        'crewId': null,
+        'crewIdHash': null,
         'germanLevel': null,
         'certificateIssuedAt': null,
         'birthDate': null,
@@ -48,7 +48,6 @@ class UserProfileService {
     required String position,
     required String department,
     required String avatarId,
-    required String crewId,
     required int? germanLevel,
     required DateTime? certificateIssuedAt,
     required DateTime? birthDate,
@@ -60,7 +59,6 @@ class UserProfileService {
       'position': position,
       'department': department,
       'avatarId': avatarId,
-      'crewId': crewId,
       'germanLevel': germanLevel,
       'certificateIssuedAt': certificateIssuedAt == null ? null : Timestamp.fromDate(certificateIssuedAt),
       'birthDate': birthDate == null ? null : Timestamp.fromDate(birthDate),
@@ -83,7 +81,6 @@ PersonalizationProfile personalizationProfileFromUserData(Map<String, dynamic>? 
     firstName: firstName,
     age: birthDate == null ? null : calculateAge(birthDate),
     position: (data?['position'] as String?)?.trim() ?? '',
-    crewId: (data?['crewId'] as String?)?.trim() ?? '',
     grammaticalForm: data?['grammaticalForm'] as String?,
   );
 }
