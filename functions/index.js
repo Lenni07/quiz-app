@@ -220,6 +220,85 @@ const FORMAT_IDS = [
 ];
 const BANS_PER_PLAYER = 3;
 const DRAFT_STEP_MS = 18000; // 18s, Mitte der geforderten 15-20s pro Zug.
+const DRAFT_GRACE_MS = 3000; // Kulanz, bevor eine abgelaufene Frist serverseitig erzwungen wird.
+// So viele eigene Züge in Folge nur per Auto-Aktion -> der Spieler gilt als
+// abwesend, das Match wird ohne Wertungsänderung abgebrochen.
+const DRAFT_ABANDON_THRESHOLD = 2;
+
+/**
+ * Wendet einen Draft-Zug (Ban oder Pick) von [actorUid] an. Gemeinsame Logik
+ * für den manuellen submitDraftAction und die serverseitige Auto-Aktion
+ * advanceDraftIfExpired (siehe ROADMAP_QuizApp.md Abschnitt 17).
+ *
+ * draftAutoStreak = { uid, count } zählt aufeinanderfolgende Auto-Aktionen
+ * desselben Spielers; ab DRAFT_ABANDON_THRESHOLD gilt er als abwesend und das
+ * Match wird abgebrochen (status "aborted", keine ELO-Änderung).
+ */
+function applyDraftAction(tx, matchRef, match, actorUid, formatId, { auto }) {
+  const takenFormats = [...match.banned, ...Object.values(match.picks)];
+  if (!match.pool.includes(formatId) || takenFormats.includes(formatId)) {
+    throw new HttpsError("failed-precondition", "Format ist nicht mehr verfügbar.");
+  }
+
+  const prev = match.draftAutoStreak || null;
+  let streak;
+  if (auto) {
+    streak = prev && prev.uid === actorUid ? { uid: actorUid, count: prev.count + 1 } : { uid: actorUid, count: 1 };
+  } else {
+    // Manuelle Aktion: eigenen Abwesenheits-Zähler zurücksetzen.
+    streak = prev && prev.uid === actorUid ? null : prev;
+  }
+
+  if (auto && streak.count >= DRAFT_ABANDON_THRESHOLD) {
+    tx.update(matchRef, {
+      status: "aborted",
+      abortReason: "opponent_unresponsive",
+      abortedUid: actorUid,
+      turnUid: null,
+      turnDeadline: null,
+      draftAutoStreak: streak,
+    });
+    for (const p of match.players) {
+      tx.set(db.collection("careerQueue").doc(p), { status: "idle" }, { merge: true });
+    }
+    return;
+  }
+
+  const isBanStep = match.draftStep < BANS_PER_PLAYER * 2;
+  const banned = [...match.banned];
+  const picks = { ...match.picks };
+  if (isBanStep) banned.push(formatId);
+  else picks[actorUid] = formatId;
+
+  const nextStep = match.draftStep + 1;
+  const totalSteps = BANS_PER_PLAYER * 2 + 2;
+  const players = match.players;
+
+  if (nextStep >= totalSteps) {
+    const rest = match.pool.filter((f) => !banned.includes(f) && !Object.values(picks).includes(f));
+    const thirdFormat = rest[Math.floor(Math.random() * rest.length)];
+    tx.update(matchRef, {
+      banned,
+      picks,
+      draftStep: nextStep,
+      status: "playing",
+      formats: [picks[players[0]], picks[players[1]], thirdFormat],
+      thirdFormat,
+      turnUid: null,
+      turnDeadline: null,
+      draftAutoStreak: streak,
+    });
+  } else {
+    tx.update(matchRef, {
+      banned,
+      picks,
+      draftStep: nextStep,
+      turnUid: players[nextStep % 2],
+      turnDeadline: Date.now() + DRAFT_STEP_MS,
+      draftAutoStreak: streak,
+    });
+  }
+}
 
 /**
  * Sucht bei jedem Eintrag/Update in careerQueue mit status "searching" nach
@@ -269,6 +348,7 @@ exports.matchmakeCareerQueue = onDocumentWritten("careerQueue/{uid}", async (eve
       draftStep: 0,
       turnUid: players[0],
       turnDeadline: Date.now() + DRAFT_STEP_MS,
+      draftAutoStreak: null,
       formats: null,
       currentRound: 0,
       roundScores: {},
@@ -308,50 +388,78 @@ exports.submitDraftAction = onCall(async (request) => {
     if (match.status !== "drafting") throw new HttpsError("failed-precondition", "Draft-Phase ist vorbei.");
     if (match.turnUid !== uid) throw new HttpsError("failed-precondition", "Du bist nicht am Zug.");
 
-    const takenFormats = [...match.banned, ...Object.values(match.picks)];
-    if (!match.pool.includes(formatId) || takenFormats.includes(formatId)) {
-      throw new HttpsError("failed-precondition", "Format ist nicht mehr verfügbar.");
-    }
-
-    const isBanStep = match.draftStep < BANS_PER_PLAYER * 2;
-    const banned = [...match.banned];
-    const picks = { ...match.picks };
-    if (isBanStep) {
-      banned.push(formatId);
-    } else {
-      picks[uid] = formatId;
-    }
-
-    const nextStep = match.draftStep + 1;
-    const totalSteps = BANS_PER_PLAYER * 2 + 2;
-    const players = match.players;
-
-    if (nextStep >= totalSteps) {
-      const remaining = match.pool.filter((f) => !banned.includes(f) && !Object.values(picks).includes(f));
-      const thirdFormat = remaining[Math.floor(Math.random() * remaining.length)];
-      tx.update(matchRef, {
-        banned,
-        picks,
-        draftStep: nextStep,
-        status: "playing",
-        formats: [picks[players[0]], picks[players[1]], thirdFormat],
-        thirdFormat,
-        turnUid: null,
-        turnDeadline: null,
-      });
-    } else {
-      tx.update(matchRef, {
-        banned,
-        picks,
-        draftStep: nextStep,
-        turnUid: players[nextStep % 2],
-        turnDeadline: Date.now() + DRAFT_STEP_MS,
-      });
-    }
+    applyDraftAction(tx, matchRef, match, uid, formatId, { auto: false });
   });
 
   return { ok: true };
 });
+
+/**
+ * Erzwingt bei abgelaufener Zug-Frist eine zufällige gültige Aktion für den
+ * Spieler, der gerade am Zug ist (siehe ROADMAP_QuizApp.md Abschnitt 17).
+ * Wird vom anwesenden Spieler aufgerufen, sobald dessen lokale Uhr die im
+ * Match-Dokument hinterlegte Frist überschritten sieht - die eigentliche
+ * Frist-Prüfung passiert hier serverseitig gegen turnDeadline, also
+ * unabhängig davon, ob beim abwesenden Gegner noch ein Zeitgeber läuft.
+ * Idempotent: ist die Frist (noch) nicht abgelaufen oder der Draft vorbei,
+ * passiert nichts.
+ */
+exports.advanceDraftIfExpired = onCall(async (request) => {
+  const uid = requireNonAnonymous(request);
+  const { matchId } = request.data || {};
+  if (!matchId) throw new HttpsError("invalid-argument", "matchId erforderlich.");
+
+  const matchRef = db.collection("matches").doc(matchId);
+
+  await db.runTransaction(async (tx) => {
+    const matchDoc = await tx.get(matchRef);
+    if (!matchDoc.exists) throw new HttpsError("not-found", "Match nicht gefunden.");
+    const match = matchDoc.data();
+    if (!match.players.includes(uid)) throw new HttpsError("permission-denied", "Kein Teilnehmer dieses Matches.");
+
+    if (match.status !== "drafting") return;
+    if (!match.turnDeadline || Date.now() < match.turnDeadline + DRAFT_GRACE_MS) return;
+
+    const taken = [...match.banned, ...Object.values(match.picks)];
+    const available = match.pool.filter((f) => !taken.includes(f));
+    if (available.length === 0) return;
+    const randomFormat = available[Math.floor(Math.random() * available.length)];
+
+    applyDraftAction(tx, matchRef, match, match.turnUid, randomFormat, { auto: true });
+  });
+
+  return { ok: true };
+});
+
+/**
+ * Sicherheitsnetz: bricht Draft-Matches ab, deren Zug-Frist deutlich (>10 min)
+ * abgelaufen ist - also Fälle, in denen BEIDE Spieler weg sind und niemand
+ * advanceDraftIfExpired auslöst. Keine Wertungsänderung.
+ */
+exports.abandonStaleDraftMatches = onSchedule(
+  { schedule: "every 10 minutes", timeZone: "Etc/UTC" },
+  async () => {
+    const cutoff = Date.now() - 10 * 60 * 1000;
+    const snap = await db.collection("matches").where("status", "==", "drafting").get();
+    const batch = db.batch();
+    let count = 0;
+    for (const doc of snap.docs) {
+      const match = doc.data();
+      if (!match.turnDeadline || match.turnDeadline > cutoff) continue;
+      batch.update(doc.ref, {
+        status: "aborted",
+        abortReason: "stale",
+        turnUid: null,
+        turnDeadline: null,
+      });
+      for (const p of match.players || []) {
+        batch.set(db.collection("careerQueue").doc(p), { status: "idle" }, { merge: true });
+      }
+      count++;
+    }
+    if (count > 0) await batch.commit();
+  }
+);
 
 /**
  * Ein Spieler reicht sein Ergebnis für die aktuelle Runde ein. Sobald beide

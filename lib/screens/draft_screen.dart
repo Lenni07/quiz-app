@@ -43,8 +43,9 @@ class _DraftScreenState extends State<DraftScreen> {
   Timer? _ticker;
   Map<String, dynamic>? _data;
   int _remainingSeconds = 0;
-  int? _autoSubmittedStep;
+  DateTime? _lastAdvanceCall;
   bool _navigatedToPlay = false;
+  bool _leftDraft = false;
 
   String get _myUid => currentUid() ?? '';
 
@@ -78,11 +79,15 @@ class _DraftScreenState extends State<DraftScreen> {
       }
       return;
     }
+    if (status == 'aborted') {
+      _ticker?.cancel();
+      _showAbortedAndLeave();
+      return;
+    }
     if (status != 'drafting') return;
 
     final turnUid = data['turnUid'] as String?;
     final deadline = (data['turnDeadline'] as num?)?.toInt();
-    final draftStep = (data['draftStep'] as num?)?.toInt() ?? 0;
 
     _ticker?.cancel();
     if (turnUid == null || deadline == null) return;
@@ -92,23 +97,46 @@ class _DraftScreenState extends State<DraftScreen> {
       final remainingMs = deadline - DateTime.now().millisecondsSinceEpoch;
       final remaining = (remainingMs / 1000).ceil();
       setState(() => _remainingSeconds = remaining < 0 ? 0 : remaining);
-      if (remaining <= 0 && turnUid == _myUid && _autoSubmittedStep != draftStep) {
-        _autoSubmittedStep = draftStep;
-        _autoSubmit(data);
-      }
+      // Frist abgelaufen: den Server bitten, für den Spieler am Zug eine
+      // zufällige Aktion zu erzwingen - egal, ob das mein eigener Zug ist oder
+      // der eines abwesenden Gegners. Der Server prüft die Frist selbst; hier
+      // nur gedrosselt aufrufen, damit nicht jede Sekunde ein Call rausgeht.
+      if (remaining <= 0) _requestServerAdvance();
     }
 
     tick();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => tick());
   }
 
-  void _autoSubmit(Map<String, dynamic> data) {
-    final pool = List<String>.from(data['pool'] as List);
-    final banned = List<String>.from(data['banned'] as List);
-    final picks = List<String>.from((data['picks'] as Map).values);
-    final available = pool.where((f) => !banned.contains(f) && !picks.contains(f)).toList()..shuffle();
-    if (available.isEmpty) return;
-    _service.submitDraftAction(matchId: widget.matchId, formatId: available.first);
+  void _requestServerAdvance() {
+    final now = DateTime.now();
+    if (_lastAdvanceCall != null && now.difference(_lastAdvanceCall!) < const Duration(seconds: 4)) {
+      return;
+    }
+    _lastAdvanceCall = now;
+    // Fehler bewusst schlucken: der nächste Tick oder der andere Spieler
+    // versucht es erneut.
+    _service.advanceDraftIfExpired(widget.matchId).catchError((_) {});
+  }
+
+  Future<void> _showAbortedAndLeave() async {
+    if (_leftDraft || !mounted) return;
+    _leftDraft = true;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(S.t('draft_aborted_title')),
+        content: Text(S.t('draft_aborted_body')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(S.t('draft_aborted_button')),
+          ),
+        ],
+      ),
+    );
+    if (mounted) Navigator.of(context).pop(); // zurück zum 1-vs-1-Reiter
   }
 
   void _selectFormat(String formatId) {

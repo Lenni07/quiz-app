@@ -44,6 +44,14 @@ class CareerMatchService {
         .call({'matchId': matchId, 'formatId': formatId});
   }
 
+  /// Bittet den Server, bei abgelaufener Zug-Frist eine zufällige Aktion für
+  /// den Spieler am Zug zu erzwingen (siehe ROADMAP_QuizApp.md Abschnitt 17).
+  /// Der Server prüft die Frist selbst - ruft der anwesende Spieler das auf,
+  /// obwohl die Frist doch noch läuft, passiert nichts.
+  Future<void> advanceDraftIfExpired(String matchId) {
+    return _functions.httpsCallable('advanceDraftIfExpired').call({'matchId': matchId});
+  }
+
   Future<void> submitRoundResult({
     required String matchId,
     required int roundIndex,

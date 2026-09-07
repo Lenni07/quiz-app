@@ -281,6 +281,14 @@ class S {
     'draft_your_turn_pick': {AppLanguage.de: 'Du bist dran: Format wählen', AppLanguage.en: 'Your turn: pick a format'},
     'draft_opponent_ban': {AppLanguage.de: 'Gegner bannt ...', AppLanguage.en: 'Opponent is banning ...'},
     'draft_opponent_pick': {AppLanguage.de: 'Gegner wählt ...', AppLanguage.en: 'Opponent is picking ...'},
+    'draft_aborted_title': {AppLanguage.de: 'Match abgebrochen', AppLanguage.en: 'Match cancelled'},
+    'draft_aborted_body': {
+      AppLanguage.de: 'Dein Gegner hat in der Draft-Phase nicht mehr reagiert. '
+          'Das Match wurde abgebrochen – deine Wertung ändert sich nicht.',
+      AppLanguage.en: 'Your opponent stopped responding during the draft. '
+          'The match was cancelled – your rating is unchanged.',
+    },
+    'draft_aborted_button': {AppLanguage.de: 'Zurück', AppLanguage.en: 'Back'},
 
     // Match-Ergebnis
     'match_result_title': {AppLanguage.de: 'Match-Ergebnis', AppLanguage.en: 'Match Result'},
