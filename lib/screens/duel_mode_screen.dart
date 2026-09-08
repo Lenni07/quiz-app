@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import '../models/department.dart';
 import '../models/question.dart';
 import '../utils/page_transitions.dart';
 import 'duel_host_screen.dart';
@@ -9,7 +10,8 @@ class DuelModeScreen extends StatelessWidget {
   const DuelModeScreen({super.key});
 
   Future<void> _startHosting(BuildContext context) async {
-    final questions = await loadQuestions();
+    // Lokales Duell ist Wettkampf - nur allgemeine Inhalte (Abschnitt 18c).
+    final questions = questionsForCompetitive(await loadQuestions());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(DuelHostScreen(questionPool: questions)));
     }

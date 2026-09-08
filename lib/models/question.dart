@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'has_department.dart';
 
-class Question {
+class Question implements HasDepartment {
   final String question;
   final List<String> options;
   final int correctIndex;
@@ -17,6 +18,7 @@ class Question {
   /// "restaurant", "housekeeping" - oder "general" für abteilungsüber-
   /// greifende Inhalte. Fehlt das Feld in den Rohdaten, gilt die Frage als
   /// allgemein.
+  @override
   final String department;
 
   /// Berlitz-Level (1-6, siehe ROADMAP_QuizApp.md Abschnitt 18e), zu dem die

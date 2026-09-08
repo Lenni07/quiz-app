@@ -1,13 +1,24 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
+import 'has_department.dart';
 
-class ImageQuizItem {
+class ImageQuizItem implements HasDepartment {
   final String icon;
   final List<String> options;
   final int correctIndex;
 
-  ImageQuizItem({required this.icon, required this.options, required this.correctIndex});
+  /// Department-Tag (siehe ROADMAP_QuizApp.md Abschnitt 18c). Fehlt das Feld,
+  /// gilt die Aufgabe als allgemein.
+  @override
+  final String department;
+
+  ImageQuizItem({
+    required this.icon,
+    required this.options,
+    required this.correctIndex,
+    this.department = 'general',
+  });
 }
 
 Future<List<ImageQuizItem>> loadImageQuizItems() async {
@@ -23,6 +34,7 @@ Future<List<ImageQuizItem>> loadImageQuizItems() async {
       icon: json['icon'] as String,
       options: options,
       correctIndex: options.indexOf(correctAnswer),
+      department: json['department'] as String? ?? 'general',
     );
   }).toList();
 }

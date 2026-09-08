@@ -67,7 +67,7 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startConversationQuiz(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     final questions = sentencesToQuestions(sentences);
     if (context.mounted) {
       Navigator.push(
@@ -78,21 +78,21 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startFillBlank(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(FillBlankScreen(sentences: sentences)));
     }
   }
 
   Future<void> _startWordOrder(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(WordOrderScreen(sentences: sentences)));
     }
   }
 
   Future<void> _startTrueFalse(BuildContext context) async {
-    final statements = await loadTrueFalseStatements();
+    final statements = contentForLearning(await loadTrueFalseStatements(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(TrueFalseScreen(statements: statements)));
     }
@@ -106,7 +106,7 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startImageQuiz(BuildContext context) async {
-    final items = await loadImageQuizItems();
+    final items = contentForLearning(await loadImageQuizItems(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(ImageQuizScreen(items: items)));
     }
@@ -120,7 +120,7 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startMatchPairs(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(MatchPairsScreen(sentences: sentences)));
     }
@@ -134,27 +134,28 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startFlipTiles(BuildContext context) async {
-    final words = await loadFlipTileWords();
+    final words = contentForLearning(await loadFlipTileWords(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(FlipTilesScreen(words: words)));
     }
   }
 
   Future<void> _startMatchUp(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(MatchUpScreen(sentences: sentences)));
     }
   }
 
   Future<void> _startWordMagnets(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(WordMagnetsScreen(sentences: sentences)));
     }
   }
 
   Future<void> _startGroupSort(BuildContext context) async {
+    // Nur eine Aktivität - der Department-Filter greift erst mit mehreren.
     final data = await loadGroupSortData();
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(GroupSortScreen(data: data)));
@@ -162,14 +163,14 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startRankOrder(BuildContext context) async {
-    final words = await loadNumberWords();
+    final words = contentForLearning(await loadNumberWords(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(RankOrderScreen(words: words)));
     }
   }
 
   Future<void> _startFlashcards(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(FlashcardCategoryScreen(sentences: sentences)));
     }
@@ -184,7 +185,7 @@ class ModeSelectScreen extends StatelessWidget {
   }
 
   Future<void> _startListening(BuildContext context) async {
-    final sentences = await loadSentences();
+    final sentences = contentForLearning(await loadSentences(), await _myDepartment());
     if (context.mounted) {
       Navigator.push(context, buildFadeSlideRoute(ListeningScreen(sentences: sentences)));
     }

@@ -32,8 +32,8 @@ import '../screens/word_order_screen.dart';
 /// nach der Draft-Phase feststeht statt fest in der Modus-Auswahl verdrahtet
 /// zu sein. "Karteikarten üben" überspringt dabei die Sprachauswahl und
 /// nutzt direkt Englisch, damit eine Runde ohne Zusatzschritt startet.
-/// Question-basierte Formate werden bewusst NUR mit allgemeinen,
-/// abteilungsübergreifenden Inhalten geladen (siehe ROADMAP_QuizApp.md
+/// Alle taggbaren Inhalte werden hier bewusst NUR mit allgemeinen,
+/// abteilungsübergreifenden Einträgen geladen (siehe ROADMAP_QuizApp.md
 /// Abschnitt 18c) - im 1-vs-1-Modus wird nicht nach Department gefiltert
 /// oder gematcht, beide Seiten haben dieselben Voraussetzungen.
 Future<Widget> buildFormatScreen(String formatId) async {
@@ -42,43 +42,44 @@ Future<Widget> buildFormatScreen(String formatId) async {
       final questions = questionsForCompetitive(await loadQuestions());
       return QuestionScreen(questions: questions, formatId: formatId);
     case 'konversation-ueben':
-      final sentences = await loadSentences();
+      final sentences = contentForCompetitive(await loadSentences());
       return QuestionScreen(questions: sentencesToQuestions(sentences), formatId: formatId);
     case 'lueckentext':
-      return FillBlankScreen(sentences: await loadSentences());
+      return FillBlankScreen(sentences: contentForCompetitive(await loadSentences()));
     case 'richtige-reihenfolge':
-      return WordOrderScreen(sentences: await loadSentences());
+      return WordOrderScreen(sentences: contentForCompetitive(await loadSentences()));
     case 'karteikarten':
       return FlashcardScreen(
-        sentences: await loadSentences(),
+        sentences: contentForCompetitive(await loadSentences()),
         languageCode: 'en',
         languageLabel: 'Englisch',
       );
     case 'wahr-oder-falsch':
-      return TrueFalseScreen(statements: await loadTrueFalseStatements());
+      return TrueFalseScreen(statements: contentForCompetitive(await loadTrueFalseStatements()));
     case 'gameshow-quiz':
       return GameshowQuizScreen(questions: questionsForCompetitive(await loadQuestions()));
     case 'bild-quiz':
-      return ImageQuizScreen(items: await loadImageQuizItems());
+      return ImageQuizScreen(items: contentForCompetitive(await loadImageQuizItems()));
     case 'open-the-box':
       final questions = questionsForCompetitive(await loadQuestions());
       return OpenBoxScreen(questions: questions.take(9).toList());
     case 'find-the-match':
-      return MatchPairsScreen(sentences: await loadSentences());
+      return MatchPairsScreen(sentences: contentForCompetitive(await loadSentences()));
     case 'random-wheel':
       return RandomWheelScreen(questions: questionsForCompetitive(await loadQuestions()));
     case 'flip-tiles':
-      return FlipTilesScreen(words: await loadFlipTileWords());
+      return FlipTilesScreen(words: contentForCompetitive(await loadFlipTileWords()));
     case 'match-up':
-      return MatchUpScreen(sentences: await loadSentences());
+      return MatchUpScreen(sentences: contentForCompetitive(await loadSentences()));
     case 'word-magnets':
-      return WordMagnetsScreen(sentences: await loadSentences());
+      return WordMagnetsScreen(sentences: contentForCompetitive(await loadSentences()));
     case 'group-sort':
+      // Nur eine Aktivität - der Department-Filter greift erst mit mehreren.
       return GroupSortScreen(data: await loadGroupSortData());
     case 'rank-order':
-      return RankOrderScreen(words: await loadNumberWords());
+      return RankOrderScreen(words: contentForCompetitive(await loadNumberWords()));
     case 'hoerverstehen':
-      return ListeningScreen(sentences: await loadSentences());
+      return ListeningScreen(sentences: contentForCompetitive(await loadSentences()));
     case 'persoenliche-fragen':
       return QuestionScreen(questions: await _buildPersonalizedQuestionsForCurrentUser(), formatId: formatId);
     default:

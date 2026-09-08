@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
+import 'has_department.dart';
 import 'question.dart';
 
 class SentenceTranslation {
@@ -17,12 +18,17 @@ class SentenceTranslation {
   }
 }
 
-class Sentence {
+class Sentence implements HasDepartment {
   final String question;
   final String correctAnswer;
   final List<String> distractors;
   final int blankIndex;
   final Map<String, SentenceTranslation> translations;
+
+  /// Department-Tag (siehe ROADMAP_QuizApp.md Abschnitt 18c). Fehlt das Feld,
+  /// gilt der Satz als allgemein.
+  @override
+  final String department;
 
   Sentence({
     required this.question,
@@ -30,6 +36,7 @@ class Sentence {
     required this.distractors,
     required this.blankIndex,
     this.translations = const {},
+    this.department = 'general',
   });
 
   factory Sentence.fromJson(Map<String, dynamic> json) {
@@ -39,6 +46,7 @@ class Sentence {
       correctAnswer: json['correctAnswer'] as String,
       distractors: List<String>.from(json['distractors'] as List),
       blankIndex: json['blankIndex'] as int,
+      department: json['department'] as String? ?? 'general',
       translations: translationsJson == null
           ? const {}
           : translationsJson.map(
@@ -75,6 +83,7 @@ List<Question> sentencesToQuestions(List<Sentence> sentences) {
       question: sentence.question,
       options: options,
       correctIndex: options.indexOf(sentence.correctAnswer),
+      department: sentence.department,
     );
   }).toList();
 }

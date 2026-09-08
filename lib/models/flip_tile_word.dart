@@ -1,14 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'has_department.dart';
 
-class FlipTileWord {
+class FlipTileWord implements HasDepartment {
   final String word;
   final String clue;
 
-  FlipTileWord({required this.word, required this.clue});
+  /// Department-Tag (siehe ROADMAP_QuizApp.md Abschnitt 18c). Fehlt das Feld,
+  /// gilt das Wort als allgemein.
+  @override
+  final String department;
+
+  FlipTileWord({required this.word, required this.clue, this.department = 'general'});
 
   factory FlipTileWord.fromJson(Map<String, dynamic> json) {
-    return FlipTileWord(word: json['word'] as String, clue: json['clue'] as String);
+    return FlipTileWord(
+      word: json['word'] as String,
+      clue: json['clue'] as String,
+      department: json['department'] as String? ?? 'general',
+    );
   }
 }
 
