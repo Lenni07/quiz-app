@@ -349,6 +349,66 @@ Damit sind die beiden Bereiche auch inhaltlich sauber getrennt: **Lernmodus = Pr
 
 **Abhängigkeit:** Der langfristige Teil gehört zum Arbeitsblock "echte Inhalte einpflegen" und sollte dort gleich mitgeplant werden.
 
+## 18h. Anmeldung und Schutz vor Mehrfach-/Fake-Konten
+
+**Ziel:** Fortschritt soll einen Handywechsel überleben, und gleichzeitig soll verhindert werden, dass sich Spieler beliebig viele Konten anlegen (App-Daten löschen → neues anonymes Konto) und damit Ranglisten und Flottentreffen verwässern.
+
+**Ausgangslage:** Bisher läuft alles über anonyme Anmeldung – bequem, aber genau das ermöglicht unbegrenzt neue Konten.
+
+**Wichtiger Vorteil der Zielgruppe:** Es geht nicht um eine anonyme Internet-Öffentlichkeit, sondern um eine bekannte, begrenzte Gruppe (Crew bestimmter Schiffe). Es muss also nicht das allgemeine Bot-Problem gelöst werden, sondern nur die Frage: Ist das wirklich ein Crew-Mitglied?
+
+**Lösung – zwei kombinierte Hürden:**
+
+1. **Google-Konto verpflichtend** für alles Wettbewerbsrelevante. Viele Google-Konten anzulegen ist aufwendig (Telefonnummer-Bestätigung), das filtert Gelegenheits-Missbrauch zuverlässig. Gleichzeitig löst es das ursprüngliche Anliegen: Der Fortschritt überlebt jeden Gerätewechsel.
+2. **Crew-ID nur einmal verwendbar.** Jede Crew-ID lässt sich genau einem Konto zuordnen; ist sie bereits vergeben, wird die Anmeldung abgelehnt. Das wirkt auch ohne offizielle Crew-Liste, da jede Person nur eine echte Crew-ID hat. Falls später eine Liste gültiger IDs verfügbar wird, kann zusätzlich dagegen geprüft werden.
+
+**Gestufter Zugang (hält die Einstiegshürde niedrig):**
+- **Lernmodus: ohne Anmeldung nutzbar.** Dort gibt es keine Rangliste und keine Auswirkung auf andere – ein Zweitkonto richtet keinen Schaden an. So kann jeder die App sofort ausprobieren.
+- **1 vs 1, Flottentreffen, Rangliste: vollwertiges Konto erforderlich** (Google + eindeutige Crew-ID). Genau dort, wo Manipulation wehtut.
+
+**Bestehende anonyme Konten:** Firebase kann ein anonymes Konto per Verknüpfung in ein dauerhaftes umwandeln – **dieselbe Kennung, alle Daten bleiben erhalten**. Bereits vorhandene Testkonten gehen also nicht verloren.
+
+**Namensänderungen – Sperrfrist statt dauerhafter Sperre:** Vorname und Nickname sollen nicht dauerhaft unveränderbar sein (Tippfehler beim ersten Eintragen passieren ständig, Namen ändern sich, ein bereuter Nickname wird sonst zum Support-Fall). Stattdessen eine **Sperrfrist von 30 Tagen** zwischen Änderungen: Die Rangliste bleibt stabil, niemand sitzt dauerhaft auf einem Fehler fest. Die Sprachform (männlich/weiblich) bleibt jederzeit änderbar.
+
+### Status 18h: fertig gebaut, noch nicht deployt
+
+Komplett umgesetzt und im Emulator durchgetestet (84 Tests grün), Commits liegen lokal auf `main`:
+
+1. Emulator-Anbindung per `--dart-define=USE_FIREBASE_EMULATOR=true`
+2. Google-Login (Web-Popup) + Umwandlung anonym → vollwertig; Kennung und alle Daten bleiben erhalten
+3. Crew-ID eindeutig, nur als HMAC-Hash mit Server-Pepper, Klartext nie in der Datenbank
+3+. Freigegebene Crew-ID bleibt dauerhaft an den Erst-Inhaber gebunden (schließt die Weitergabe-Lücke)
+4. / 4b. Gestufter Zugang – Sperrbildschirm für 1 vs 1 / Flottentreffen / Rangliste, **serverseitig durchgesetzt** (Regeln + Functions), nicht über die Oberfläche umgehbar
+5. Namensänderung: 30-Tage-Sperrfrist pro Feld, serverseitig; Sprachform bleibt frei änderbar
+6. `users`-Anlege-Regel gehärtet (kein Profil mit selbst gesetztem `eloRating` möglich)
+
+**Nebenbei behobene Fehler:** 1-vs-1-Freeze durch `setState` während `build()` (bereits live deployt) sowie Draft- und Spielphasen-Timeout serverseitig, inklusive Wiedereinstieg nach Verbindungsabriss. Bei Abbruch in der Draft-Phase: Match wird ohne Wertungsänderung abgebrochen (nichts gespielt). In der Spielphase: Sieg für den anwesenden Spieler, mit großzügiger Frist und Wiederverbindungsmöglichkeit – wichtig wegen der instabilen Satellitenverbindung an Bord.
+
+**Vor dem gebündelten Deploy noch manuell zu erledigen (Konsolen-Aufgaben):**
+1. Firebase-Konsole → Authentication → Google-Anbieter aktivieren
+2. Secret Manager API für Projekt `quiz-up-c1312` aktivieren
+3. `firebase functions:secrets:set CREW_ID_PEPPER` mit einem langen Zufallswert setzen
+
+## 18i. Datenschutz (DSGVO)
+
+*Hinweis: keine Rechtsberatung, sondern eine Orientierungsliste der Punkte, die vor einem echten Einsatz geklärt sein sollten.*
+
+**Ausgangslage:** Mit Crew-ID, Vor-/Nachname, Position, Abteilung, Geburtsdatum und Lernfortschritt liegt ein klarer Personenbezug vor – die DSGVO greift vollständig.
+
+**Technische Maßnahme mit großer Wirkung – Crew-ID nur als Hash speichern:** Für den Zweck "jede Crew-ID nur einmal verwendbar" (Abschnitt 18h) genügt es, einen **Hash** der ID zu speichern statt der ID im Klartext. Dieselbe ID ergibt denselben Hash, die Doppelprüfung funktioniert also unverändert – aber in der Datenbank steht keine lesbare Crew-ID mehr. Falls die Datenbank je kompromittiert wird, ist der Schaden erheblich kleiner. Entspricht dem Grundsatz "Datenschutz durch Technikgestaltung".
+
+**Weitere offene Pflichten:**
+1. **Datenschutzerklärung** – welche Daten erhoben werden, wofür, auf welcher Rechtsgrundlage, wie lange, welche Rechte bestehen. Fehlt bisher vollständig und ist Pflicht, sobald echte Nutzer die App verwenden.
+2. **Rechtsgrundlage festlegen** – solange die Nutzung freiwillig ist, liegt Einwilligung nahe (freiwillig, informiert, widerrufbar).
+3. **Konto- und Datenlöschung** – Nutzer haben ein Recht auf Löschung. Es braucht eine Funktion, mit der ein Konto samt zugehöriger Daten gelöscht werden kann. Existiert bisher nicht.
+4. **Auftragsverarbeitungsvertrag mit Google** – Firebase verarbeitet die Daten im Auftrag; der Vertrag wird über die Google-Cloud-Bedingungen geschlossen. Positiv: Die Daten liegen in Deutschland (Firestore Berlin, Functions Frankfurt).
+
+**Wofür der Datenschutz-Aufwand eigentlich zählt:** Für die Crew selbst ist die Behandlung der Crew-ID vermutlich kein Thema – die interessiert es schlicht nicht. Relevant wird es erst, wenn die Reederei die App einkaufen oder offiziell einsetzen soll. Dann läuft die Prüfung über Einkauf, IT und Datenschutz, und genau diese Fragen kommen: Wo liegen die Daten? Werden Personalnummern im Klartext gespeichert? Gibt es eine Löschfunktion? Darauf sauber antworten zu können (Daten in Deutschland, Crew-IDs nur als Hash, Löschung implementiert) ist im Verkaufsgespräch ein Argument, kein Formalismus. Der Aufwand ist also weniger Compliance-Pflicht als Vertriebsvoraussetzung.
+
+**Randnotiz zur Löschfunktion:** Wer sein Konto löscht, gibt die Crew-ID frei und kann sie mit einem neuen Konto erneut beanspruchen – mit zurückgesetzter Wertung. Zwei Konten gleichzeitig bleiben ausgeschlossen, ein Neustart ist aber möglich (theoretisch nutzbar, um nach schlechten Ergebnissen auf 1000 zurückzusetzen). Bewusst so belassen: Die DSGVO verlangt die Löschmöglichkeit ohnehin, der Preis ist hoch (aller Fortschritt weg), und in einer kleinen, bekannten Crew fällt so etwas auf. Falls es doch zum Problem wird, wäre die Gegenmaßnahme, den Crew-ID-Hash mit Zeitstempel für eine Sperrfrist aufzubewahren.
+
+**Besonders zu beachten – Arbeitgeberkontext:** Ranglisten zeigen faktisch, wie gut jemand Deutsch kann; das sind Leistungsdaten von Beschäftigten. Solange die Nutzung freiwillig ist und in Ranglisten nur Nickname und Position erscheinen (kein Klarname), ist das vertretbar. Sobald die Reederei Einblick erhalten oder die Nutzung erwarten würde, wäre in Deutschland voraussichtlich der Betriebsrat einzubeziehen. Sollte früh mitgedacht werden – spätestens vor Gesprächen mit der Reederei.
+
 ## 18f. Personalisierte Fragen aus Profildaten
 
 **Idee:** Fragen nach persönlichen Angaben werden mit den echten Profildaten des Nutzers beantwortet, statt mit erfundenen Beispielwerten. Bei "Wie heißen Sie?" ist die richtige Antwort der eigene Vorname, bei "Wie alt sind Sie?" das eigene Alter, bei Berufsbezeichnungen die passende Form (Kellner/Kellnerin).
