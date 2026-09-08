@@ -22,7 +22,19 @@ service cloud.firestore {
     // sich dauerhaft den höheren Platzierungs-K-Faktor erschleichen.
     match /users/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
-      allow create: if request.auth != null && request.auth.uid == uid;
+      // Beim Anlegen muessen die wettbewerbs-/sicherheitsrelevanten Felder auf
+      // ihren Startwerten stehen - sonst koennte ein praeparierter Client sein
+      // Profil direkt mit z. B. eloRating 5000 oder gesetztem crewIdHash
+      // erzeugen. Setzen darf diese Felder danach nur noch die Cloud Function.
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.get('eloRating', 1000) == 1000
+        && request.resource.data.get('rankedMatchesPlayed', 0) == 0
+        && request.resource.data.get('crewIdHash', null) == null
+        && request.resource.data.get('crewId', null) == null
+        && request.resource.data.get('firstName', null) == null
+        && request.resource.data.get('nickname', null) == null
+        && request.resource.data.get('firstNameChangedAt', null) == null
+        && request.resource.data.get('nicknameChangedAt', null) == null;
       allow update: if request.auth != null && request.auth.uid == uid
         && !request.resource.data.diff(resource.data).affectedKeys()
              .hasAny([
