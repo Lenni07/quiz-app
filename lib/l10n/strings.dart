@@ -357,6 +357,35 @@ class S {
       AppLanguage.de: 'Name muss zwischen 1 und 40 Zeichen lang sein.',
       AppLanguage.en: 'Name must be between 1 and 40 characters.',
     },
+
+    // Konto- und Datenlöschung (DSGVO, siehe ROADMAP_QuizApp.md Abschnitt 18i)
+    'delete_account_title': {AppLanguage.de: 'Konto löschen', AppLanguage.en: 'Delete account'},
+    'delete_account_explainer': {
+      AppLanguage.de: 'Löscht dein Konto und alle zugehörigen Daten unwiderruflich: '
+          'Profil, Fortschritt, Wertung, Ranglisteneintrag und die Freigabe deiner Crew-ID.',
+      AppLanguage.en: 'Permanently deletes your account and all associated data: '
+          'profile, progress, rating, ranking entry, and releases your crew ID.',
+    },
+    'delete_account_button': {AppLanguage.de: 'Konto löschen', AppLanguage.en: 'Delete account'},
+    'delete_account_keyword': {AppLanguage.de: 'LÖSCHEN', AppLanguage.en: 'DELETE'},
+    'delete_account_dialog_body': {
+      AppLanguage.de: 'Das kann nicht rückgängig gemacht werden. Dein gesamter Fortschritt geht verloren.',
+      AppLanguage.en: 'This cannot be undone. All your progress will be lost.',
+    },
+    'delete_account_dialog_prompt': {
+      AppLanguage.de: 'Tippe {0} ein, um zu bestätigen:',
+      AppLanguage.en: 'Type {0} to confirm:',
+    },
+    'delete_account_cancel': {AppLanguage.de: 'Abbrechen', AppLanguage.en: 'Cancel'},
+    'delete_account_confirm': {AppLanguage.de: 'Endgültig löschen', AppLanguage.en: 'Delete permanently'},
+    'delete_account_done': {
+      AppLanguage.de: 'Konto gelöscht. Du bist jetzt wieder ohne Anmeldung unterwegs.',
+      AppLanguage.en: 'Account deleted. You are now using the app without an account.',
+    },
+    'delete_account_error': {
+      AppLanguage.de: 'Löschen fehlgeschlagen – bitte Internetverbindung prüfen und erneut versuchen.',
+      AppLanguage.en: 'Deletion failed – please check your connection and try again.',
+    },
     'profile_position_label': {AppLanguage.de: 'Position', AppLanguage.en: 'Position'},
     'profile_realname_label': {AppLanguage.de: 'Echter Name', AppLanguage.en: 'Real Name'},
     'profile_private_helper': {

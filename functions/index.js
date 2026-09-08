@@ -5,6 +5,7 @@ const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 // Geheimer Server-Schlüssel ("Pepper") für das Hashen der Crew-IDs (siehe
@@ -825,6 +826,97 @@ exports.updateLockedNames = onCall(async (request) => {
     if (Object.keys(patch).length === 0) return;
     tx.set(userRef, patch, { merge: true });
   });
+
+  return { ok: true };
+});
+
+// --- Konto- und Datenlöschung (DSGVO, ROADMAP_QuizApp.md Abschnitt 18i) ---
+
+/**
+ * Löscht das Konto des Aufrufers samt aller zugehörigen Daten - unwiderruflich.
+ * Der Client fragt vorher deutlich nach (siehe profile_screen.dart).
+ *
+ * Gelöscht wird:
+ * - users/{uid} (Profil inkl. Fortschritt, Streak, Schiff, Namen)
+ * - careerRankings/{uid} (Ranglisteneintrag)
+ * - careerQueue/{uid} (Warteschlange)
+ * - scoreSubmissions mit uid == <uid> (die aggregierten Schiffspunkte
+ *   bleiben - anonymisierte Summe, keine Personendaten)
+ * - crewIds-Sperren, deren aktueller ODER ursprünglicher Inhaber dieser
+ *   Nutzer ist -> die Crew-ID wird wieder komplett frei. Die
+ *   Erst-Inhaber-Bindung (originalUid) gilt nur beim WECHSEL der ID durch ein
+ *   noch existierendes Konto; ist das Konto ganz weg, gäbe es sonst niemanden
+ *   mehr, der die ID je wieder beanspruchen könnte.
+ * - laufende Matches (drafting/playing) mit diesem Spieler werden abgebrochen,
+ *   damit der Gegner nicht hängt; beendete Matches bleiben (die uid ist dann
+ *   nur noch eine kontenlose Kennung, kein Personenbezug).
+ * - das Firebase-Auth-Konto selbst (zuletzt, damit bei einem Fehler die Daten
+ *   nicht ohne Konto zurückbleiben).
+ */
+exports.deleteAccount = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Anmeldung erforderlich.");
+
+  const userSnap = await db.collection("users").doc(uid).get();
+  const crewIdHash = userSnap.data()?.crewIdHash ?? null;
+
+  // crewIds-Sperren dieses Nutzers einsammeln (aktueller Inhaber, Erst-Inhaber,
+  // und die im Profil hinterlegte).
+  const crewIdRefs = new Map();
+  if (crewIdHash) crewIdRefs.set(crewIdHash, db.collection("crewIds").doc(crewIdHash));
+  for (const field of ["uid", "originalUid"]) {
+    const snap = await db.collection("crewIds").where(field, "==", uid).get();
+    for (const doc of snap.docs) crewIdRefs.set(doc.id, doc.ref);
+  }
+
+  const scoreSnap = await db.collection("scoreSubmissions").where("uid", "==", uid).get();
+  const matchSnap = await db.collection("matches").where("players", "array-contains", uid).get();
+
+  // Firestore-Daten in Batches löschen/abbrechen (500 Ops pro Batch).
+  let batch = db.batch();
+  let ops = 0;
+  const flushIfNeeded = async () => {
+    if (ops >= 450) {
+      await batch.commit();
+      batch = db.batch();
+      ops = 0;
+    }
+  };
+  const del = async (ref) => {
+    batch.delete(ref);
+    ops++;
+    await flushIfNeeded();
+  };
+
+  await del(db.collection("users").doc(uid));
+  await del(db.collection("careerRankings").doc(uid));
+  await del(db.collection("careerQueue").doc(uid));
+  for (const ref of crewIdRefs.values()) await del(ref);
+  for (const doc of scoreSnap.docs) await del(doc.ref);
+  for (const doc of matchSnap.docs) {
+    const status = doc.data().status;
+    if (status === "drafting" || status === "playing") {
+      batch.update(doc.ref, {
+        status: "aborted",
+        abortReason: "account_deleted",
+        turnUid: null,
+        turnDeadline: null,
+        roundDeadline: null,
+      });
+      ops++;
+      await flushIfNeeded();
+      const otherUid = (doc.data().players || []).find((p) => p !== uid);
+      if (otherUid) {
+        batch.set(db.collection("careerQueue").doc(otherUid), { status: "idle" }, { merge: true });
+        ops++;
+        await flushIfNeeded();
+      }
+    }
+  }
+  if (ops > 0) await batch.commit();
+
+  // Auth-Konto zuletzt.
+  await getAuth().deleteUser(uid);
 
   return { ok: true };
 });

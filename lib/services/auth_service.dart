@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'firebase_emulator.dart';
@@ -50,6 +51,21 @@ class AuthService {
     }
     await user.linkWithPopup(GoogleAuthProvider());
     await user.reload();
+  }
+
+  /// Löscht das Konto samt aller zugehörigen Daten unwiderruflich (DSGVO,
+  /// siehe ROADMAP_QuizApp.md Abschnitt 18i). Die eigentliche Löschung macht
+  /// die Cloud Function `deleteAccount`; danach wird lokal abgemeldet, damit
+  /// die App sofort wieder beim anonymen Startzustand landet.
+  Future<void> deleteAccount() async {
+    await FirebaseFunctions.instanceFor(region: functionsRegion)
+        .httpsCallable('deleteAccount')
+        .call();
+    try {
+      await _auth.signOut();
+    } catch (_) {
+      // Konto ist serverseitig schon weg - lokaler Abmelde-Fehler egal.
+    }
   }
 
   /// NUR für den lokalen Emulator (siehe firebase_emulator.dart): verknüpft

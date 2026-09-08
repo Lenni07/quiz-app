@@ -16,6 +16,7 @@ import '../services/name_service.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/account_status.dart';
+import '../widgets/delete_account_dialog.dart';
 import '../widgets/game_button.dart';
 import '../widgets/maritime_icon.dart';
 import '../widgets/game_panel.dart';
@@ -56,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _loaded = false;
   bool _saving = false;
   bool _linking = false;
+  bool _deletingAccount = false;
 
   final _authService = AuthService();
   final _crewIdService = CrewIdService();
@@ -214,6 +216,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } finally {
       if (mounted) setState(() => _linking = false);
+    }
+  }
+
+  /// Konto + alle Daten löschen (DSGVO, siehe ROADMAP_QuizApp.md Abschnitt
+  /// 18i). Verlangt vorher, dass der Nutzer ein Bestätigungswort eintippt -
+  /// die Aktion ist unwiderruflich.
+  Future<void> _confirmDeleteAccount(String uid) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const DeleteAccountDialog(),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _deletingAccount = true);
+    try {
+      await _authService.deleteAccount();
+      // Frisches anonymes Konto anlegen, damit die App sofort wieder im
+      // Startzustand nutzbar ist (kein Neustart nötig).
+      final user = await _authService.ensureSignedIn();
+      await UserProfileService().ensureProfileExists(user.uid);
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.t('delete_account_done'))),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _deletingAccount = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.t('delete_account_error'))),
+      );
     }
   }
 
@@ -464,6 +497,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
+                    const SizedBox(height: 40),
+                    _DangerZone(deleting: _deletingAccount, onDelete: () => _confirmDeleteAccount(uid)),
                   ],
                 ),
               );
@@ -475,6 +510,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(S.t('tab_profile'))),
       body: body,
+    );
+  }
+}
+
+/// Konto-Löschung (DSGVO, ROADMAP_QuizApp.md Abschnitt 18i) - ganz unten im
+/// Profil, klar als unwiderruflich markiert.
+class _DangerZone extends StatelessWidget {
+  final bool deleting;
+  final VoidCallback onDelete;
+
+  const _DangerZone({required this.deleting, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return GamePanel(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      borderRadius: 14,
+      borderColor: AppColors.signalRed,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(S.t('delete_account_title'), style: displayStyle(fontSize: 15, color: AppColors.signalRed)),
+          const SizedBox(height: 6),
+          Text(
+            S.t('delete_account_explainer'),
+            style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.75)),
+          ),
+          const SizedBox(height: 12),
+          deleting
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(6),
+                    child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                )
+              : OutlinedButton.icon(
+                  onPressed: onDelete,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.signalRed,
+                    side: const BorderSide(color: AppColors.signalRed),
+                  ),
+                  icon: const Icon(Icons.delete_forever_outlined, size: 18),
+                  label: Text(S.t('delete_account_button')),
+                ),
+        ],
+      ),
     );
   }
 }
