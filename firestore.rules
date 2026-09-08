@@ -25,7 +25,12 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == uid;
       allow update: if request.auth != null && request.auth.uid == uid
         && !request.resource.data.diff(resource.data).affectedKeys()
-             .hasAny(['eloRating', 'rankedMatchesPlayed', 'crewId', 'crewIdHash']);
+             .hasAny([
+               'eloRating', 'rankedMatchesPlayed', 'crewId', 'crewIdHash',
+               // Vorname/Nickname laufen wegen der 30-Tage-Sperrfrist nur über
+               // die Cloud Function updateLockedNames (Abschnitt 18h Punkt 4).
+               'firstName', 'firstNameChangedAt', 'nickname', 'nicknameChangedAt',
+             ]);
     }
 
     // Crew-ID-Sperre (siehe ROADMAP_QuizApp.md Abschnitt 18h/18i): pro Crew-ID

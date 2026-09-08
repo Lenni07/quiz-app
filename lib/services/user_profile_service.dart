@@ -16,7 +16,10 @@ class UserProfileService {
         'ship': null,
         'eloRating': 1000,
         'rankedMatchesPlayed': 0,
+        'firstName': null,
+        'firstNameChangedAt': null,
         'nickname': null,
+        'nicknameChangedAt': null,
         'realName': null,
         'position': null,
         'department': null,
@@ -35,15 +38,13 @@ class UserProfileService {
     return doc.data();
   }
 
-  /// Speichert die Profilangaben aus ROADMAP_QuizApp.md Abschnitt 18
-  /// (Nickname/Position sind auch in der Rangliste sichtbar, alles andere
-  /// bleibt nur im eigenen Profil). Das Deutsch-Level hat seit Abschnitt 18b
-  /// keinen Einfluss mehr auf Wertung/Matchmaking - reine Profil-Information.
-  /// eloRating wird hier bewusst NICHT geschrieben, das ist per Regel
-  /// ohnehin nur den Cloud Functions erlaubt.
+  /// Speichert die frei änderbaren Profilangaben. Vorname und Nickname sind
+  /// hier NICHT dabei - die laufen wegen der 30-Tage-Sperrfrist über die
+  /// Cloud Function (siehe NameService / ROADMAP_QuizApp.md Abschnitt 18h).
+  /// eloRating/crewIdHash werden ebenfalls bewusst nicht geschrieben, das ist
+  /// per Regel nur den Cloud Functions erlaubt.
   Future<void> updateProfile({
     required String uid,
-    required String nickname,
     required String realName,
     required String position,
     required String department,
@@ -54,7 +55,6 @@ class UserProfileService {
     required String? grammaticalForm,
   }) {
     return _firestore.collection('users').doc(uid).set({
-      'nickname': nickname,
       'realName': realName,
       'position': position,
       'department': department,
@@ -69,16 +69,13 @@ class UserProfileService {
 
 /// Wandelt die in Firestore gespeicherten Profil-Rohdaten in die
 /// Firebase-unabhängigen [PersonalizationProfile]-Werte um (siehe
-/// ROADMAP_QuizApp.md Abschnitt 18f) - der Vorname wird bewusst aus dem
-/// vorhandenen "echter Name"-Feld abgeleitet (erstes Wort), statt ein
-/// weiteres Profilfeld nur dafür einzuführen.
+/// ROADMAP_QuizApp.md Abschnitt 18f). Der Vorname ist ein eigenes,
+/// serverseitig sperrfrist-geschütztes Feld (Abschnitt 18h).
 PersonalizationProfile personalizationProfileFromUserData(Map<String, dynamic>? data) {
-  final realName = (data?['realName'] as String?)?.trim() ?? '';
-  final firstName = realName.isEmpty ? '' : realName.split(RegExp(r'\s+')).first;
   final birthDate = (data?['birthDate'] as Timestamp?)?.toDate();
 
   return PersonalizationProfile(
-    firstName: firstName,
+    firstName: (data?['firstName'] as String?)?.trim() ?? '',
     age: birthDate == null ? null : calculateAge(birthDate),
     position: (data?['position'] as String?)?.trim() ?? '',
     grammaticalForm: data?['grammaticalForm'] as String?,

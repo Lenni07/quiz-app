@@ -12,6 +12,7 @@ import '../models/personalized_question.dart';
 import '../services/career_service.dart';
 import '../services/crew_id_service.dart';
 import '../services/fleet_war_service.dart';
+import '../services/name_service.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/account_status.dart';
@@ -34,6 +35,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final _firstNameController = TextEditingController();
   final _nicknameController = TextEditingController();
   final _realNameController = TextEditingController();
   final _positionController = TextEditingController();
@@ -48,15 +50,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _crewIdSet = false;
   bool _editingCrewId = false;
   bool _claimingCrewId = false;
+  bool _savingNames = false;
+  DateTime? _firstNameChangedAt;
+  DateTime? _nicknameChangedAt;
   bool _loaded = false;
   bool _saving = false;
   bool _linking = false;
 
   final _authService = AuthService();
   final _crewIdService = CrewIdService();
+  final _nameService = NameService();
 
   @override
   void dispose() {
+    _firstNameController.dispose();
     _nicknameController.dispose();
     _realNameController.dispose();
     _positionController.dispose();
@@ -69,10 +76,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final data = await UserProfileService().loadProfile(uid);
     if (!mounted) return;
     setState(() {
+      _firstNameController.text = (data?['firstName'] as String?) ?? '';
       _nicknameController.text = (data?['nickname'] as String?) ?? '';
       _realNameController.text = (data?['realName'] as String?) ?? '';
       _positionController.text = (data?['position'] as String?) ?? '';
       _department = data?['department'] as String?;
+      _firstNameChangedAt = (data?['firstNameChangedAt'] as Timestamp?)?.toDate();
+      _nicknameChangedAt = (data?['nicknameChangedAt'] as Timestamp?)?.toDate();
       _crewIdSet = data?['crewIdHash'] != null;
       _avatarId = (data?['avatarId'] as String?) ?? allAvatarOptions.first.id;
       _germanLevel = (data?['germanLevel'] as num?)?.toInt();
@@ -124,7 +134,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await UserProfileService().updateProfile(
         uid: uid,
-        nickname: _nicknameController.text.trim(),
         realName: _realNameController.text.trim(),
         position: _positionController.text.trim(),
         department: _department ?? '',
@@ -143,6 +152,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  /// Vorname + Nickname über die Cloud Function speichern (30-Tage-Sperrfrist
+  /// pro Feld, serverseitig - siehe ROADMAP_QuizApp.md Abschnitt 18h Punkt 4).
+  Future<void> _saveNames(String uid) async {
+    setState(() => _savingNames = true);
+    try {
+      await _nameService.updateNames(
+        firstName: _firstNameController.text.trim(),
+        nickname: _nicknameController.text.trim(),
+      );
+      if (!mounted) return;
+      // Frist-Anzeige aus dem frisch gespeicherten Stand aktualisieren.
+      final data = await UserProfileService().loadProfile(uid);
+      if (!mounted) return;
+      setState(() {
+        _firstNameChangedAt = (data?['firstNameChangedAt'] as Timestamp?)?.toDate();
+        _nicknameChangedAt = (data?['nicknameChangedAt'] as Timestamp?)?.toDate();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('names_save_success'))));
+    } on NameLockedException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.f('names_locked', [e.daysLeft ?? 30])),
+      ));
+    } on NameInvalidException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('names_invalid'))));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('profile_save_error'))));
+    } finally {
+      if (mounted) setState(() => _savingNames = false);
     }
   }
 
@@ -298,12 +341,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    TextField(
-                      controller: _nicknameController,
-                      decoration: InputDecoration(
-                        labelText: S.t('profile_nickname_label'),
-                        helperText: S.t('profile_public_helper'),
-                      ),
+                    _NameSection(
+                      firstNameController: _firstNameController,
+                      nicknameController: _nicknameController,
+                      firstNameChangedAt: _firstNameChangedAt,
+                      nicknameChangedAt: _nicknameChangedAt,
+                      saving: _savingNames,
+                      onSave: () => _saveNames(uid),
                     ),
                     const SizedBox(height: 12),
                     TextField(
@@ -497,6 +541,76 @@ class _CrewIdField extends StatelessWidget {
                   onPressed: onSubmit,
                   icon: const Icon(Icons.check, size: 18),
                   label: Text(S.t('crewid_save')),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Vorname + Nickname mit 30-Tage-Sperrfrist pro Feld (siehe
+/// ROADMAP_QuizApp.md Abschnitt 18h Punkt 4). Muss zur Frist in
+/// functions/index.js (NAME_LOCK_MS) passen.
+const _nameLockDuration = Duration(days: 30);
+
+class _NameSection extends StatelessWidget {
+  final TextEditingController firstNameController;
+  final TextEditingController nicknameController;
+  final DateTime? firstNameChangedAt;
+  final DateTime? nicknameChangedAt;
+  final bool saving;
+  final VoidCallback onSave;
+
+  const _NameSection({
+    required this.firstNameController,
+    required this.nicknameController,
+    required this.firstNameChangedAt,
+    required this.nicknameChangedAt,
+    required this.saving,
+    required this.onSave,
+  });
+
+  String? _lockHint(DateTime? changedAt) {
+    if (changedAt == null) return null;
+    final unlockAt = changedAt.add(_nameLockDuration);
+    if (DateTime.now().isAfter(unlockAt)) return null;
+    final d = unlockAt;
+    final date = '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+    return S.f('names_locked_until', [date]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: firstNameController,
+          decoration: InputDecoration(
+            labelText: S.t('profile_firstname_label'),
+            helperText: _lockHint(firstNameChangedAt) ?? S.t('names_change_helper'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: nicknameController,
+          decoration: InputDecoration(
+            labelText: S.t('profile_nickname_label'),
+            helperText: _lockHint(nicknameChangedAt) ?? S.t('profile_public_helper'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerRight,
+          child: saving
+              ? const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                )
+              : TextButton.icon(
+                  onPressed: onSave,
+                  icon: const Icon(Icons.save_outlined, size: 18),
+                  label: Text(S.t('names_save')),
                 ),
         ),
       ],

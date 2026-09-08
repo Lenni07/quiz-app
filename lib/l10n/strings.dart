@@ -333,9 +333,29 @@ class S {
     'profile_no_account': {AppLanguage.de: 'Keine Verbindung zum Konto.', AppLanguage.en: 'No connection to your account.'},
     'profile_avatar_choose': {AppLanguage.de: 'Avatar wählen', AppLanguage.en: 'Choose Avatar'},
     'profile_nickname_label': {AppLanguage.de: 'Nickname', AppLanguage.en: 'Nickname'},
+    'profile_firstname_label': {AppLanguage.de: 'Vorname', AppLanguage.en: 'First name'},
     'profile_public_helper': {
       AppLanguage.de: 'Wird auch in der Rangliste angezeigt',
       AppLanguage.en: 'Also shown in the ranking',
+    },
+    // Namensänderung mit Sperrfrist (siehe ROADMAP_QuizApp.md Abschnitt 18h Punkt 4)
+    'names_change_helper': {
+      AppLanguage.de: 'Nach einer Änderung 30 Tage gesperrt',
+      AppLanguage.en: 'Locked for 30 days after a change',
+    },
+    'names_locked_until': {
+      AppLanguage.de: 'Wieder änderbar ab {0}',
+      AppLanguage.en: 'Changeable again from {0}',
+    },
+    'names_save': {AppLanguage.de: 'Namen speichern', AppLanguage.en: 'Save names'},
+    'names_save_success': {AppLanguage.de: 'Namen gespeichert.', AppLanguage.en: 'Names saved.'},
+    'names_locked': {
+      AppLanguage.de: 'Vor- oder Nickname wurde kürzlich geändert – erst in {0} Tagen wieder möglich.',
+      AppLanguage.en: 'First name or nickname was changed recently – possible again in {0} days.',
+    },
+    'names_invalid': {
+      AppLanguage.de: 'Name muss zwischen 1 und 40 Zeichen lang sein.',
+      AppLanguage.en: 'Name must be between 1 and 40 characters.',
     },
     'profile_position_label': {AppLanguage.de: 'Position', AppLanguage.en: 'Position'},
     'profile_realname_label': {AppLanguage.de: 'Echter Name', AppLanguage.en: 'Real Name'},

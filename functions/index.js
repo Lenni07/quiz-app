@@ -765,3 +765,66 @@ exports.claimCrewId = onCall({ secrets: [CREW_ID_PEPPER] }, async (request) => {
 
   return { ok: true };
 });
+
+// --- Namensänderungs-Sperrfrist (ROADMAP_QuizApp.md Abschnitt 18h Punkt 4) ---
+
+const NAME_LOCK_MS = 30 * 24 * 60 * 60 * 1000; // 30 Tage pro Feld
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Ändert Vorname und/oder Nickname mit 30-Tage-Sperrfrist pro Feld.
+ * Serverseitig durchgesetzt - der Client kann users/{uid}.firstName/nickname
+ * nicht direkt schreiben (firestore.rules). Erstsetzen (Feld noch leer) ist
+ * immer erlaubt; ein unveränderter Wert ist ein No-Op und stößt die Frist
+ * NICHT an. Die Sprachform bleibt frei änderbar (normaler Profil-Schreibpfad).
+ */
+exports.updateLockedNames = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Anmeldung erforderlich.");
+
+  const data = request.data || {};
+  const wantFirstName = typeof data.firstName === "string" ? data.firstName.trim() : null;
+  const wantNickname = typeof data.nickname === "string" ? data.nickname.trim() : null;
+  if (wantFirstName === null && wantNickname === null) {
+    throw new HttpsError("invalid-argument", "Nichts zu ändern.");
+  }
+  for (const v of [wantFirstName, wantNickname]) {
+    if (v !== null && (v.length < 1 || v.length > 40)) {
+      throw new HttpsError("invalid-argument", "Name muss 1-40 Zeichen haben.");
+    }
+  }
+
+  const userRef = db.collection("users").doc(uid);
+  const now = Date.now();
+
+  await db.runTransaction(async (tx) => {
+    const doc = await tx.get(userRef);
+    if (!doc.exists) throw new HttpsError("failed-precondition", "Profil nicht gefunden.");
+    const user = doc.data();
+    const patch = {};
+
+    const apply = (field, changedAtField, want) => {
+      if (want === null) return;
+      const current = (user[field] ?? "").toString().trim();
+      if (want === current) return; // No-Op, Frist unangetastet
+      const changedAtMs = user[changedAtField]?.toMillis ? user[changedAtField].toMillis() : null;
+      if (current !== "" && changedAtMs !== null && now < changedAtMs + NAME_LOCK_MS) {
+        const daysLeft = Math.ceil((changedAtMs + NAME_LOCK_MS - now) / DAY_MS);
+        throw new HttpsError("failed-precondition", `Änderung erst in ${daysLeft} Tagen möglich.`, {
+          field,
+          daysLeft,
+        });
+      }
+      patch[field] = want;
+      patch[changedAtField] = FieldValue.serverTimestamp();
+    };
+
+    apply("firstName", "firstNameChangedAt", wantFirstName);
+    apply("nickname", "nicknameChangedAt", wantNickname);
+
+    if (Object.keys(patch).length === 0) return;
+    tx.set(userRef, patch, { merge: true });
+  });
+
+  return { ok: true };
+});
