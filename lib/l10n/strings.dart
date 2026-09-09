@@ -503,36 +503,96 @@ class S {
     'account_section_title': {AppLanguage.de: 'Konto', AppLanguage.en: 'Account'},
     'account_anonymous_info': {
       AppLanguage.de: 'Dein Fortschritt ist zurzeit nur auf diesem Gerät gespeichert. '
-          'Melde dich mit Google an, damit er einen Gerätewechsel übersteht – '
+          'Melde dich an, damit er einen Gerätewechsel übersteht – '
           'und um 1 vs 1, Flottentreffen und Rangliste freizuschalten.',
       AppLanguage.en: 'Your progress is currently stored only on this device. '
-          'Sign in with Google so it survives a device change – '
+          'Sign in so it survives a device change – '
           'and to unlock 1 vs 1, Fleet Meetup and Ranking.',
     },
     'account_link_google_button': {
       AppLanguage.de: 'Mit Google anmelden',
       AppLanguage.en: 'Sign in with Google',
     },
+    'account_link_email_button': {
+      AppLanguage.de: 'Mit E-Mail-Link anmelden (ohne Passwort)',
+      AppLanguage.en: 'Sign in with email link (no password)',
+    },
+    'account_email_link_helper': {
+      AppLanguage.de: 'Wir schicken dir einen Link zum Anklicken – kein Passwort nötig.',
+      AppLanguage.en: 'We send you a link to tap – no password needed.',
+    },
+    'account_email_link_send': {AppLanguage.de: 'Link senden', AppLanguage.en: 'Send link'},
+    'account_email_link_resend': {AppLanguage.de: 'Link erneut senden', AppLanguage.en: 'Send link again'},
+    'account_email_link_sent': {
+      AppLanguage.de: 'Anmeldelink an {0} geschickt. Öffne ihn möglichst auf diesem Gerät; '
+          'auf einem anderen Gerät fragt die App noch einmal nach deiner Adresse.',
+      AppLanguage.en: 'Sign-in link sent to {0}. Open it on this device if you can; '
+          'on another device the app will ask for your address again.',
+    },
+    'account_email_invalid': {
+      AppLanguage.de: 'Bitte eine gültige E-Mail-Adresse eingeben.',
+      AppLanguage.en: 'Please enter a valid email address.',
+    },
+    'account_email_link_error': {
+      AppLanguage.de: 'Link konnte nicht gesendet werden – bitte Internetverbindung prüfen.',
+      AppLanguage.en: 'Could not send the link – please check your internet connection.',
+    },
     'account_linked_as': {
-      AppLanguage.de: 'Angemeldet mit Google als {0}',
-      AppLanguage.en: 'Signed in with Google as {0}',
+      AppLanguage.de: 'Angemeldet als {0}',
+      AppLanguage.en: 'Signed in as {0}',
     },
     'account_link_success': {
-      AppLanguage.de: 'Google-Konto verknüpft – dein Fortschritt ist jetzt gesichert.',
-      AppLanguage.en: 'Google account linked – your progress is now backed up.',
+      AppLanguage.de: 'Konto verknüpft – dein Fortschritt ist jetzt gesichert.',
+      AppLanguage.en: 'Account linked – your progress is now backed up.',
     },
     'account_link_error_in_use': {
-      AppLanguage.de: 'Dieses Google-Konto ist bereits mit einem anderen Spielstand verknüpft.',
-      AppLanguage.en: 'This Google account is already linked to another progress record.',
+      AppLanguage.de: 'Dieses Konto ist bereits mit einem anderen Spielstand verknüpft.',
+      AppLanguage.en: 'This account is already linked to another progress record.',
     },
     'account_link_error_generic': {
       AppLanguage.de: 'Anmeldung nicht abgeschlossen. Bitte erneut versuchen.',
       AppLanguage.en: 'Sign-in was not completed. Please try again.',
     },
     'account_link_web_only': {
-      AppLanguage.de: 'Die Google-Anmeldung ist zurzeit nur in der Web-Version möglich.',
-      AppLanguage.en: 'Google sign-in is currently only available in the web version.',
+      AppLanguage.de: 'Die Anmeldung ist zurzeit nur in der Web-Version möglich.',
+      AppLanguage.en: 'Signing in is currently only available in the web version.',
     },
+    // Abmelden / Konto wechseln (siehe ROADMAP_QuizApp.md Abschnitt 18h)
+    'account_sign_out_button': {AppLanguage.de: 'Abmelden / Konto wechseln', AppLanguage.en: 'Sign out / switch account'},
+    'account_sign_out_title': {AppLanguage.de: 'Abmelden?', AppLanguage.en: 'Sign out?'},
+    'account_sign_out_explainer': {
+      AppLanguage.de: 'Die App läuft danach anonym weiter – der Lernmodus bleibt nutzbar. '
+          'Dein bisheriger Fortschritt hängt am abgemeldeten Konto und kommt zurück, '
+          'sobald du dich dort wieder anmeldest. 1 vs 1, Flottentreffen und Rangliste '
+          'sind bis dahin gesperrt.',
+      AppLanguage.en: 'The app then continues anonymously – Learning Mode stays usable. '
+          'Your progress so far stays with the account you signed out of and returns '
+          'once you sign back in there. 1 vs 1, Fleet Meetup and Ranking are locked '
+          'until then.',
+    },
+    'account_sign_out_done': {
+      AppLanguage.de: 'Abgemeldet. Melde dich jederzeit wieder an, um deinen Fortschritt zu holen.',
+      AppLanguage.en: 'Signed out. Sign in again any time to get your progress back.',
+    },
+    'cancel': {AppLanguage.de: 'Abbrechen', AppLanguage.en: 'Cancel'},
+
+    // E-Mail-Link abschließen (CompleteEmailSignInScreen, ROADMAP 18h)
+    'email_link_title': {AppLanguage.de: 'Anmeldung abschließen', AppLanguage.en: 'Finish signing in'},
+    'email_link_needs_email': {
+      AppLanguage.de: 'Zur Sicherheit noch einmal: Für welche E-Mail-Adresse wurde dieser '
+          'Anmeldelink angefordert? (Der Link wurde auf einem anderen Gerät geöffnet.)',
+      AppLanguage.en: 'For security, once more: which email address was this sign-in link '
+          'requested for? (The link was opened on a different device.)',
+    },
+    'email_link_email_label': {AppLanguage.de: 'E-Mail-Adresse', AppLanguage.en: 'Email address'},
+    'email_link_finish': {AppLanguage.de: 'Anmelden', AppLanguage.en: 'Sign in'},
+    'email_link_success': {AppLanguage.de: 'Angemeldet – dein Fortschritt ist gesichert.', AppLanguage.en: 'Signed in – your progress is backed up.'},
+    'email_link_success_as': {AppLanguage.de: 'Angemeldet als {0} – dein Fortschritt ist gesichert.', AppLanguage.en: 'Signed in as {0} – your progress is backed up.'},
+    'email_link_failed': {
+      AppLanguage.de: 'Dieser Anmeldelink ist ungültig oder abgelaufen. Fordere im Profil einen neuen an.',
+      AppLanguage.en: 'This sign-in link is invalid or has expired. Request a new one in your profile.',
+    },
+    'email_link_continue': {AppLanguage.de: 'Weiter zur App', AppLanguage.en: 'Continue to app'},
 
     // Gestufter Zugang / Konto-Sperre (siehe ROADMAP_QuizApp.md Abschnitt 18h)
     'gate_title': {AppLanguage.de: 'Wettkampf-Profil unvollständig', AppLanguage.en: 'Competitive profile incomplete'},

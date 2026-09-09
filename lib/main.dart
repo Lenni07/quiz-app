@@ -6,6 +6,7 @@ import 'audio/sound_settings.dart';
 import 'firebase_options.dart';
 import 'l10n/app_language.dart';
 import 'l10n/strings.dart';
+import 'screens/complete_email_sign_in_screen.dart';
 import 'screens/main_tabs_screen.dart';
 import 'screens/one_vs_one_queue_screen.dart';
 import 'services/auth_service.dart';
@@ -30,6 +31,7 @@ void main() async {
     await UserProfileService().ensureProfileExists(user.uid);
     debugPrint('Firebase: profile ensured');
     await _maybeRunEmulatorDevLink(user);
+    _detectEmailSignInLink();
   } catch (e, stack) {
     // Kein Internet oder Firebase nicht erreichbar: App bleibt trotzdem
     // voll nutzbar (offline-first), nur der Cloud-Abgleich fehlt dann.
@@ -41,6 +43,26 @@ void main() async {
   // SoundEffects.preload()).
   SoundEffects.instance.preload();
   runApp(const MyApp());
+}
+
+/// Gesetzt, wenn die App über einen E-Mail-Anmeldelink geöffnet wurde (siehe
+/// ROADMAP_QuizApp.md Abschnitt 18h). [MyApp] zeigt dann den
+/// [CompleteEmailSignInScreen] statt des Startbildschirms.
+final ValueNotifier<String?> pendingEmailSignInLink = ValueNotifier(null);
+
+/// Prüft die Aufruf-URL auf einen Firebase-Anmeldelink. Der eigentliche
+/// Abschluss (Verknüpfung des anonymen Kontos bzw. Kontowechsel) passiert im
+/// [CompleteEmailSignInScreen], damit dort bei Bedarf die Adresse erfragt
+/// werden kann.
+void _detectEmailSignInLink() {
+  try {
+    final link = Uri.base.toString();
+    if (AuthService().isSignInWithEmailLink(link)) {
+      pendingEmailSignInLink.value = link;
+    }
+  } catch (e) {
+    debugPrint('email-link detection failed: $e');
+  }
 }
 
 /// Nur im Emulator-Modus (siehe firebase_emulator.dart): Wird die App mit
@@ -80,11 +102,20 @@ class MyApp extends StatelessWidget {
     // wie GameModeContext/MatchRoundContext, nur mit Rebuild statt Konsum.
     return ValueListenableBuilder<AppLanguage>(
       valueListenable: appLanguage,
-      builder: (context, language, _) => MaterialApp(
-        title: S.t('app_title'),
-        theme: buildAppTheme(),
-        home: _emulatorDevRoute() ?? const StartScreen(),
-        builder: (context, child) => PhoneFrame(child: child ?? const SizedBox.shrink()),
+      builder: (context, language, _) => ValueListenableBuilder<String?>(
+        valueListenable: pendingEmailSignInLink,
+        builder: (context, emailLink, _) => MaterialApp(
+          title: S.t('app_title'),
+          theme: buildAppTheme(),
+          home: _emulatorDevRoute() ??
+              (emailLink != null
+                  ? CompleteEmailSignInScreen(
+                      link: emailLink,
+                      onDone: () => pendingEmailSignInLink.value = null,
+                    )
+                  : const StartScreen()),
+          builder: (context, child) => PhoneFrame(child: child ?? const SizedBox.shrink()),
+        ),
       ),
     );
   }

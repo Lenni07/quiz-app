@@ -63,6 +63,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _loaded = false;
   bool _saving = false;
   bool _linking = false;
+  bool _sendingEmailLink = false;
+  String? _emailLinkSentTo;
+  bool _signingOut = false;
   bool _deletingAccount = false;
 
   final _authService = AuthService();
@@ -82,6 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadProfile(String uid) async {
     if (_loaded) return;
     final data = await UserProfileService().loadProfile(uid);
+    final pendingEmail = await _authService.pendingEmailLinkAddress();
     if (!mounted) return;
     setState(() {
       _firstNameController.text = (data?['firstName'] as String?) ?? '';
@@ -99,6 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _certificateIssuedAt = (data?['certificateIssuedAt'] as Timestamp?)?.toDate();
       _birthDate = (data?['birthDate'] as Timestamp?)?.toDate();
       _grammaticalForm = data?['grammaticalForm'] as String?;
+      _emailLinkSentTo = pendingEmail;
       _loaded = true;
     });
   }
@@ -235,6 +240,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// Schickt einen passwortlosen Anmeldelink an [email] (siehe
+  /// ROADMAP_QuizApp.md Abschnitt 18h). Der Klick auf den Link schließt die
+  /// Anmeldung im CompleteEmailSignInScreen ab.
+  Future<void> _sendEmailLink(String email) async {
+    final trimmed = email.trim();
+    if (!trimmed.contains('@') || trimmed.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.t('account_email_invalid')),
+        backgroundColor: AppColors.signalRed,
+      ));
+      return;
+    }
+    setState(() => _sendingEmailLink = true);
+    try {
+      await _authService.sendSignInLinkToEmail(trimmed);
+      if (!mounted) return;
+      setState(() => _emailLinkSentTo = trimmed);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.t('account_email_link_error')),
+        backgroundColor: AppColors.signalRed,
+      ));
+    } finally {
+      if (mounted) setState(() => _sendingEmailLink = false);
+    }
+  }
+
+  /// Abmelden und sofort anonym weiter (siehe ROADMAP_QuizApp.md Abschnitt
+  /// 18h): der Lernmodus bleibt nutzbar, der Fortschritt hängt am
+  /// abgemeldeten Konto und kommt beim erneuten Anmelden zurück.
+  Future<void> _signOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(S.t('account_sign_out_title')),
+        content: Text(S.t('account_sign_out_explainer')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(S.t('cancel'))),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(S.t('account_sign_out_button'))),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _signingOut = true);
+    try {
+      final user = await _authService.signOutToAnonymous();
+      await UserProfileService().ensureProfileExists(user.uid);
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.t('account_sign_out_done'))),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _signingOut = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.t('account_link_error_generic'))),
+      );
+    }
+  }
+
   /// Konto + alle Daten löschen (DSGVO, siehe ROADMAP_QuizApp.md Abschnitt
   /// 18i). Verlangt vorher, dass der Nutzer ein Bestätigungswort eintippt -
   /// die Aktion ist unwiderruflich.
@@ -349,9 +417,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     AccountStatus(
                       isFullAccount: _authService.isFullAccount,
                       email: _authService.linkedEmail,
-                      linking: _linking,
                       canLink: kIsWeb,
-                      onLink: _linkGoogle,
+                      linkingGoogle: _linking,
+                      onLinkGoogle: _linkGoogle,
+                      sendingEmailLink: _sendingEmailLink,
+                      emailLinkSentTo: _emailLinkSentTo,
+                      onSendEmailLink: _sendEmailLink,
+                      signingOut: _signingOut,
+                      onSignOut: _signOut,
                     ),
                     if (!_authService.isFullAccount || !_crewIdSet || !_nicknameSaved || !_positionSaved) ...[
                       const SizedBox(height: 12),
