@@ -674,10 +674,16 @@ async function resolveRoundTimeout(tx, matchRef, match) {
 
 // --- Crew-ID: Eindeutigkeit + Datenschutz (ROADMAP_QuizApp.md 18h Punkt 3 / 18i) ---
 
-/** Vereinheitlicht eine Crew-ID vor dem Hashen, damit "CR-42", "cr 42" und
- *  "CR42" als dieselbe ID gelten. */
+/** Vereinheitlicht eine Crew-ID vor dem Hashen (Leerzeichen/Bindestriche raus).
+ *  Muss zu normalizeCrewId in lib/services/crew_id_service.dart passen. */
 function normalizeCrewId(raw) {
   return String(raw ?? "").trim().toUpperCase().replace(/[\s-]/g, "");
+}
+
+/** Gültiges Crew-ID-Format: genau 6 Ziffern (ROADMAP_QuizApp.md Abschnitt 18h).
+ *  Hier serverseitig erzwungen, damit ein manipulierter Client es nicht umgeht. */
+function isValidCrewId(normalized) {
+  return /^\d{6}$/.test(normalized);
 }
 
 /** HMAC-SHA256 der normalisierten Crew-ID mit dem Server-Pepper. Deterministisch
@@ -710,8 +716,8 @@ exports.claimCrewId = onCall({ secrets: [CREW_ID_PEPPER] }, async (request) => {
   }
 
   const normalized = normalizeCrewId(request.data?.crewId);
-  if (normalized.length < 3 || normalized.length > 32) {
-    throw new HttpsError("invalid-argument", "Ungültige Crew-ID.");
+  if (!isValidCrewId(normalized)) {
+    throw new HttpsError("invalid-argument", "Die Crew-ID muss aus genau 6 Ziffern bestehen.");
   }
 
   const hash = hashCrewId(normalized);

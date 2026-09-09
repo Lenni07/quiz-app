@@ -402,8 +402,8 @@ class S {
     'profile_crewid_label': {AppLanguage.de: 'Crew-ID', AppLanguage.en: 'Crew ID'},
     // Crew-ID einreichen (siehe ROADMAP_QuizApp.md Abschnitt 18h/18i)
     'crewid_helper': {
-      AppLanguage.de: 'Wird nur verschlüsselt geprüft und gespeichert. Jede Crew-ID gehört zu genau einem Konto.',
-      AppLanguage.en: 'Checked and stored only in encrypted form. Each crew ID belongs to exactly one account.',
+      AppLanguage.de: 'Genau 6 Ziffern. Wird nur verschlüsselt geprüft und gespeichert und gehört zu genau einem Konto.',
+      AppLanguage.en: 'Exactly 6 digits. Checked and stored only in encrypted form, and belongs to exactly one account.',
     },
     'crewid_save': {AppLanguage.de: 'Crew-ID speichern', AppLanguage.en: 'Save crew ID'},
     'crewid_set_label': {AppLanguage.de: 'Crew-ID ist hinterlegt', AppLanguage.en: 'Crew ID is on file'},
@@ -418,12 +418,33 @@ class S {
       AppLanguage.en: 'Please sign in with Google first, then add your crew ID.',
     },
     'crewid_error_invalid': {
-      AppLanguage.de: 'Diese Crew-ID hat kein gültiges Format.',
-      AppLanguage.en: 'That crew ID is not a valid format.',
+      AppLanguage.de: 'Die Crew-ID muss aus genau 6 Ziffern bestehen.',
+      AppLanguage.en: 'The crew ID must be exactly 6 digits.',
     },
     'crewid_error_generic': {
       AppLanguage.de: 'Speichern fehlgeschlagen - bitte Internetverbindung prüfen.',
       AppLanguage.en: 'Save failed - please check your internet connection.',
+    },
+    // Was zum Freischalten von 1 vs 1 / Flottentreffen / Rangliste noch fehlt
+    // (siehe ROADMAP_QuizApp.md Abschnitt 18h "Gestufter Zugang"). Offene
+    // Schritte werden rot hervorgehoben - im Profil und auf dem Sperrbildschirm.
+    'unlock_todo_title': {
+      AppLanguage.de: 'Zum Freischalten von 1 vs 1, Flottentreffen und Rangliste fehlt noch:',
+      AppLanguage.en: 'To unlock 1 vs 1, Fleet Meetup and Ranking you still need:',
+    },
+    'unlock_step_google': {
+      AppLanguage.de: 'Mit Google anmelden',
+      AppLanguage.en: 'Sign in with Google',
+    },
+    'unlock_step_crewid': {
+      AppLanguage.de: 'Crew-ID hinterlegen (6 Ziffern)',
+      AppLanguage.en: 'Add your crew ID (6 digits)',
+    },
+    'unlock_step_done': {AppLanguage.de: 'erledigt', AppLanguage.en: 'done'},
+    'unlock_step_open': {AppLanguage.de: 'fehlt noch', AppLanguage.en: 'still missing'},
+    'unlock_all_done': {
+      AppLanguage.de: 'Alles erledigt – 1 vs 1, Flottentreffen und Rangliste sind frei.',
+      AppLanguage.en: 'All done – 1 vs 1, Fleet Meetup and Ranking are unlocked.',
     },
     'profile_level_label': {AppLanguage.de: 'Deutsch-Level', AppLanguage.en: 'German Level'},
     'profile_level_helper': {

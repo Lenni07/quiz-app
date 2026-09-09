@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show FilteringTextInputFormatter, LengthLimitingTextInputFormatter;
 import '../audio/sound_settings.dart';
 import '../services/auth_service.dart';
 import '../l10n/app_language.dart';
@@ -20,6 +21,7 @@ import '../widgets/delete_account_dialog.dart';
 import '../widgets/game_button.dart';
 import '../widgets/maritime_icon.dart';
 import '../widgets/game_panel.dart';
+import '../widgets/unlock_steps.dart';
 
 /// Profil/Optionen-Bildschirm (siehe ROADMAP_QuizApp.md Abschnitt 16/18):
 /// Nickname, echter Name, Position, Department und ein vordefinierter
@@ -134,6 +136,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _save(String uid) async {
     setState(() => _saving = true);
     try {
+      // Wenn im Crew-ID-Feld noch eine Eingabe steht, muss sie über die
+      // claimCrewId-Function laufen (das normale Profil-Speichern schreibt
+      // die Crew-ID bewusst nicht). Schlägt das fehl, hier abbrechen und
+      // KEIN "Profil gespeichert" melden - sonst denkt der Nutzer, die
+      // Crew-ID sei hinterlegt, obwohl der Zugang gesperrt bleibt.
+      if (!await _submitPendingCrewId()) return; // finally setzt _saving zurück
       await UserProfileService().updateProfile(
         uid: uid,
         realName: _realNameController.text.trim(),
@@ -250,22 +258,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  /// Reicht die eingegebene Crew-ID serverseitig ein (siehe
-  /// ROADMAP_QuizApp.md Abschnitt 18h/18i). Gespeichert wird nur ein Hash;
-  /// ist die ID schon vergeben, lehnt der Server ab.
-  Future<void> _claimCrewId() async {
+  /// True, wenn im Crew-ID-Feld eine noch nicht übernommene Eingabe steht.
+  bool get _crewIdPending {
     final value = _crewIdController.text.trim();
-    if (value.isEmpty) return;
-    setState(() => _claimingCrewId = true);
+    return value.isNotEmpty && (!_crewIdSet || _editingCrewId);
+  }
+
+  /// Reicht eine ausstehende Crew-ID-Eingabe serverseitig ein (siehe
+  /// ROADMAP_QuizApp.md Abschnitt 18h/18i). Gespeichert wird nur ein Hash.
+  /// Gibt `true` zurück, wenn nichts anstand ODER die Übernahme geklappt hat;
+  /// bei einem Fehler wird eine deutliche Meldung gezeigt und `false`
+  /// zurückgegeben - der Aufrufer darf dann KEINEN Erfolg melden.
+  Future<bool> _submitPendingCrewId() async {
+    if (!_crewIdPending) return true;
+    final value = _crewIdController.text.trim();
+    if (!isValidCrewId(value)) {
+      _showCrewIdError('crewid_error_invalid');
+      return false;
+    }
     try {
       await _crewIdService.claim(value);
-      if (!mounted) return;
+      if (!mounted) return false;
       setState(() {
         _crewIdSet = true;
         _editingCrewId = false;
         _crewIdController.clear();
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('crewid_claim_success'))));
+      return true;
     } on CrewIdTakenException {
       _showCrewIdError('crewid_error_taken');
     } on CrewIdNeedsGoogleException {
@@ -274,14 +293,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _showCrewIdError('crewid_error_invalid');
     } catch (_) {
       _showCrewIdError('crewid_error_generic');
-    } finally {
-      if (mounted) setState(() => _claimingCrewId = false);
+    }
+    return false;
+  }
+
+  /// Eigener "Crew-ID speichern"-Knopf direkt am Feld.
+  Future<void> _claimCrewId() async {
+    if (_crewIdController.text.trim().isEmpty) return;
+    setState(() => _claimingCrewId = true);
+    final ok = await _submitPendingCrewId();
+    if (!mounted) return;
+    setState(() => _claimingCrewId = false);
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('crewid_claim_success'))));
     }
   }
 
   void _showCrewIdError(String key) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t(key))));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(S.t(key)),
+      backgroundColor: AppColors.signalRed,
+    ));
   }
 
   @override
@@ -312,6 +345,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       canLink: kIsWeb,
                       onLink: _linkGoogle,
                     ),
+                    if (!_authService.isFullAccount || !_crewIdSet) ...[
+                      const SizedBox(height: 12),
+                      UnlockSteps(
+                        googleDone: _authService.isFullAccount,
+                        crewIdDone: _crewIdSet,
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     Text(S.t('profile_language_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
                     const SizedBox(height: 8),
@@ -605,6 +645,11 @@ class _CrewIdField extends StatelessWidget {
       children: [
         TextField(
           controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
           decoration: InputDecoration(
             labelText: S.t('profile_crewid_label'),
             helperText: S.t('crewid_helper'),

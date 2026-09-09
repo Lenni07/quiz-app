@@ -8,6 +8,7 @@ import '../utils/current_uid.dart';
 import 'empty_state.dart';
 import 'game_button.dart';
 import 'game_panel.dart';
+import 'unlock_steps.dart';
 
 /// Zustand der Konto-Sperre für die wettbewerbsrelevanten Bereiche (siehe
 /// ROADMAP_QuizApp.md Abschnitt 18h, "Gestufter Zugang").
@@ -103,6 +104,9 @@ class _LockScreen extends StatelessWidget {
       return EmptyState(icon: Icons.wifi_off, message: S.t('gate_no_connection'));
     }
 
+    // needsGoogle: beide Schritte offen. needsCrewId: Google erledigt, nur die
+    // Crew-ID fehlt noch.
+    final googleDone = state == GateState.needsCrewId;
     final message = state == GateState.needsGoogle ? S.t('gate_needs_google') : S.t('gate_needs_crewid');
 
     return Center(
@@ -125,6 +129,8 @@ class _LockScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.canvas.withValues(alpha: 0.85), fontSize: 13),
               ),
+              const SizedBox(height: 16),
+              UnlockSteps(googleDone: googleDone, crewIdDone: false, compact: true),
               const SizedBox(height: 18),
               GameButton(
                 label: S.t('gate_go_to_profile'),
