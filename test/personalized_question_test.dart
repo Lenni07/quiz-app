@@ -141,4 +141,32 @@ void main() {
       expect(question.topic, 'Testthema');
     });
   });
+
+  group('missingPersonalizationRequirements (ROADMAP 18f/18h)', () {
+    test('vollständiges Profil: nichts fehlt', () {
+      const p = PersonalizationProfile(firstName: 'Nala', age: 30, position: 'Kellner', grammaticalForm: 'female');
+      expect(missingPersonalizationRequirements(p), isEmpty);
+    });
+
+    test('leeres Profil: Vorname, Geburtsdatum und Sprachform fehlen (Position nicht)', () {
+      expect(
+        missingPersonalizationRequirements(PersonalizationProfile.empty),
+        [
+          PersonalizationRequirement.firstName,
+          PersonalizationRequirement.birthDate,
+          PersonalizationRequirement.grammaticalForm,
+        ],
+      );
+    });
+
+    test('nur Geburtsdatum fehlt', () {
+      const p = PersonalizationProfile(firstName: 'Nala', age: null, position: '', grammaticalForm: 'male');
+      expect(missingPersonalizationRequirements(p), [PersonalizationRequirement.birthDate]);
+    });
+
+    test('nur-Leerzeichen-Vorname zählt als fehlend', () {
+      const p = PersonalizationProfile(firstName: '  ', age: 22, position: '', grammaticalForm: 'male');
+      expect(missingPersonalizationRequirements(p), [PersonalizationRequirement.firstName]);
+    });
+  });
 }

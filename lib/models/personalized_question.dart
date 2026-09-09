@@ -39,6 +39,24 @@ class PersonalizationProfile {
   );
 }
 
+/// Pflichtangaben für den Modus "Persönliche Fragen" (siehe ROADMAP_QuizApp.md
+/// Abschnitt 18f/18h). Fehlt eine davon, wird nur dieser Modus gesperrt - der
+/// Rest der App bleibt nutzbar. Position ist bewusst NICHT dabei: Vorlagen,
+/// die sie brauchen, werden von [usableTemplates] ausgefiltert; die übrigen
+/// funktionieren auch ohne.
+enum PersonalizationRequirement { firstName, birthDate, grammaticalForm }
+
+/// Welche der Pflichtangaben in [profile] noch fehlen (leere Liste = alles da).
+List<PersonalizationRequirement> missingPersonalizationRequirements(
+  PersonalizationProfile profile,
+) {
+  return [
+    if (profile.firstName.trim().isEmpty) PersonalizationRequirement.firstName,
+    if (profile.age == null) PersonalizationRequirement.birthDate,
+    if (profile.grammaticalForm == null) PersonalizationRequirement.grammaticalForm,
+  ];
+}
+
 final _placeholderPattern = RegExp(r'\{([^{}]+)\}');
 
 /// Ersetzt Platzhalter in [template]: einfache Werte wie "{vorname}",

@@ -4,14 +4,17 @@ import '../l10n/strings.dart';
 import '../theme/app_theme.dart';
 import 'game_panel.dart';
 
-/// Zeigt die zwei Schritte zum Freischalten der wettbewerbsrelevanten
-/// Bereiche (Google-Anmeldung + Crew-ID, siehe ROADMAP_QuizApp.md Abschnitt
-/// 18h). Noch offene Schritte werden rot hervorgehoben - bewusst nicht nur
-/// als grauer Hinweistext. Wird im Profil und auf dem Sperrbildschirm
-/// verwendet, damit die Anzeige an beiden Stellen gleich aussieht.
+/// Zeigt die Schritte zum Freischalten der wettbewerbsrelevanten Bereiche
+/// (Google-Anmeldung, Crew-ID, Nickname, Position - siehe ROADMAP_QuizApp.md
+/// Abschnitt 18h). Noch offene Schritte werden rot hervorgehoben, bewusst
+/// nicht nur als grauer Hinweistext. Wird im Profil und auf dem
+/// Sperrbildschirm verwendet, damit die Anzeige an beiden Stellen gleich
+/// aussieht.
 class UnlockSteps extends StatelessWidget {
-  final bool googleDone;
-  final bool crewIdDone;
+  final bool google;
+  final bool crewId;
+  final bool nickname;
+  final bool position;
 
   /// Kompakte Variante ohne Panel/Titel - für den Sperrbildschirm, der schon
   /// ein eigenes Panel mitbringt.
@@ -19,14 +22,22 @@ class UnlockSteps extends StatelessWidget {
 
   const UnlockSteps({
     super.key,
-    required this.googleDone,
-    required this.crewIdDone,
+    required this.google,
+    required this.crewId,
+    required this.nickname,
+    required this.position,
     this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final allDone = googleDone && crewIdDone;
+    final steps = <(String, bool)>[
+      (S.t('unlock_step_google'), google),
+      (S.t('unlock_step_crewid'), crewId),
+      (S.t('unlock_step_nickname'), nickname),
+      (S.t('unlock_step_position'), position),
+    ];
+    final allDone = steps.every((s) => s.$2);
 
     final rows = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,9 +54,10 @@ class UnlockSteps extends StatelessWidget {
           ),
           const SizedBox(height: 10),
         ],
-        _StepRow(label: S.t('unlock_step_google'), done: googleDone),
-        const SizedBox(height: 6),
-        _StepRow(label: S.t('unlock_step_crewid'), done: crewIdDone),
+        for (var i = 0; i < steps.length; i++) ...[
+          if (i > 0) const SizedBox(height: 6),
+          _StepRow(label: steps[i].$1, done: steps[i].$2),
+        ],
       ],
     );
 

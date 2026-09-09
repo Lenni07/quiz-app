@@ -10,46 +10,78 @@ import 'game_button.dart';
 import 'game_panel.dart';
 import 'unlock_steps.dart';
 
-/// Zustand der Konto-Sperre für die wettbewerbsrelevanten Bereiche (siehe
-/// ROADMAP_QuizApp.md Abschnitt 18h, "Gestufter Zugang").
-enum GateState {
-  /// Konto lässt sich gerade nicht prüfen (offline / Firebase nicht erreichbar).
-  noConnection,
+/// Die Voraussetzungen für die wettbewerbsrelevanten Bereiche (1 vs 1,
+/// Flottentreffen, Rangliste) - siehe ROADMAP_QuizApp.md Abschnitt 18h,
+/// "Gestufter Zugang". Verlangt werden Google-Anmeldung, eine eindeutige
+/// Crew-ID sowie Nickname UND Position: beide erscheinen in der Rangliste,
+/// ohne sie entstünden dort leere Einträge.
+class CompetitiveAccess {
+  /// false = Konto/Profil lässt sich gerade nicht prüfen (offline).
+  final bool connected;
+  final bool google;
+  final bool crewId;
+  final bool nickname;
+  final bool position;
 
-  /// Noch kein Google-Konto verknüpft (Konto ist anonym).
-  needsGoogle,
+  const CompetitiveAccess({
+    required this.connected,
+    required this.google,
+    required this.crewId,
+    required this.nickname,
+    required this.position,
+  });
 
-  /// Google ist da, aber noch keine Crew-ID hinterlegt.
-  needsCrewId,
+  static const offline = CompetitiveAccess(
+    connected: false,
+    google: false,
+    crewId: false,
+    nickname: false,
+    position: false,
+  );
 
-  /// Vollwertiges Konto - Zugang frei.
-  open,
+  bool get open => connected && google && crewId && nickname && position;
 }
 
 /// Reine Entscheidungslogik der Sperre (ohne Firebase/Widgets, damit
-/// testbar). [crewIdSet] wird erst ausgewertet, wenn Konto + Google stimmen.
-GateState gateStateFor({
+/// testbar). [profileLoaded] false = Profil noch nicht geladen; dann gilt der
+/// Zugang vorläufig als offen und die Ladeanzeige übernimmt das Widget.
+CompetitiveAccess competitiveAccessFor({
   required String? uid,
   required bool isFullAccount,
-  required bool crewIdLoaded,
-  required bool crewIdSet,
+  required bool profileLoaded,
+  bool crewIdSet = false,
+  String? nickname,
+  String? position,
   bool firestoreError = false,
 }) {
-  if (uid == null || firestoreError) return GateState.noConnection;
-  if (!isFullAccount) return GateState.needsGoogle;
-  if (!crewIdLoaded) return GateState.open; // Ladeanzeige übernimmt das Widget
-  return crewIdSet ? GateState.open : GateState.needsCrewId;
+  if (uid == null || firestoreError) return CompetitiveAccess.offline;
+  if (!profileLoaded) {
+    return const CompetitiveAccess(
+      connected: true,
+      google: true,
+      crewId: true,
+      nickname: true,
+      position: true,
+    );
+  }
+  return CompetitiveAccess(
+    connected: true,
+    google: isFullAccount,
+    crewId: crewIdSet,
+    nickname: (nickname ?? '').trim().isNotEmpty,
+    position: (position ?? '').trim().isNotEmpty,
+  );
 }
 
 /// Sperrt wettbewerbsrelevante Bereiche (1 vs 1, Flottentreffen, Rangliste)
-/// für Konten, die noch nicht vollwertig sind: Google-Anmeldung UND eine
-/// eindeutige Crew-ID. Der Lernmodus bleibt bewusst ohne Anmeldung nutzbar
-/// und wird NICHT mit diesem Gate umschlossen.
+/// für Konten, die das Wettkampf-Profil noch nicht vollständig haben. Der
+/// Lernmodus bleibt bewusst ohne Anmeldung nutzbar und wird NICHT mit diesem
+/// Gate umschlossen.
 class FullAccountGate extends StatelessWidget {
   final Widget child;
 
-  /// Führt den Nutzer zum Profil-Reiter, wo er sich anmelden / die Crew-ID
-  /// hinterlegen kann.
+  /// Führt den Nutzer zum Profil-Reiter, wo er sich anmelden / die fehlenden
+  /// Angaben nachtragen kann.
   final VoidCallback onGoToProfile;
 
   final AuthService _authService;
@@ -64,50 +96,65 @@ class FullAccountGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uid = currentUid();
-    final isFull = _authService.isFullAccount;
+    if (uid == null) {
+      return _LockScreen(access: CompetitiveAccess.offline, onGoToProfile: onGoToProfile);
+    }
 
-    if (uid == null) return _LockScreen(state: GateState.noConnection, onGoToProfile: onGoToProfile);
-    if (!isFull) return _LockScreen(state: GateState.needsGoogle, onGoToProfile: onGoToProfile);
+    final isFull = _authService.isFullAccount;
+    if (!isFull) {
+      // Ohne Google zählt der Rest ohnehin nicht - den billigen Weg ohne
+      // Firestore-Lesezugriff nehmen und nur "mit Google anmelden" als
+      // offenen Schritt zeigen. Sobald Google steht, liefert der
+      // StreamBuilder unten die genaue Restliste.
+      return _LockScreen(
+        access: const CompetitiveAccess(
+          connected: true,
+          google: false,
+          crewId: false,
+          nickname: false,
+          position: false,
+        ),
+        onGoToProfile: onGoToProfile,
+      );
+    }
 
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return _LockScreen(state: GateState.noConnection, onGoToProfile: onGoToProfile);
+          return _LockScreen(access: CompetitiveAccess.offline, onGoToProfile: onGoToProfile);
         }
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        final state = gateStateFor(
+        final data = snapshot.data!.data();
+        final access = competitiveAccessFor(
           uid: uid,
           isFullAccount: isFull,
-          crewIdLoaded: true,
-          crewIdSet: snapshot.data!.data()?['crewIdHash'] != null,
+          profileLoaded: true,
+          crewIdSet: data?['crewIdHash'] != null,
+          nickname: data?['nickname'] as String?,
+          position: data?['position'] as String?,
         );
-        return state == GateState.open
+        return access.open
             ? child
-            : _LockScreen(state: state, onGoToProfile: onGoToProfile);
+            : _LockScreen(access: access, onGoToProfile: onGoToProfile);
       },
     );
   }
 }
 
 class _LockScreen extends StatelessWidget {
-  final GateState state;
+  final CompetitiveAccess access;
   final VoidCallback onGoToProfile;
 
-  const _LockScreen({required this.state, required this.onGoToProfile});
+  const _LockScreen({required this.access, required this.onGoToProfile});
 
   @override
   Widget build(BuildContext context) {
-    if (state == GateState.noConnection) {
+    if (!access.connected) {
       return EmptyState(icon: Icons.wifi_off, message: S.t('gate_no_connection'));
     }
-
-    // needsGoogle: beide Schritte offen. needsCrewId: Google erledigt, nur die
-    // Crew-ID fehlt noch.
-    final googleDone = state == GateState.needsCrewId;
-    final message = state == GateState.needsGoogle ? S.t('gate_needs_google') : S.t('gate_needs_crewid');
 
     return Center(
       child: SingleChildScrollView(
@@ -125,12 +172,18 @@ class _LockScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                message,
+                S.t('gate_locked_intro'),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.canvas.withValues(alpha: 0.85), fontSize: 13),
               ),
               const SizedBox(height: 16),
-              UnlockSteps(googleDone: googleDone, crewIdDone: false, compact: true),
+              UnlockSteps(
+                google: access.google,
+                crewId: access.crewId,
+                nickname: access.nickname,
+                position: access.position,
+                compact: true,
+              ),
               const SizedBox(height: 18),
               GameButton(
                 label: S.t('gate_go_to_profile'),

@@ -193,6 +193,16 @@ class S {
       AppLanguage.de: 'Fülle zuerst dein Profil aus (Name, Geburtsdatum, Position, Sprachform), um personalisierte Fragen zu erhalten.',
       AppLanguage.en: 'Fill in your profile first (name, birth date, position, language form) to get personalized questions.',
     },
+    // Nur der Modus "Persönliche Fragen" wird gesperrt, wenn diese Angaben
+    // fehlen (siehe ROADMAP_QuizApp.md Abschnitt 18f/18h) - der Rest der App
+    // bleibt nutzbar. {0} = kommagetrennte Liste der fehlenden Angaben.
+    'personal_questions_missing': {
+      AppLanguage.de: 'Für persönliche Fragen fehlt in deinem Profil noch: {0}.',
+      AppLanguage.en: 'Personal questions still need this in your profile: {0}.',
+    },
+    'pq_req_firstname': {AppLanguage.de: 'Vorname', AppLanguage.en: 'first name'},
+    'pq_req_birthdate': {AppLanguage.de: 'Geburtsdatum', AppLanguage.en: 'date of birth'},
+    'pq_req_form': {AppLanguage.de: 'Sprachform', AppLanguage.en: 'language form'},
     'duel_title': {AppLanguage.de: 'Lokales Duell', AppLanguage.en: 'Local Duel'},
     'duel_subtitle': {
       AppLanguage.de: 'Gegen ein anderes Gerät im selben WLAN antreten',
@@ -440,6 +450,14 @@ class S {
       AppLanguage.de: 'Crew-ID hinterlegen (6 Ziffern)',
       AppLanguage.en: 'Add your crew ID (6 digits)',
     },
+    'unlock_step_nickname': {
+      AppLanguage.de: 'Nickname eintragen (steht in der Rangliste)',
+      AppLanguage.en: 'Add a nickname (shown in the ranking)',
+    },
+    'unlock_step_position': {
+      AppLanguage.de: 'Position eintragen (steht in der Rangliste)',
+      AppLanguage.en: 'Add your position (shown in the ranking)',
+    },
     'unlock_step_done': {AppLanguage.de: 'erledigt', AppLanguage.en: 'done'},
     'unlock_step_open': {AppLanguage.de: 'fehlt noch', AppLanguage.en: 'still missing'},
     'unlock_all_done': {
@@ -517,18 +535,12 @@ class S {
     },
 
     // Gestufter Zugang / Konto-Sperre (siehe ROADMAP_QuizApp.md Abschnitt 18h)
-    'gate_title': {AppLanguage.de: 'Vollwertiges Konto nötig', AppLanguage.en: 'Full account required'},
-    'gate_needs_google': {
-      AppLanguage.de: '1 vs 1, Flottentreffen und Rangliste brauchen ein vollwertiges Konto. '
-          'Melde dich im Profil mit Google an und hinterlege deine Crew-ID.',
-      AppLanguage.en: '1 vs 1, Fleet Meetup and Ranking need a full account. '
-          'Sign in with Google in your profile and add your crew ID.',
-    },
-    'gate_needs_crewid': {
-      AppLanguage.de: 'Fast geschafft: Hinterlege noch deine Crew-ID im Profil, '
-          'dann sind 1 vs 1, Flottentreffen und Rangliste frei.',
-      AppLanguage.en: 'Almost there: add your crew ID in your profile, '
-          'then 1 vs 1, Fleet Meetup and Ranking are unlocked.',
+    'gate_title': {AppLanguage.de: 'Wettkampf-Profil unvollständig', AppLanguage.en: 'Competitive profile incomplete'},
+    'gate_locked_intro': {
+      AppLanguage.de: '1 vs 1, Flottentreffen und Rangliste brauchen ein vollständiges Wettkampf-Profil. '
+          'Im Profil eintragen, was noch fehlt:',
+      AppLanguage.en: '1 vs 1, Fleet Meetup and Ranking need a complete competitive profile. '
+          'Add what is still missing in your profile:',
     },
     'gate_no_connection': {
       AppLanguage.de: 'Konto gerade nicht prüfbar – bitte Internetverbindung prüfen.',

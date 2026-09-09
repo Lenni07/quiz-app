@@ -195,6 +195,17 @@ class ModeSelectScreen extends StatelessWidget {
   /// ROADMAP_QuizApp.md Abschnitt 18f) - nur Vorlagen, für die alle
   /// nötigen Angaben vorhanden sind; ist das Profil noch leer, gibt es
   /// einen Hinweis statt einer leeren Fragenrunde.
+  static String _personalizationRequirementKey(PersonalizationRequirement r) {
+    switch (r) {
+      case PersonalizationRequirement.firstName:
+        return 'pq_req_firstname';
+      case PersonalizationRequirement.birthDate:
+        return 'pq_req_birthdate';
+      case PersonalizationRequirement.grammaticalForm:
+        return 'pq_req_form';
+    }
+  }
+
   Future<void> _startPersonalizedQuestions(BuildContext context) async {
     String? uid;
     try {
@@ -206,6 +217,20 @@ class ModeSelectScreen extends StatelessWidget {
 
     final data = await UserProfileService().loadProfile(uid);
     final profile = personalizationProfileFromUserData(data);
+    if (!context.mounted) return;
+
+    // Nur dieser Modus wird gesperrt, wenn Pflichtangaben fehlen (siehe
+    // ROADMAP_QuizApp.md Abschnitt 18f/18h) - mit klarem Hinweis, was genau.
+    final missing = missingPersonalizationRequirements(profile);
+    if (missing.isNotEmpty) {
+      final names = missing.map((r) => S.t(_personalizationRequirementKey(r))).join(', ');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(S.f('personal_questions_missing', [names])),
+        backgroundColor: AppColors.signalRed,
+      ));
+      return;
+    }
+
     final templates = await loadPersonalizedQuestionTemplates();
     final usable = usableTemplates(templates, profile);
     if (!context.mounted) return;

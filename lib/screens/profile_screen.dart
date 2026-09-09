@@ -51,6 +51,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   DateTime? _birthDate;
   String? _grammaticalForm;
   bool _crewIdSet = false;
+  // Gespeicherter Stand (nicht der Tippstand im Textfeld) - für die
+  // Freischalt-Checkliste, damit sie dasselbe zeigt wie die Konto-Sperre.
+  bool _nicknameSaved = false;
+  bool _positionSaved = false;
   bool _editingCrewId = false;
   bool _claimingCrewId = false;
   bool _savingNames = false;
@@ -84,6 +88,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _nicknameController.text = (data?['nickname'] as String?) ?? '';
       _realNameController.text = (data?['realName'] as String?) ?? '';
       _positionController.text = (data?['position'] as String?) ?? '';
+      _nicknameSaved = _nicknameController.text.trim().isNotEmpty;
+      _positionSaved = _positionController.text.trim().isNotEmpty;
       _department = data?['department'] as String?;
       _firstNameChangedAt = (data?['firstNameChangedAt'] as Timestamp?)?.toDate();
       _nicknameChangedAt = (data?['nicknameChangedAt'] as Timestamp?)?.toDate();
@@ -154,6 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         grammaticalForm: _grammaticalForm,
       );
       if (!mounted) return;
+      setState(() => _positionSaved = _positionController.text.trim().isNotEmpty);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('profile_save_success'))));
     } catch (_) {
       if (!mounted) return;
@@ -181,6 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _firstNameChangedAt = (data?['firstNameChangedAt'] as Timestamp?)?.toDate();
         _nicknameChangedAt = (data?['nicknameChangedAt'] as Timestamp?)?.toDate();
+        _nicknameSaved = ((data?['nickname'] as String?) ?? '').trim().isNotEmpty;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(S.t('names_save_success'))));
     } on NameLockedException catch (e) {
@@ -345,11 +353,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       canLink: kIsWeb,
                       onLink: _linkGoogle,
                     ),
-                    if (!_authService.isFullAccount || !_crewIdSet) ...[
+                    if (!_authService.isFullAccount || !_crewIdSet || !_nicknameSaved || !_positionSaved) ...[
                       const SizedBox(height: 12),
                       UnlockSteps(
-                        googleDone: _authService.isFullAccount,
-                        crewIdDone: _crewIdSet,
+                        google: _authService.isFullAccount,
+                        crewId: _crewIdSet,
+                        nickname: _nicknameSaved,
+                        position: _positionSaved,
                       ),
                     ],
                     const SizedBox(height: 24),

@@ -1,48 +1,84 @@
 // Entscheidungslogik der Konto-Sperre (siehe lib/widgets/full_account_gate.dart
-// und ROADMAP_QuizApp.md Abschnitt 18h "Gestufter Zugang").
+// und ROADMAP_QuizApp.md Abschnitt 18h "Gestufter Zugang"). Verlangt werden
+// Google-Anmeldung, Crew-ID sowie Nickname UND Position (beide stehen in der
+// Rangliste).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rank_up/widgets/full_account_gate.dart';
 
 void main() {
-  test('kein uid (offline / nicht angemeldet) -> noConnection', () {
-    expect(
-      gateStateFor(uid: null, isFullAccount: false, crewIdLoaded: false, crewIdSet: false),
-      GateState.noConnection,
-    );
+  test('kein uid (offline / nicht angemeldet) -> nicht verbunden, gesperrt', () {
+    final a = competitiveAccessFor(uid: null, isFullAccount: false, profileLoaded: false);
+    expect(a.connected, isFalse);
+    expect(a.open, isFalse);
   });
 
-  test('Firestore-Fehler -> noConnection', () {
-    expect(
-      gateStateFor(uid: 'u1', isFullAccount: true, crewIdLoaded: true, crewIdSet: true, firestoreError: true),
-      GateState.noConnection,
+  test('Firestore-Fehler -> nicht verbunden, gesperrt', () {
+    final a = competitiveAccessFor(
+      uid: 'u1',
+      isFullAccount: true,
+      profileLoaded: true,
+      crewIdSet: true,
+      nickname: 'Nic',
+      position: 'Kellner',
+      firestoreError: true,
     );
+    expect(a.connected, isFalse);
+    expect(a.open, isFalse);
   });
 
-  test('angemeldet, aber anonym (kein Google) -> needsGoogle', () {
-    expect(
-      gateStateFor(uid: 'u1', isFullAccount: false, crewIdLoaded: true, crewIdSet: false),
-      GateState.needsGoogle,
-    );
+  test('Profil noch nicht geladen -> vorläufig offen (Ladeanzeige übernimmt das Widget)', () {
+    final a = competitiveAccessFor(uid: 'u1', isFullAccount: true, profileLoaded: false);
+    expect(a.open, isTrue);
   });
 
-  test('Google da, aber Crew-ID fehlt -> needsCrewId', () {
-    expect(
-      gateStateFor(uid: 'u1', isFullAccount: true, crewIdLoaded: true, crewIdSet: false),
-      GateState.needsCrewId,
+  test('anonym (kein Google) -> gesperrt, google offen', () {
+    final a = competitiveAccessFor(
+      uid: 'u1',
+      isFullAccount: false,
+      profileLoaded: true,
+      crewIdSet: true,
+      nickname: 'Nic',
+      position: 'Kellner',
     );
+    expect(a.google, isFalse);
+    expect(a.open, isFalse);
   });
 
-  test('Google + Crew-ID -> open', () {
-    expect(
-      gateStateFor(uid: 'u1', isFullAccount: true, crewIdLoaded: true, crewIdSet: true),
-      GateState.open,
+  test('Google + Crew-ID, aber Nickname fehlt -> gesperrt', () {
+    final a = competitiveAccessFor(
+      uid: 'u1',
+      isFullAccount: true,
+      profileLoaded: true,
+      crewIdSet: true,
+      nickname: '   ',
+      position: 'Kellner',
     );
+    expect(a.nickname, isFalse);
+    expect(a.open, isFalse);
   });
 
-  test('Crew-ID-Status noch nicht geladen -> open (Ladeanzeige übernimmt das Widget)', () {
-    expect(
-      gateStateFor(uid: 'u1', isFullAccount: true, crewIdLoaded: false, crewIdSet: false),
-      GateState.open,
+  test('Google + Crew-ID + Nickname, aber Position fehlt -> gesperrt', () {
+    final a = competitiveAccessFor(
+      uid: 'u1',
+      isFullAccount: true,
+      profileLoaded: true,
+      crewIdSet: true,
+      nickname: 'Nic',
+      position: null,
     );
+    expect(a.position, isFalse);
+    expect(a.open, isFalse);
+  });
+
+  test('alle vier Voraussetzungen erfüllt -> offen', () {
+    final a = competitiveAccessFor(
+      uid: 'u1',
+      isFullAccount: true,
+      profileLoaded: true,
+      crewIdSet: true,
+      nickname: 'Nic',
+      position: 'Kellner',
+    );
+    expect(a.open, isTrue);
   });
 }

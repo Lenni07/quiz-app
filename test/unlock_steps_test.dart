@@ -14,40 +14,55 @@ void main() {
     final texts = tester.widgetList<RichText>(find.byType(RichText));
     for (final rt in texts) {
       final span = rt.text as TextSpan;
-      final flat = span.toPlainText();
-      if (!flat.contains(partial)) continue;
-      // Irgendein Teil des Spans muss in Signalrot gesetzt sein.
-      var red = false;
+      if (!span.toPlainText().contains(partial)) continue;
+      var red = span.style?.color == AppColors.signalRed;
       span.visitChildren((child) {
         if (child is TextSpan && child.style?.color == AppColors.signalRed) red = true;
         return true;
       });
-      if (span.style?.color == AppColors.signalRed) red = true;
       if (red) return true;
     }
     return false;
   }
 
-  testWidgets('beide Schritte offen: Titel + beide Zeilen rot', (tester) async {
-    await tester.pumpWidget(wrap(const UnlockSteps(googleDone: false, crewIdDone: false)));
+  testWidgets('alles offen: Titel + alle vier Zeilen rot', (tester) async {
+    await tester.pumpWidget(wrap(const UnlockSteps(
+      google: false,
+      crewId: false,
+      nickname: false,
+      position: false,
+    )));
 
     expect(find.text(S.t('unlock_todo_title')), findsOneWidget);
     expect(hasRedText(tester, S.t('unlock_step_google')), isTrue);
     expect(hasRedText(tester, S.t('unlock_step_crewid')), isTrue);
+    expect(hasRedText(tester, S.t('unlock_step_nickname')), isTrue);
+    expect(hasRedText(tester, S.t('unlock_step_position')), isTrue);
   });
 
-  testWidgets('Google erledigt, Crew-ID offen: nur die Crew-ID-Zeile rot', (tester) async {
-    await tester.pumpWidget(wrap(const UnlockSteps(googleDone: true, crewIdDone: false)));
+  testWidgets('nur Position offen: nur diese Zeile rot', (tester) async {
+    await tester.pumpWidget(wrap(const UnlockSteps(
+      google: true,
+      crewId: true,
+      nickname: true,
+      position: false,
+    )));
 
     expect(hasRedText(tester, S.t('unlock_step_google')), isFalse);
-    expect(hasRedText(tester, S.t('unlock_step_crewid')), isTrue);
+    expect(hasRedText(tester, S.t('unlock_step_nickname')), isFalse);
+    expect(hasRedText(tester, S.t('unlock_step_position')), isTrue);
   });
 
   testWidgets('alles erledigt: Erfolgstext, nichts rot', (tester) async {
-    await tester.pumpWidget(wrap(const UnlockSteps(googleDone: true, crewIdDone: true)));
+    await tester.pumpWidget(wrap(const UnlockSteps(
+      google: true,
+      crewId: true,
+      nickname: true,
+      position: true,
+    )));
 
     expect(find.text(S.t('unlock_all_done')), findsOneWidget);
-    expect(hasRedText(tester, S.t('unlock_step_crewid')), isFalse);
+    expect(hasRedText(tester, S.t('unlock_step_position')), isFalse);
   });
 
   testWidgets('compact: rendert auch ohne feste Breite (zentriertes Sperr-Panel)', (tester) async {
@@ -56,7 +71,15 @@ void main() {
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [UnlockSteps(googleDone: false, crewIdDone: false, compact: true)],
+            children: const [
+              UnlockSteps(
+                google: false,
+                crewId: false,
+                nickname: false,
+                position: false,
+                compact: true,
+              ),
+            ],
           ),
         ),
       ),

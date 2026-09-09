@@ -3,15 +3,24 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Vollwertiges Konto (siehe ROADMAP_QuizApp.md Abschnitt 18h, "Gestufter
-    // Zugang"): nicht anonym angemeldet UND eine Crew-ID hinterlegt. Wird für
-    // alles Wettbewerbsrelevante verlangt (1 vs 1, Flottenkrieg-Einreichungen).
-    // Der get() kostet einen Lesezugriff - nur auf den wenigen Schreibpfaden
-    // eingesetzt, nicht flächendeckend.
+    // Vollwertiges Wettkampf-Konto (siehe ROADMAP_QuizApp.md Abschnitt 18h,
+    // "Gestufter Zugang"): nicht anonym angemeldet, Crew-ID hinterlegt UND
+    // Nickname + Position gesetzt (beide erscheinen in der Rangliste - ohne
+    // sie entstünden leere Einträge). Wird für alles Wettbewerbsrelevante
+    // verlangt (1 vs 1, Flottenkrieg-Einreichungen). Der get() kostet einen
+    // Lesezugriff - nur auf den wenigen Schreibpfaden eingesetzt, nicht
+    // flächendeckend (mehrfache get() derselben Doc werden zusammengefasst).
     function isFullAccount() {
       return request.auth != null
         && request.auth.token.firebase.sign_in_provider != 'anonymous'
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('crewIdHash', null) != null;
+        && isCompetitiveProfileComplete(
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data);
+    }
+
+    function isCompetitiveProfileComplete(d) {
+      return d.get('crewIdHash', null) != null
+        && d.get('nickname', '') is string && d.get('nickname', '').size() > 0
+        && d.get('position', '') is string && d.get('position', '').size() > 0;
     }
 
     // Jeder Nutzer darf nur sein eigenes Profil lesen/schreiben - aber die
