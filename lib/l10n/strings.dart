@@ -348,10 +348,13 @@ class S {
       AppLanguage.de: 'Wird auch in der Rangliste angezeigt',
       AppLanguage.en: 'Also shown in the ranking',
     },
-    // Namensänderung mit Sperrfrist (siehe ROADMAP_QuizApp.md Abschnitt 18h Punkt 4)
-    'names_change_helper': {
-      AppLanguage.de: 'Nach einer Änderung 30 Tage gesperrt',
-      AppLanguage.en: 'Locked for 30 days after a change',
+    // Namensänderung mit Sperrfrist (siehe ROADMAP_QuizApp.md Abschnitt 18h Punkt 4).
+    // Die Regel steht gebündelt unter dem "Namen speichern"-Knopf, damit klar
+    // ist, dass sie für Nickname UND Vorname gilt - nicht als Hilfetext an einem
+    // einzelnen Feld.
+    'names_save_caption': {
+      AppLanguage.de: 'Gilt für Nickname und Vorname. Nach dem Speichern 30 Tage gesperrt.',
+      AppLanguage.en: 'Applies to nickname and first name. Locked for 30 days after saving.',
     },
     'names_locked_until': {
       AppLanguage.de: 'Wieder änderbar ab {0}',
@@ -491,10 +494,6 @@ class S {
     },
     'profile_birthdate_set': {AppLanguage.de: '{0} ({1} Jahre)', AppLanguage.en: '{0} ({1} years)'},
     'profile_grammatical_form_label': {AppLanguage.de: 'Sprachform', AppLanguage.en: 'Language form'},
-    'profile_grammatical_form_title': {
-      AppLanguage.de: 'Welche Sprachform möchtest du lernen?',
-      AppLanguage.en: 'Which language form would you like to learn?',
-    },
     'profile_grammatical_form_male': {AppLanguage.de: 'Männlich', AppLanguage.en: 'Male'},
     'profile_grammatical_form_female': {AppLanguage.de: 'Weiblich', AppLanguage.en: 'Female'},
 

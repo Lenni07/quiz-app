@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rank_up/l10n/strings.dart';
 import 'package:rank_up/theme/app_theme.dart';
+import 'package:rank_up/widgets/game_panel.dart';
 
 Future<void> _loadFonts() async {
   for (final weight in ['Regular', 'Medium', 'SemiBold', 'Bold', 'ExtraBold']) {
@@ -76,7 +77,7 @@ class _PickerField extends StatelessWidget {
 void main() {
   testWidgets('Profil-Felder haben ein einheitliches Muster', (tester) async {
     await _loadFonts();
-    await tester.binding.setSurfaceSize(const Size(430, 880));
+    await tester.binding.setSurfaceSize(const Size(430, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final nickname = TextEditingController(text: 'SeaWolf');
@@ -110,17 +111,25 @@ void main() {
                 controller: firstName,
                 decoration: InputDecoration(
                   labelText: S.t('profile_firstname_label'),
-                  helperText: S.t('names_change_helper'),
+                  helperText: S.t('profile_private_helper'),
                 ),
               )),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(foregroundColor: AppColors.brassLight),
-                  icon: const Icon(Icons.save_outlined, size: 18),
-                  label: Text(S.t('names_save')),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      S.t('names_save_caption'),
+                      style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.7)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  TextButton.icon(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(foregroundColor: AppColors.brassLight),
+                    icon: const Icon(Icons.save_outlined, size: 18),
+                    label: Text(S.t('names_save')),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               field(TextField(
@@ -154,11 +163,29 @@ void main() {
                   helperText: S.t('profile_public_helper'),
                 ),
               )),
+              // Crew-ID: sobald hinterlegt, bewusst als eigene Kachel statt als
+              // Feld (nur der Hash liegt auf dem Server, siehe Abschnitt 18i) -
+              // steht zwischen Position und Sprachform.
+              field(GamePanel(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                borderRadius: 14,
+                child: Row(
+                  children: [
+                    Icon(Icons.badge_outlined, color: Colors.greenAccent.shade400),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(S.t('crewid_set_label'),
+                          style: const TextStyle(color: AppColors.canvas)),
+                    ),
+                    TextButton(onPressed: () {}, child: Text(S.t('crewid_change'))),
+                  ],
+                ),
+              )),
               field(DropdownButtonFormField<String?>(
                 initialValue: 'female',
                 decoration: InputDecoration(
                   labelText: S.t('profile_grammatical_form_label'),
-                  helperText: S.t('profile_grammatical_form_title'),
+                  helperText: S.t('profile_private_helper'),
                 ),
                 items: [
                   DropdownMenuItem(value: null, child: Text(S.t('department_unspecified'))),

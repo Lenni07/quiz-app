@@ -576,7 +576,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       initialValue: _grammaticalForm,
                       decoration: InputDecoration(
                         labelText: S.t('profile_grammatical_form_label'),
-                        helperText: S.t('profile_grammatical_form_title'),
+                        helperText: S.t('profile_private_helper'),
                       ),
                       items: [
                         DropdownMenuItem(value: null, child: Text(S.t('department_unspecified'))),
@@ -834,22 +834,30 @@ class _NameSection extends StatelessWidget {
           controller: firstNameController,
           decoration: InputDecoration(
             labelText: S.t('profile_firstname_label'),
-            helperText: _lockHint(firstNameChangedAt) ?? S.t('names_change_helper'),
+            helperText: _lockHint(firstNameChangedAt) ?? S.t('profile_private_helper'),
           ),
         ),
         const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerRight,
-          child: saving
-              ? const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                )
-              : TextButton.icon(
-                  onPressed: onSave,
-                  icon: const Icon(Icons.save_outlined, size: 18),
-                  label: Text(S.t('names_save')),
-                ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                S.t('names_save_caption'),
+                style: TextStyle(fontSize: 12, color: AppColors.canvas.withValues(alpha: 0.7)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            saving
+                ? const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                : TextButton.icon(
+                    onPressed: onSave,
+                    icon: const Icon(Icons.save_outlined, size: 18),
+                    label: Text(S.t('names_save')),
+                  ),
+          ],
         ),
       ],
     );
