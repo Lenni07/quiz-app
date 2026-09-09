@@ -11,6 +11,24 @@
 
 **Zurückgestellt:** Abschnitt 18d (Download-Seite/Hosting), Abschnitt 18e (Ligen- und EP-System – Ranking-Konzept noch nicht final), Sound-Dateien in besserer Qualität (Kenney klingt zu billig – bessere Quellen: Pixabay, Mixkit, WOW Sound, BOOM Library), vorproduzierte Audiodateien für das Hörverständnis (Abschnitt 18g, langfristiger Teil).
 
+### Offene Entscheidungen / Beobachtungspunkte
+
+**Lokales Duell (Phase 4a) – behalten oder streichen? Noch nicht entschieden.**
+- *Dafür:* Die Gäste-App und die Arbeitgeber-App an Bord funktionieren ohne gekauftes Internetpaket, weil sie auf einem Server **an Bord** laufen. Würde die Reederei der App ebenfalls Serverplatz an Bord geben, wäre das lokale Duell der einzige Weg, wie zwei Crew-Mitglieder ohne Internet gegeneinander spielen können.
+- *Dagegen:* Es zahlt auf nichts ein (keine Wertung, keine Liga, kein Flottentreffen), nach dem Navigations-Umbau auf fünf Reiter ist unklar, wo es überhaupt erreichbar ist, und es muss bei jeder Änderung mitgepflegt und mitgetestet werden.
+- **Technische Klarstellung, die dauerhaft gilt:** Schiffsübergreifendes Spielen (Flottentreffen, Online-1-vs-1) ist **ohne Internet physikalisch unmöglich**. Zwischen zwei Schiffen auf See gibt es keinen Weg außer der Satellitenverbindung. Lokale Funktionen (Lernmodus, lokales Duell, schiffsinterne Rangliste) könnten ohne Internet laufen, alles Schiffsübergreifende nicht.
+
+**Datenverbrauch im Auge behalten.** Die Crew kauft Internet selbst und gibt viel dafür aus – Sparsamkeit ist also ein echtes Verkaufsargument.
+- Das Spielen selbst zieht praktisch nichts (wenige Kilobyte pro Runde).
+- Der Brocken ist die **Erstladung von derzeit ~44 MB**, davon allein ~30 MB für Flutters CanvasKit-Renderer. Stellschraube: schlankerer Renderer.
+- **Wichtig:** Das ist kein einmaliges Thema. Mit dem geplanten optischen Ausbau (Grafiken, Sounds, Animationen) wächst das Paket weiter. Die Größe sollte deshalb bei jedem größeren Ausbauschritt mitgeprüft werden, nicht nur einmal optimiert.
+
+### Firebase-Konsole: noch vorzunehmende Einstellungen (E-Mail-Link-Anmeldung)
+
+1. Authentication → Sign-in method → Anbieter "E-Mail-Adresse/Passwort" aktivieren und darin den Schalter **"E-Mail-Link (passwortlose Anmeldung)"** einschalten
+2. Authentication → Settings → prüfen, dass `quiz-up-c1312.web.app` und `quiz-up-c1312.firebaseapp.com` unter den autorisierten Domains stehen (eine spätere eigene Domain hier ergänzen)
+3. Optional: Authentication → Templates → Absendername und Betreff der Anmelde-Mail anpassen
+
 ### ⚠ Technische Wartung mit Frist
 
 - **Node.js 20 → 22 umstellen (Frist: 30.10.2026).** Die aktuelle Cloud-Functions-Laufzeit Node.js 20 ist bereits als veraltet markiert und wird zu diesem Datum endgültig abgeschaltet. Danach lassen sich die Functions nicht mehr deployen bzw. laufen nicht mehr. Muss also vor Ende Oktober 2026 erledigt sein – nicht dringend heute, aber auch nicht bis zum letzten Moment aufschieben.
@@ -370,7 +388,7 @@ Damit sind die beiden Bereiche auch inhaltlich sauber getrennt: **Lernmodus = Pr
 
 **Namensänderungen – Sperrfrist statt dauerhafter Sperre:** Vorname und Nickname sollen nicht dauerhaft unveränderbar sein (Tippfehler beim ersten Eintragen passieren ständig, Namen ändern sich, ein bereuter Nickname wird sonst zum Support-Fall). Stattdessen eine **Sperrfrist von 30 Tagen** zwischen Änderungen: Die Rangliste bleibt stabil, niemand sitzt dauerhaft auf einem Fehler fest. Die Sprachform (männlich/weiblich) bleibt jederzeit änderbar.
 
-### Status 18h: fertig gebaut, noch nicht deployt
+### Status 18h: LIVE (deployt am 09.09.2026)
 
 Komplett umgesetzt und im Emulator durchgetestet (84 Tests grün), Commits liegen lokal auf `main`:
 
@@ -384,10 +402,17 @@ Komplett umgesetzt und im Emulator durchgetestet (84 Tests grün), Commits liege
 
 **Nebenbei behobene Fehler:** 1-vs-1-Freeze durch `setState` während `build()` (bereits live deployt) sowie Draft- und Spielphasen-Timeout serverseitig, inklusive Wiedereinstieg nach Verbindungsabriss. Bei Abbruch in der Draft-Phase: Match wird ohne Wertungsänderung abgebrochen (nichts gespielt). In der Spielphase: Sieg für den anwesenden Spieler, mit großzügiger Frist und Wiederverbindungsmöglichkeit – wichtig wegen der instabilen Satellitenverbindung an Bord.
 
-**Vor dem gebündelten Deploy noch manuell zu erledigen (Konsolen-Aufgaben):**
-1. Firebase-Konsole → Authentication → Google-Anbieter aktivieren
-2. Secret Manager API für Projekt `quiz-up-c1312` aktivieren
-3. `firebase functions:secrets:set CREW_ID_PEPPER` mit einem langen Zufallswert setzen
+**Konsolen-Aufgaben: alle erledigt** (Google-Anbieter aktiv, Secret Manager API aktiv, `CREW_ID_PEPPER` gesetzt – Version 2, Version 1 zerstört nach versehentlicher Offenlegung; E-Mail-Link-Anmeldung aktiviert, autorisierte Domains geprüft).
+
+**Zusätzlich live seit 09.09.2026:**
+- Alle 13 Cloud Functions auf **Node.js 22** in `europe-west3` (Frist 30.10.2026 damit erledigt)
+- `deleteAccount` – DSGVO-Konto- und Datenlöschung
+- Crew-ID: **genau 6 Ziffern**, client- und serverseitig erzwungen
+- Wettkampf-Zugang verlangt jetzt **vier** Angaben: Anmeldung + Crew-ID + Nickname + Position (serverseitig durchgesetzt)
+- **Anmeldung per E-Mail-Link** (passwortlos) als zweite Option neben Google – wichtig, da etwa die Hälfte der Crew iPhones nutzt und nicht alle ein Google-Konto haben. Apple-Anmeldung bewusst nicht umgesetzt (setzt eine kostenpflichtige Apple-Entwicklermitgliedschaft von rund 99 $/Jahr voraus).
+- **Abmelden / Konto wechseln** im Profil
+- Freischalt-Checkliste mit rot markierten fehlenden Schritten, im Profil und auf dem Sperrbildschirm
+- „Persönliche Fragen" gesperrt, solange Vorname, Geburtsdatum oder Sprachform fehlen – blockiert nur diesen Modus, nicht die App
 
 ## 18i. Datenschutz (DSGVO)
 
