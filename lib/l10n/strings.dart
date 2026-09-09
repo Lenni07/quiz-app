@@ -478,7 +478,6 @@ class S {
     'profile_certificate_issued': {AppLanguage.de: 'Ausgestellt am {0}', AppLanguage.en: 'Issued on {0}'},
     'profile_certificate_valid': {AppLanguage.de: 'Gültig bis {0}', AppLanguage.en: 'Valid until {0}'},
     'profile_certificate_expired': {AppLanguage.de: 'Abgelaufen seit {0}', AppLanguage.en: 'Expired since {0}'},
-    'profile_certificate_pick': {AppLanguage.de: 'Datum wählen', AppLanguage.en: 'Pick Date'},
 
     // Geburtsdatum/Sprachform (siehe ROADMAP_QuizApp.md Abschnitt 18f, für
     // personalisierte Fragen) - beide bleiben wie realName/department nur
@@ -491,7 +490,7 @@ class S {
       AppLanguage.en: 'No date of birth on file',
     },
     'profile_birthdate_set': {AppLanguage.de: '{0} ({1} Jahre)', AppLanguage.en: '{0} ({1} years)'},
-    'profile_birthdate_pick': {AppLanguage.de: 'Datum wählen', AppLanguage.en: 'Pick Date'},
+    'profile_grammatical_form_label': {AppLanguage.de: 'Sprachform', AppLanguage.en: 'Language form'},
     'profile_grammatical_form_title': {
       AppLanguage.de: 'Welche Sprachform möchtest du lernen?',
       AppLanguage.en: 'Which language form would you like to learn?',

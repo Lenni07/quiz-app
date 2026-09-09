@@ -118,6 +118,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() {});
   }
 
+  static String _formatDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+  /// Ablaufdatum (Ausstellung + 2 Jahre) und ob das Zertifikat noch gültig
+  /// ist (siehe ROADMAP_QuizApp.md Abschnitt 18). Null, wenn kein
+  /// Ausstellungsdatum hinterlegt ist.
+  (DateTime expiry, bool valid)? _certificateExpiry() {
+    final issued = _certificateIssuedAt;
+    if (issued == null) return null;
+    final expiry = DateTime(issued.year + 2, issued.month, issued.day);
+    return (expiry, DateTime.now().isBefore(expiry));
+  }
+
   Future<void> _pickCertificateDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -407,6 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (!_loaded) {
                 return const Center(child: CircularProgressIndicator());
               }
+              final cert = _certificateExpiry();
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -515,14 +529,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         helperText: S.t('profile_private_helper'),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(S.t('profile_birthdate_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
-                    const SizedBox(height: 8),
-                    _BirthDateStatus(
-                      birthDate: _birthDate,
-                      onPick: _pickBirthDate,
+                    const SizedBox(height: 12),
+                    _PickerField(
+                      label: S.t('profile_birthdate_title'),
+                      valueText: _birthDate == null
+                          ? S.t('profile_birthdate_none')
+                          : S.f('profile_birthdate_set',
+                              [_formatDate(_birthDate!), calculateAge(_birthDate!)]),
+                      muted: _birthDate == null,
+                      helperText: S.t('profile_private_helper'),
+                      onTap: _pickBirthDate,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
                       initialValue: departmentIds.contains(_department) ? _department : null,
                       decoration: InputDecoration(
@@ -553,20 +571,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onStartEdit: () => setState(() => _editingCrewId = true),
                       onSubmit: _claimCrewId,
                     ),
-                    const SizedBox(height: 16),
-                    Text(S.t('profile_grammatical_form_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
-                    const SizedBox(height: 8),
-                    SegmentedButton<String>(
-                      segments: [
-                        ButtonSegment(value: 'male', label: Text(S.t('profile_grammatical_form_male'))),
-                        ButtonSegment(value: 'female', label: Text(S.t('profile_grammatical_form_female'))),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String?>(
+                      initialValue: _grammaticalForm,
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_grammatical_form_label'),
+                        helperText: S.t('profile_grammatical_form_title'),
+                      ),
+                      items: [
+                        DropdownMenuItem(value: null, child: Text(S.t('department_unspecified'))),
+                        DropdownMenuItem(value: 'male', child: Text(S.t('profile_grammatical_form_male'))),
+                        DropdownMenuItem(value: 'female', child: Text(S.t('profile_grammatical_form_female'))),
                       ],
-                      selected: _grammaticalForm == null ? {} : {_grammaticalForm!},
-                      emptySelectionAllowed: true,
-                      onSelectionChanged: (selection) =>
-                          setState(() => _grammaticalForm = selection.isEmpty ? null : selection.first),
+                      onChanged: (value) => setState(() => _grammaticalForm = value),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<int>(
                       initialValue: _germanLevel,
                       decoration: InputDecoration(
@@ -579,12 +598,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                       onChanged: (value) => setState(() => _germanLevel = value),
                     ),
-                    const SizedBox(height: 16),
-                    Text(S.t('profile_certificate_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
-                    const SizedBox(height: 8),
-                    _CertificateStatus(
-                      issuedAt: _certificateIssuedAt,
-                      onPick: _pickCertificateDate,
+                    const SizedBox(height: 12),
+                    _PickerField(
+                      label: S.t('profile_certificate_title'),
+                      valueText: _certificateIssuedAt == null
+                          ? S.t('profile_certificate_none')
+                          : S.f('profile_certificate_issued', [_formatDate(_certificateIssuedAt!)]),
+                      muted: _certificateIssuedAt == null,
+                      helperText: cert != null && cert.$2
+                          ? S.f('profile_certificate_valid', [_formatDate(cert.$1)])
+                          : null,
+                      errorText: cert != null && !cert.$2
+                          ? S.f('profile_certificate_expired', [_formatDate(cert.$1)])
+                          : null,
+                      onTap: _pickCertificateDate,
                     ),
                     const SizedBox(height: 20),
                     Center(
@@ -861,88 +888,47 @@ class _AvatarChoice extends StatelessWidget {
   }
 }
 
-/// Zeigt das Geburtsdatum und das daraus berechnete Alter (siehe
-/// ROADMAP_QuizApp.md Abschnitt 18f) - gespeichert wird bewusst das Datum,
-/// nicht eine feste Alterszahl, die sonst nie mehr aktuell wäre.
-class _BirthDateStatus extends StatelessWidget {
-  final DateTime? birthDate;
-  final VoidCallback onPick;
+/// Feld zum Antippen im selben Stil wie die Textfelder daneben: Rahmen und
+/// schwebende Beschriftung kommen aus dem `inputDecorationTheme`, damit
+/// Geburtsdatum und Zertifikat optisch nicht aus der Reihe fallen (siehe
+/// ROADMAP_QuizApp.md Abschnitt 18). Beim Antippen öffnet sich der
+/// Datumswähler.
+class _PickerField extends StatelessWidget {
+  final String label;
+  final String valueText;
+  final bool muted;
+  final String? helperText;
+  final String? errorText;
+  final VoidCallback onTap;
 
-  const _BirthDateStatus({required this.birthDate, required this.onPick});
-
-  @override
-  Widget build(BuildContext context) {
-    final date = birthDate;
-    String formatDate(DateTime d) => '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
-
-    return GamePanel(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      borderRadius: 14,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              date == null ? S.t('profile_birthdate_none') : S.f('profile_birthdate_set', [formatDate(date), calculateAge(date)]),
-              style: const TextStyle(color: AppColors.canvas),
-            ),
-          ),
-          TextButton(onPressed: onPick, child: Text(S.t('profile_birthdate_pick'))),
-        ],
-      ),
-    );
-  }
-}
-
-/// Zeigt das Ausstellungsdatum des Zertifikats und den automatisch daraus
-/// berechneten Status (Ausstellung + 2 Jahre, siehe ROADMAP_QuizApp.md
-/// Abschnitt 18) - keine manuelle Ablaufprüfung nötig.
-class _CertificateStatus extends StatelessWidget {
-  final DateTime? issuedAt;
-  final VoidCallback onPick;
-
-  const _CertificateStatus({required this.issuedAt, required this.onPick});
+  const _PickerField({
+    required this.label,
+    required this.valueText,
+    required this.onTap,
+    this.muted = false,
+    this.helperText,
+    this.errorText,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final issued = issuedAt;
-    DateTime? expiry;
-    bool? isValid;
-    if (issued != null) {
-      expiry = DateTime(issued.year + 2, issued.month, issued.day);
-      isValid = DateTime.now().isBefore(expiry);
-    }
-
-    String formatDate(DateTime date) =>
-        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
-
-    return GamePanel(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      borderRadius: 14,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  issued == null ? S.t('profile_certificate_none') : S.f('profile_certificate_issued', [formatDate(issued)]),
-                  style: const TextStyle(color: AppColors.canvas),
-                ),
-                if (expiry != null)
-                  Text(
-                    isValid!
-                        ? S.f('profile_certificate_valid', [formatDate(expiry)])
-                        : S.f('profile_certificate_expired', [formatDate(expiry)]),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isValid ? Colors.greenAccent.shade400 : AppColors.signalRed,
-                    ),
-                  ),
-              ],
-            ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: InputDecorator(
+        isEmpty: false,
+        decoration: InputDecoration(
+          labelText: label,
+          helperText: helperText,
+          errorText: errorText,
+          suffixIcon: const Icon(Icons.event_outlined, size: 20),
+        ),
+        child: Text(
+          valueText,
+          style: TextStyle(
+            color: muted ? AppColors.canvas.withValues(alpha: 0.6) : AppColors.canvas,
           ),
-          TextButton(onPressed: onPick, child: Text(S.t('profile_certificate_pick'))),
-        ],
+        ),
       ),
     );
   }
