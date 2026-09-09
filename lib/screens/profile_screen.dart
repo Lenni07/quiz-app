@@ -506,14 +506,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onSave: () => _saveNames(uid),
                     ),
                     const SizedBox(height: 12),
-                    TextField(
-                      controller: _positionController,
-                      decoration: InputDecoration(
-                        labelText: S.t('profile_position_label'),
-                        helperText: S.t('profile_public_helper'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    // Nachname (früher "Echter Name" - der Vorname steht jetzt
+                    // separat oben im _NameSection, deshalb hier nur der Nachname).
                     TextField(
                       controller: _realNameController,
                       decoration: InputDecoration(
@@ -521,7 +515,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         helperText: S.t('profile_private_helper'),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    Text(S.t('profile_birthdate_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
+                    const SizedBox(height: 8),
+                    _BirthDateStatus(
+                      birthDate: _birthDate,
+                      onPick: _pickBirthDate,
+                    ),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<String?>(
                       initialValue: departmentIds.contains(_department) ? _department : null,
                       decoration: InputDecoration(
@@ -536,6 +537,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onChanged: (value) => setState(() => _department = value),
                     ),
                     const SizedBox(height: 12),
+                    TextField(
+                      controller: _positionController,
+                      decoration: InputDecoration(
+                        labelText: S.t('profile_position_label'),
+                        helperText: S.t('profile_public_helper'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     _CrewIdField(
                       controller: _crewIdController,
                       alreadySet: _crewIdSet,
@@ -544,7 +553,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onStartEdit: () => setState(() => _editingCrewId = true),
                       onSubmit: _claimCrewId,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    Text(S.t('profile_grammatical_form_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
+                    const SizedBox(height: 8),
+                    SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(value: 'male', label: Text(S.t('profile_grammatical_form_male'))),
+                        ButtonSegment(value: 'female', label: Text(S.t('profile_grammatical_form_female'))),
+                      ],
+                      selected: _grammaticalForm == null ? {} : {_grammaticalForm!},
+                      emptySelectionAllowed: true,
+                      onSelectionChanged: (selection) =>
+                          setState(() => _grammaticalForm = selection.isEmpty ? null : selection.first),
+                    ),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<int>(
                       initialValue: _germanLevel,
                       decoration: InputDecoration(
@@ -563,26 +585,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _CertificateStatus(
                       issuedAt: _certificateIssuedAt,
                       onPick: _pickCertificateDate,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(S.t('profile_birthdate_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
-                    const SizedBox(height: 8),
-                    _BirthDateStatus(
-                      birthDate: _birthDate,
-                      onPick: _pickBirthDate,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(S.t('profile_grammatical_form_title'), style: displayStyle(fontSize: 15, color: AppColors.brassLight)),
-                    const SizedBox(height: 8),
-                    SegmentedButton<String>(
-                      segments: [
-                        ButtonSegment(value: 'male', label: Text(S.t('profile_grammatical_form_male'))),
-                        ButtonSegment(value: 'female', label: Text(S.t('profile_grammatical_form_female'))),
-                      ],
-                      selected: _grammaticalForm == null ? {} : {_grammaticalForm!},
-                      emptySelectionAllowed: true,
-                      onSelectionChanged: (selection) =>
-                          setState(() => _grammaticalForm = selection.isEmpty ? null : selection.first),
                     ),
                     const SizedBox(height: 20),
                     Center(
@@ -794,18 +796,18 @@ class _NameSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
-          controller: firstNameController,
-          decoration: InputDecoration(
-            labelText: S.t('profile_firstname_label'),
-            helperText: _lockHint(firstNameChangedAt) ?? S.t('names_change_helper'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
           controller: nicknameController,
           decoration: InputDecoration(
             labelText: S.t('profile_nickname_label'),
             helperText: _lockHint(nicknameChangedAt) ?? S.t('profile_public_helper'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: firstNameController,
+          decoration: InputDecoration(
+            labelText: S.t('profile_firstname_label'),
+            helperText: _lockHint(firstNameChangedAt) ?? S.t('names_change_helper'),
           ),
         ),
         const SizedBox(height: 8),

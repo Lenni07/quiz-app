@@ -397,7 +397,7 @@ class S {
       AppLanguage.en: 'Deletion failed – please check your connection and try again.',
     },
     'profile_position_label': {AppLanguage.de: 'Position', AppLanguage.en: 'Position'},
-    'profile_realname_label': {AppLanguage.de: 'Echter Name', AppLanguage.en: 'Real Name'},
+    'profile_realname_label': {AppLanguage.de: 'Nachname', AppLanguage.en: 'Last name'},
     'profile_private_helper': {
       AppLanguage.de: 'Nur in deinem Profil sichtbar',
       AppLanguage.en: 'Only visible in your own profile',
